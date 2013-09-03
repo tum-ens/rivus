@@ -38,10 +38,28 @@ def create_model(filename, node, edge):
     has_one_input = r_in.groupby(level='Process').count() == 1
     hub = process[ has_cost_inv_fix_0 & has_cap_min_0 & has_one_input ]
     
-    # edge demands
+    # derive peak and demand of edges
+    # use intersection to only leave area types existing both in edges and in
+    # column 
     area_types = list(area_demand.index.levels[0])
-    edge_areas = edges_w_area[edges_w_area.columns.intersection(area_types)]
-    demand = 
+    edge_areas = edge[edge.columns.intersection(area_types)]
+   
+    # helper function: calculates outer product of column in table area_demand
+    # with specified series, which is applied to the  area columns of edge_areas
+    def multiply_by_area_demand(series, column):
+        return area_demand[column] \
+               .ix[series.name] \
+               .apply(lambda x: x*series) \
+               .stack()
+    
+    # peak(edge, commodity) in kW
+    peak = edge_areas.apply(lambda x: multiply_by_area_demand(x, 'peak')) \
+                     .sum(axis=1) \
+                     .unstack('Commodity')
+    # demand(edge, commodity) in GWh [due to /1e6]
+    demand = edge_areas.apply(lambda x: multiply_by_area_demand(x, 'demand')) \
+                       .sum(axis=1) \
+                       .unstack('Commodity') / 1e6
     
     # MODEL
     
@@ -54,6 +72,7 @@ def create_model(filename, node, edge):
     #                                 storage.index.names.index('Storage')])
     
     # Parameters
+    # few should be needed
     
     # Variables
     
