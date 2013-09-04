@@ -5,10 +5,11 @@ and [to be done] energy storage.
 
 """
 import coopr.pyomo as pyomo
+import itertools
 import pandas as pd
 import pyomotools
 
-def create_model(filename, node, edge):
+def create_model(filename, vertex, edge):
     """Return a CAPMIN model instance from input file""" 
     m = pyomo.ConcreteModel()
     m.name = 'CAPMIN'
@@ -45,7 +46,7 @@ def create_model(filename, node, edge):
     edge_areas = edge[edge.columns.intersection(area_types)]
    
     # helper function: calculates outer product of column in table area_demand
-    # with specified series, which is applied to the  area columns of edge_areas
+    # with specified series, which is applied to the columns of edge_areas
     def multiply_by_area_demand(series, column):
         return area_demand[column] \
                .ix[series.name] \
@@ -53,14 +54,17 @@ def create_model(filename, node, edge):
                .stack()
     
     # peak(edge, commodity) in kW
-    peak = edge_areas.apply(lambda x: multiply_by_area_demand(x, 'peak')) \
+    m.peak = edge_areas.apply(lambda x: multiply_by_area_demand(x, 'peak')) \
                      .sum(axis=1) \
                      .unstack('Commodity')
     # demand(edge, commodity) in GWh [due to /1e6]
-    demand = edge_areas.apply(lambda x: multiply_by_area_demand(x, 'demand')) \
+    m.demand = edge_areas.apply(lambda x: multiply_by_area_demand(x, 'demand')) \
                        .sum(axis=1) \
                        .unstack('Commodity') / 1e6
     
+    edge = edge.set_index(['Vertex1', 'Vertex2'], inplace=True)
+    arcs = [arc for (v1, v2) in edge.index for arc in ((v1, v2), (v2, v1))]
+
     # MODEL
     
     # Sets
@@ -70,13 +74,51 @@ def create_model(filename, node, edge):
     m.time = pyomo.Set(initialize=time.index)
     #m.storage = pyomo.Set(initialize=storage.index.levels[
     #                                 storage.index.names.index('Storage')])
+    m.edge = pyomo.Set(initialize=edge.index)
+    m.arc = pyomo.Set(initialize=arcs)
+    m.vertex = pyomo.Set(initialize=vertex.index)
     
     # Parameters
     # few should be needed
     
     # Variables
     
+    # edges and arcs
+    m.Sigma = pyomo.Var(m.edge, m.commodity, m.time, within=pyomo.NonNegativeReals)
+    m.Pin = pyomo.Var(m.arc, m.commodity, m.time, within=pyomo.NonNegativeReals)
+    m.Pot = pyomo.Var(m.arc, m.commodity, m.time, within=pyomo.NonNegativeReals)
+    m.Psi = pyomo.Var(m.arc, m.commodity, m.time, within=pyomo.Binary)
+    m.Pmax = pyomo.Var(m.edge, m.commodity, within=pyomo.NonNegativeReals)
+    m.Xi = pyomo.Var(m.edge, m.commodity, within=pyomo.Binary)
+    
+    # vertices
+    m.Rho = pyomo.Var(m.vertex, m.commodity, m.time, within=pyomo.NonNegativeReals)
+
+    # hubs
+    m.Kappa_hub = pyomo.Var(m.edge, m.hub, within=pyomo.NonNegativeReals)
+    m.Epsilon_hub = pyomo.Var(m.edge, m.hub, m.time, within=pyomo.NonNegativeReals)
+
+    # processes
+
+    m.Kappa_process = pyomo.Var(m.vertex, m.process, within=pyomo.NonNegativeReals)
+    m.Tau_process = pyomo.Var(m.vertex, m.process, m.time)
+    m.Epsilon_in = pyomo.Var(m.vertex, m.process, m.commodity, m.time, within=pyomo.NonNegativeReals)
+    m.Epsilon_out = pyomo.Var(m.vertex, m.process, m.commodity, m.time, within=pyomo.NonNegativeReals)
+    
+    
     # Constraints
+    
+    def peak_satisfaction_rule(m, e, co, t):
+        if not co in m.co_demand:
+            return pyomo.Constraint.Skip
+        else:
+            provided_power = 0
+            for h in m.hub_tuples:
+                if h[1] == co:
+                    provided_power -= m.Epsilon_hub(e, h
+                if h[2] == co:
+                    provided_power += m.Epsilon_hub(e, h
+            return m.peak[e,c,t] <= provided_power
     
     # Objective
     
