@@ -23,20 +23,20 @@
             </spatialrefsys>
         </destinationsrs>
     </mapcanvas>
-    <legend updateDrawingOrder="true" activeLayer="pas_building20130828100131005">
+    <legend updateDrawingOrder="true" activeLayer="pas_building20130916101917156">
         <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="pas_node" showFeatureCount="0">
             <filegroup open="true" hidden="false">
                 <legendlayerfile isInOverview="0" layerid="pas_node20130827174606905" visible="1"/>
             </filegroup>
         </legendlayer>
+        <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="pas_building" showFeatureCount="0">
+            <filegroup open="true" hidden="false">
+                <legendlayerfile isInOverview="0" layerid="pas_building20130916101917156" visible="1"/>
+            </filegroup>
+        </legendlayer>
         <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="pas_edge" showFeatureCount="0">
             <filegroup open="true" hidden="false">
                 <legendlayerfile isInOverview="0" layerid="pas_edge20130827174604830" visible="1"/>
-            </filegroup>
-        </legendlayer>
-        <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="pas_building" showFeatureCount="0">
-            <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="pas_building20130828100131005" visible="1"/>
             </filegroup>
         </legendlayer>
     </legend>
@@ -50,7 +50,7 @@
                     <BackgroundColor alpha="255" red="255" blue="255" green="255"/>
                 </ComposerItem>
             </ComposerLabel>
-            <ComposerScaleBar penColor="#646464" style="Single Box" numMapUnitsPerScaleBarUnit="1" alignment="0" brushColor="#646464" numSegments="4" segmentMillimeters="8.07166" fontColor="#646464" font="TUM Neue Helvetica 55 Regular,8,-1,5,50,0,0,0,0,0" numUnitsPerSegment="100" units="1" labelBarSpace="2" outlineWidth="0.25" numSegmentsLeft="2" height="1" mapId="0" boxContentSpace="2" unitLabel="m">
+            <ComposerScaleBar penColor="#646464" style="Single Box" numMapUnitsPerScaleBarUnit="1" alignment="0" brushColor="#646464" numSegments="4" segmentMillimeters="8.07183" fontColor="#646464" font="TUM Neue Helvetica 55 Regular,8,-1,5,50,0,0,0,0,0" numUnitsPerSegment="100" units="1" labelBarSpace="2" outlineWidth="0.25" numSegmentsLeft="2" height="1" mapId="0" boxContentSpace="2" unitLabel="m">
                 <ComposerItem width="52.8583" x="10.589" transparency="0" y="188.143" rotation="0" height="9.7" positionMode="6" frame="false" outlineWidth="0.3" zValue="4" lastValidViewScaleFactor="4.63507" uuid="{e6c588f8-307a-467a-b0be-6fc6c00d8db4}" id="" background="false" blendMode="0" positionLock="false">
                     <FrameColor alpha="255" red="0" blue="0" green="0"/>
                     <BackgroundColor alpha="255" red="255" blue="255" green="255"/>
@@ -154,8 +154,8 @@
                             </VectorClassificationItemNg>
                         </LayerItem>
                     </GroupItem>
-                    <LayerItem layerId="pas_building20130828100131005" userText="Buildings" style="subgroup" text="Buildings" showFeatureCount="0">
-                        <VectorClassificationItemNg userText="" text="residential">
+                    <LayerItem layerId="pas_building20130916101917156" userText="" style="subgroup" text="pas_building" showFeatureCount="0">
+                        <VectorClassificationItemNg userText="" text="apartments">
                             <symbols>
                                 <symbol alpha="1" type="fill" name="classificationSymbol">
                                     <layer pass="0" class="SimpleFill" locked="0">
@@ -171,12 +171,44 @@
                                 </symbol>
                             </symbols>
                         </VectorClassificationItemNg>
-                        <VectorClassificationItemNg userText="" text="commercial">
+                        <VectorClassificationItemNg userText="" text="church">
                             <symbols>
                                 <symbol alpha="1" type="fill" name="classificationSymbol">
                                     <layer pass="0" class="SimpleFill" locked="0">
                                         <prop k="border_width_unit" v="MM"/>
-                                        <prop k="color" v="199,225,234,255"/>
+                                        <prop k="color" v="220,220,199,255"/>
+                                        <prop k="color_border" v="0,0,0,255"/>
+                                        <prop k="offset" v="0,0"/>
+                                        <prop k="offset_unit" v="MM"/>
+                                        <prop k="style" v="solid"/>
+                                        <prop k="style_border" v="no"/>
+                                        <prop k="width_border" v="0.26"/>
+                                    </layer>
+                                </symbol>
+                            </symbols>
+                        </VectorClassificationItemNg>
+                        <VectorClassificationItemNg userText="" text="farm">
+                            <symbols>
+                                <symbol alpha="1" type="fill" name="classificationSymbol">
+                                    <layer pass="0" class="SimpleFill" locked="0">
+                                        <prop k="border_width_unit" v="MM"/>
+                                        <prop k="color" v="221,219,199,255"/>
+                                        <prop k="color_border" v="0,0,0,255"/>
+                                        <prop k="offset" v="0,0"/>
+                                        <prop k="offset_unit" v="MM"/>
+                                        <prop k="style" v="solid"/>
+                                        <prop k="style_border" v="no"/>
+                                        <prop k="width_border" v="0.26"/>
+                                    </layer>
+                                </symbol>
+                            </symbols>
+                        </VectorClassificationItemNg>
+                        <VectorClassificationItemNg userText="" text="house">
+                            <symbols>
+                                <symbol alpha="1" type="fill" name="classificationSymbol">
+                                    <layer pass="0" class="SimpleFill" locked="0">
+                                        <prop k="border_width_unit" v="MM"/>
+                                        <prop k="color" v="212,234,199,255"/>
                                         <prop k="color_border" v="0,0,0,255"/>
                                         <prop k="offset" v="0,0"/>
                                         <prop k="offset_unit" v="MM"/>
@@ -203,7 +235,23 @@
                                 </symbol>
                             </symbols>
                         </VectorClassificationItemNg>
-                        <VectorClassificationItemNg userText="other" text="other">
+                        <VectorClassificationItemNg userText="" text="residential">
+                            <symbols>
+                                <symbol alpha="1" type="fill" name="classificationSymbol">
+                                    <layer pass="0" class="SimpleFill" locked="0">
+                                        <prop k="border_width_unit" v="MM"/>
+                                        <prop k="color" v="212,234,199,255"/>
+                                        <prop k="color_border" v="0,0,0,255"/>
+                                        <prop k="offset" v="0,0"/>
+                                        <prop k="offset_unit" v="MM"/>
+                                        <prop k="style" v="solid"/>
+                                        <prop k="style_border" v="no"/>
+                                        <prop k="width_border" v="0.26"/>
+                                    </layer>
+                                </symbol>
+                            </symbols>
+                        </VectorClassificationItemNg>
+                        <VectorClassificationItemNg userText="" text="cemetery">
                             <symbols>
                                 <symbol alpha="1" type="fill" name="classificationSymbol">
                                     <layer pass="0" class="SimpleFill" locked="0">
@@ -219,9 +267,137 @@
                                 </symbol>
                             </symbols>
                         </VectorClassificationItemNg>
+                        <VectorClassificationItemNg userText="" text="commercial">
+                            <symbols>
+                                <symbol alpha="1" type="fill" name="classificationSymbol">
+                                    <layer pass="0" class="SimpleFill" locked="0">
+                                        <prop k="border_width_unit" v="MM"/>
+                                        <prop k="color" v="199,225,234,255"/>
+                                        <prop k="color_border" v="0,0,0,255"/>
+                                        <prop k="offset" v="0,0"/>
+                                        <prop k="offset_unit" v="MM"/>
+                                        <prop k="style" v="solid"/>
+                                        <prop k="style_border" v="no"/>
+                                        <prop k="width_border" v="0.26"/>
+                                    </layer>
+                                </symbol>
+                            </symbols>
+                        </VectorClassificationItemNg>
+                        <VectorClassificationItemNg userText="" text="forest">
+                            <symbols>
+                                <symbol alpha="1" type="fill" name="classificationSymbol">
+                                    <layer pass="0" class="SimpleFill" locked="0">
+                                        <prop k="border_width_unit" v="MM"/>
+                                        <prop k="color" v="0,170,0,255"/>
+                                        <prop k="color_border" v="0,0,0,255"/>
+                                        <prop k="offset" v="0,0"/>
+                                        <prop k="offset_unit" v="MM"/>
+                                        <prop k="style" v="solid"/>
+                                        <prop k="style_border" v="no"/>
+                                        <prop k="width_border" v="0.26"/>
+                                    </layer>
+                                </symbol>
+                            </symbols>
+                        </VectorClassificationItemNg>
+                        <VectorClassificationItemNg userText="" text="grass">
+                            <symbols>
+                                <symbol alpha="1" type="fill" name="classificationSymbol">
+                                    <layer pass="0" class="SimpleFill" locked="0">
+                                        <prop k="border_width_unit" v="MM"/>
+                                        <prop k="color" v="0,170,0,255"/>
+                                        <prop k="color_border" v="0,0,0,255"/>
+                                        <prop k="offset" v="0,0"/>
+                                        <prop k="offset_unit" v="MM"/>
+                                        <prop k="style" v="solid"/>
+                                        <prop k="style_border" v="no"/>
+                                        <prop k="width_border" v="0.26"/>
+                                    </layer>
+                                </symbol>
+                            </symbols>
+                        </VectorClassificationItemNg>
+                        <VectorClassificationItemNg userText="" text="meadow">
+                            <symbols>
+                                <symbol alpha="1" type="fill" name="classificationSymbol">
+                                    <layer pass="0" class="SimpleFill" locked="0">
+                                        <prop k="border_width_unit" v="MM"/>
+                                        <prop k="color" v="0,170,0,255"/>
+                                        <prop k="color_border" v="0,0,0,255"/>
+                                        <prop k="offset" v="0,0"/>
+                                        <prop k="offset_unit" v="MM"/>
+                                        <prop k="style" v="solid"/>
+                                        <prop k="style_border" v="no"/>
+                                        <prop k="width_border" v="0.26"/>
+                                    </layer>
+                                </symbol>
+                            </symbols>
+                        </VectorClassificationItemNg>
+                        <VectorClassificationItemNg userText="" text="retail">
+                            <symbols>
+                                <symbol alpha="1" type="fill" name="classificationSymbol">
+                                    <layer pass="0" class="SimpleFill" locked="0">
+                                        <prop k="border_width_unit" v="MM"/>
+                                        <prop k="color" v="199,225,234,255"/>
+                                        <prop k="color_border" v="0,0,0,255"/>
+                                        <prop k="offset" v="0,0"/>
+                                        <prop k="offset_unit" v="MM"/>
+                                        <prop k="style" v="solid"/>
+                                        <prop k="style_border" v="no"/>
+                                        <prop k="width_border" v="0.26"/>
+                                    </layer>
+                                </symbol>
+                            </symbols>
+                        </VectorClassificationItemNg>
+                        <VectorClassificationItemNg userText="" text="hospital">
+                            <symbols>
+                                <symbol alpha="1" type="fill" name="classificationSymbol">
+                                    <layer pass="0" class="SimpleFill" locked="0">
+                                        <prop k="border_width_unit" v="MM"/>
+                                        <prop k="color" v="220,220,199,255"/>
+                                        <prop k="color_border" v="0,0,0,255"/>
+                                        <prop k="offset" v="0,0"/>
+                                        <prop k="offset_unit" v="MM"/>
+                                        <prop k="style" v="solid"/>
+                                        <prop k="style_border" v="no"/>
+                                        <prop k="width_border" v="0.26"/>
+                                    </layer>
+                                </symbol>
+                            </symbols>
+                        </VectorClassificationItemNg>
+                        <VectorClassificationItemNg userText="" text="office">
+                            <symbols>
+                                <symbol alpha="1" type="fill" name="classificationSymbol">
+                                    <layer pass="0" class="SimpleFill" locked="0">
+                                        <prop k="border_width_unit" v="MM"/>
+                                        <prop k="color" v="199,225,234,255"/>
+                                        <prop k="color_border" v="0,0,0,255"/>
+                                        <prop k="offset" v="0,0"/>
+                                        <prop k="offset_unit" v="MM"/>
+                                        <prop k="style" v="solid"/>
+                                        <prop k="style_border" v="no"/>
+                                        <prop k="width_border" v="0.26"/>
+                                    </layer>
+                                </symbol>
+                            </symbols>
+                        </VectorClassificationItemNg>
+                        <VectorClassificationItemNg userText="" text="school">
+                            <symbols>
+                                <symbol alpha="1" type="fill" name="classificationSymbol">
+                                    <layer pass="0" class="SimpleFill" locked="0">
+                                        <prop k="border_width_unit" v="MM"/>
+                                        <prop k="color" v="199,225,234,255"/>
+                                        <prop k="color_border" v="0,0,0,255"/>
+                                        <prop k="offset" v="0,0"/>
+                                        <prop k="offset_unit" v="MM"/>
+                                        <prop k="style" v="solid"/>
+                                        <prop k="style_border" v="no"/>
+                                        <prop k="width_border" v="0.26"/>
+                                    </layer>
+                                </symbol>
+                            </symbols>
+                        </VectorClassificationItemNg>
                     </LayerItem>
                 </Model>
-                <ComposerItem width="52" x="225" transparency="0" y="162.6" rotation="0" height="36.4" positionMode="8" frame="false" outlineWidth="0.2" zValue="3" lastValidViewScaleFactor="4.63507" uuid="{500f8c02-a87c-4353-8a87-e292fbf6f0fa}" id="" background="false" blendMode="0" positionLock="false">
+                <ComposerItem width="52" x="225" transparency="0" y="162.6" rotation="0" height="85.2" positionMode="8" frame="false" outlineWidth="0" zValue="3" lastValidViewScaleFactor="4.63507" uuid="{500f8c02-a87c-4353-8a87-e292fbf6f0fa}" id="" background="false" blendMode="0" positionLock="false">
                     <FrameColor alpha="255" red="100" blue="100" green="100"/>
                     <BackgroundColor alpha="255" red="255" blue="255" green="255"/>
                 </ComposerItem>
@@ -263,7 +439,7 @@
                         <fontColor red="0" blue="0" green="0"/>
                     </Annotation>
                 </Grid>
-                <ComposerItem width="270" x="10" transparency="0" y="10" rotation="0" height="190" positionMode="0" frame="true" outlineWidth="0.2" zValue="2" lastValidViewScaleFactor="4.63507" uuid="{c611887f-d688-4315-82c1-8f22f3d822de}" id="" background="true" blendMode="0" positionLock="false">
+                <ComposerItem width="270" x="10" transparency="0" y="10" rotation="0" height="190" positionMode="0" frame="true" outlineWidth="0" zValue="2" lastValidViewScaleFactor="4.63507" uuid="{c611887f-d688-4315-82c1-8f22f3d822de}" id="" background="true" blendMode="0" positionLock="false">
                     <FrameColor alpha="255" red="100" blue="100" green="100"/>
                     <BackgroundColor alpha="255" red="255" blue="255" green="255"/>
                 </ComposerItem>
@@ -272,7 +448,7 @@
     </Composer>
     <projectlayers layercount="3">
         <maplayer minimumScale="-4.65661e-10" maximumScale="1e+08" minLabelScale="1" maxLabelScale="1e+08" geometry="Polygon" type="vector" hasScaleBasedVisibilityFlag="0" scaleBasedLabelVisibilityFlag="0">
-            <id>pas_building20130828100131005</id>
+            <id>pas_building20130916101917156</id>
             <datasource>./pas_building.shp</datasource>
             <title></title>
             <abstract></abstract>
@@ -293,7 +469,7 @@
                 </spatialrefsys>
             </srs>
             <provider encoding="System">ogr</provider>
-            <previewExpression></previewExpression>
+            <previewExpression>name</previewExpression>
             <vectorjoins/>
             <renderer-v2 attr="type" symbollevels="0" type="categorizedSymbol">
                 <categories>
@@ -686,7 +862,7 @@
                 <edittype labelontop="0" editable="1" type="0" name="type_2"/>
                 <edittype labelontop="0" editable="1" type="0" name="type_3"/>
             </edittypes>
-            <editform></editform>
+            <editform>.</editform>
             <editforminit></editforminit>
             <annotationform>.</annotationform>
             <editorlayout>generatedlayout</editorlayout>
