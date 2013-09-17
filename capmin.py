@@ -11,7 +11,7 @@ import pyomotools
 import pdb
 
 def create_model(filename, vertex, edge):
-    """Return a CAPMIN model instance from input file""" 
+    """Return a CAPMIN model instance from input file and spatial input. """ 
     m = pyomo.ConcreteModel()
     m.name = 'CAPMIN'
     
@@ -65,7 +65,13 @@ def create_model(filename, vertex, edge):
                          .sum(axis=1) \
                          .unstack('Commodity') / 1e6
     
+    # reindex edges to vertex tuple index
+    vertex.set_index('Vertex', inplace=True)
     edge.set_index(['Vertex1', 'Vertex2'], inplace=True)
+    m.peak.index = edge.index
+    m.demand.index = edge.index
+    
+    # construct arc set of directed (i,j), (j,i) edges
     arcs = [arc for (v1, v2) in edge.index for arc in ((v1, v2), (v2, v1))]
     
     # derive list of neighbours for each vertex
@@ -73,12 +79,18 @@ def create_model(filename, vertex, edge):
     for (v1, v2) in arcs:
         m.neighbours.setdefault(v1, [])
         m.neighbours[v1].append(v2)
+        
+    # find all commodities for which there exists demand
+    co_demand = set(area_demand.index.get_level_values('Commodity'))
 
     # MODEL
     
     # Sets
     m.commodity = pyomo.Set(initialize=commodity.index)
+    m.co_demand = pyomo.Set(within=m.commodity, initialize=co_demand)
     m.process = pyomo.Set(initialize=process.index)
+    m.process_input_tuples = pyomo.Set(within=m.process*m.commodity, initialize=m.r_in.index)
+    m.process_output_tuples = pyomo.Set(within=m.process*m.commodity, initialize=m.r_out.index)
     m.hub = pyomo.Set(initialize=hub.index, within=m.process)
     m.time = pyomo.Set(initialize=time.index)
     #m.storage = pyomo.Set(initialize=storage.index.levels[
@@ -87,7 +99,7 @@ def create_model(filename, vertex, edge):
     m.edge = pyomo.Set(within=m.vertex*m.vertex, initialize=edge.index)
     m.arc = pyomo.Set(within=m.vertex*m.vertex, initialize=arcs)
     
-    m.cost_type = pyomo.Set(initialize=['Inv', 'Fix', 'Var', 'Fuel'])
+    m.cost_type = pyomo.Set(initialize=['Inv', 'Fix', 'Var'])
     
     # Parameters
     # no or few will be needed
@@ -111,7 +123,8 @@ def create_model(filename, vertex, edge):
 
     # processes
     m.Kappa_process = pyomo.Var(m.vertex, m.process, within=pyomo.NonNegativeReals)
-    m.Tau = pyomo.Var(m.vertex, m.process, m.time)
+    m.Phi = pyomo.Var(m.vertex, m.process, within=pyomo.Binary)
+    m.Tau = pyomo.Var(m.vertex, m.process, m.time, within=pyomo.NonNegativeReals)
     m.Epsilon_in = pyomo.Var(m.vertex, m.process, m.commodity, m.time, within=pyomo.NonNegativeReals)
     m.Epsilon_out = pyomo.Var(m.vertex, m.process, m.commodity, m.time, within=pyomo.NonNegativeReals)
     
@@ -121,81 +134,103 @@ def create_model(filename, vertex, edge):
     # Constraints
     
     # edges/arcs
-    def peak_satisfaction_rule(m, e, co, t):
-        if not co in m.co_demand:
-            return pyomo.Constraint.Skip
-        else:
-            provided_power = hub_balance(m, e, co, t)
-            return m.peak[e,c,t] * time.loc[t]['scale'] <= provided_power
-            
-    def edge_supply_rule(m, e, co, t):
-        needed_power = - hub_balance(m, e, co, t)
-        return m.Sigma(e, co, t) >= needed_power
+    def peak_satisfaction_rule(m, i, j, co, t):
+        provided_power = hub_balance(m, i, j, co, t) + m.Sigma[i,j,co,t]
+        return provided_power > m.peak.loc[i,j][co] * time.loc[t]['scale']
+
+    def edge_supply_rule(m, i, j, co, t):
+        power_required = - hub_balance(m, i, j, co, t)
+        return m.Sigma[i,j,co,t] >= power_required
     
-    def edge_equation_rule(m, e, co, t):
-        (a, b) = create_arc_pair(e)
-        length = edge.loc[e]['geometry'].length
+    def edge_equation_rule(m, i, j, co, t):
+        length = edge.loc[i, j]['geometry'].length
         
-        flow_in = ( 1 - length * commodity.loc[co]['loss-var']) \
-                * ( m.Pin[a, co, t] - m.Pin[b, co, t] )
-        flow_out =  m.Pot[a, co, t] - m.Pot[b, co, t]
-        fixed_losses = ( m.Psi[a, co, t] + m.Psi[b, co, t] ) \
-                     * length * commodity.loc[co]['loss-fix']
+        flow_in = ( 1 - length * commodity.loc[co]['loss-var']) * \
+                  ( m.Pin[i,j,co,t] - m.Pin[j,i,co,t] )
+        flow_out =  m.Pot[i,j,co,t] - m.Pot[j,i,co,t]
+        fixed_losses = ( m.Psi[i,j,co,t] + m.Psi[j,i,co,t] ) * \
+                       length * commodity.loc[co]['loss-fix']
         
-        return m.Sigma(e, co, t) <= flow_in - flow_out - fixed_losses 
+        return m.Sigma[i,j,co,t] <= flow_in - flow_out - fixed_losses
         
-    def arc_flow_by_capacity_rule(m, a, co, t):
-        e = find_matching_edge(m, a)        
-        return m.Pin[a, co, t] <= m.Psi[a, co, t] * m.Pmax[e, co]
+    def arc_flow_by_capacity_rule(m, i, j, co, t):
+        (v1, v2) = find_matching_edge(m, i, j)        
+        return m.Pin[i,j,co,t] <= m.Pmax[v1, v2, co]
         
-    def arc_unidirectionality_rule(m, a, co, t):
-        b = reverse_arc(a)
-        return m.Psi[a, co, t] + m.Psi[b, co, t] <= 1
+    def arc_unidirectionality_rule(m, i, j, co, t):
+        return m.Psi[i,j,co,t] + m.Psi[j,i,co,t] <= 1
         
-    def edge_capacity_rule(m, e, co):
-        return m.Pmax[e, co] <= m.Xi[e, co] * commodity.loc[co]['cap-max']
+    def edge_capacity_rule(m, i, j, co):
+        return m.Pmax[i,j,co] <= m.Xi[i,j,co] * commodity.loc[co]['cap-max']
         
     # hubs
-    def hub_output_by_capacity_rule(m, e, h, t):
-        return m.Epsilon_hub[e, h, t] <= m.Kappa_hub[e, h]
+    def hub_output_by_capacity_rule(m, i, j, h, t):
+        return m.Epsilon_hub[i,j,h,t] <= m.Kappa_hub[i,j,h]
         
-    def hub_capacity(m, e, h):
-        return m.Kappa_hub[e, h] <= hub.loc[h]['cap-max']
+    def hub_capacity_rule(m, i, j, h):
+        return m.Kappa_hub[i,j,h] <= hub.loc[h]['cap-max']
         
     # vertex
     def vertex_equation_rule(m, v, co, t):
         flow_required = - flow_balance(m, v, co, t)
         process_required = - process_balance(m, v, co, t)
-        return m.Rho[v, co, t] >= flow_required + process_required # + storage_required
+        return m.Rho[v,co,t] >= flow_required + process_required # + storage_required
     
     def process_throughput_rule(m, v, p, t):
-        return m.Tau[v, p, t] == throughput_sum(m, v, p, t)
+        return m.Tau[v,p,t] == throughput_sum(m, v, p, t)
         
     def process_throughput_by_capacity_rule(m, v, p, t):
-        return m.Tau[v, p, t] <= m.Kappa_process[v, p]
+        return m.Tau[v,p,t] <= m.Kappa_process[v, p]
     
     def process_capacity_rule(m, v, p):
-        return m.Kappa_process[v, p] <= process.loc[p]['cap-max']
+        return m.Kappa_process[v, p] <= m.Phi[v, p] * process.loc[p]['cap-max']
         
     def process_input_rule(m, v, p, co, t):
-        return m.Epsilon_in[v, p, co, t] == m.Tau[v, p, t] * r_in.loc[p, co]
+        return m.Epsilon_in[v, p, co, t] == m.Tau[v, p, t] * m.r_in.loc[p, co]
         
     def process_output_rule(m, v, p, co, t):
-        return m.Epsilon_out[v, p, co, t] == m.Tau[v, p, t] * r_out.loc[p, co]
+        return m.Epsilon_out[v, p, co, t] == m.Tau[v, p, t] * m.r_out.loc[p, co]
     
     # Objective
+    def def_costs_rule(m, cost_type):
+        if cost_type == 'Inv':
+            return m.costs['Inv'] == \
+                sum(m.Kappa_hub[i,j,h] * hub.loc[h]['cost-inv-var'] 
+                    for (i,j) in m.edge for h in m.hub) + \
+                sum(m.Kappa_process[v,p] * process.loc[p]['cost-inv-var'] + 
+                    m.Phi[v,p] * process.loc[p]['cost-inv-fix']
+                    for v in m.vertex for p in m.process) + \
+                sum(m.Pmax[i,j,co] * commodity.loc[co]['cost-inv-var'] + 
+                    m.Xi[i,j,co] * commodity.loc[co]['cost-inv-fix']
+                    for (i,j) in m.edge for co in m.co_demand)
+                    
+        elif cost_type == 'Fix':
+            return m.costs['Fix'] == m.costs['Inv'] * 0.05
+            
+        elif cost_type == 'Var':
+            return m.costs['Var'] == \
+                sum(m.Epsilon_hub[i,j,h,t] * hub.loc[h]['cost-var'] * time.loc[t]['weight']
+                    for (i,j) in m.edge for h in m.hub for t in m.time) + \
+                sum(m.Tau[v,p,t] * process.loc[p]['cost-var'] * time.loc[t]['weight']
+                    for v in m.vertex for p in m.process for t in m.time) + \
+                sum(m.Rho[v,co,t] * commodity.loc[co]['cost-var'] * time.loc[t]['weight']
+                    for v in m.vertex for co in m.co_demand for t in m.time)
+            
+        else:
+            raise NotImplementedError("Unknown cost type!")
+    
     def obj_rule(m):
         return pyomo.summation(m.costs)
     
     # Equation declarations
     
     # edges/arcs
-    m.peak_satisfaction = pyomo.Constraint(m.edge, m.commodity, m.time)
-    m.edge_supply = pyomo.Constraint(m.edge, m.commodity, m.time)
-    m.edge_equation = pyomo.Constraint(m.edge, m.commodity, m.time)
-    m.arc_flow_by_capacity = pyomo.Constraint(m.arc, m.commodity, m.time)
-    m.arc_unidirectionality = pyomo.Constraint(m.arc, m.commodity, m.time)
-    m.edge_capacity = pyomo.Constraint(m.edge, m.commodity)
+    m.peak_satisfaction = pyomo.Constraint(m.edge, m.co_demand, m.time)
+    m.edge_supply = pyomo.Constraint(m.edge, m.co_demand, m.time)
+    m.edge_equation = pyomo.Constraint(m.edge, m.co_demand, m.time)
+    m.arc_flow_by_capacity = pyomo.Constraint(m.arc, m.co_demand, m.time)
+    m.arc_unidirectionality = pyomo.Constraint(m.arc, m.co_demand, m.time)
+    m.edge_capacity = pyomo.Constraint(m.edge, m.co_demand)
 
     # hubs
     m.hub_output_by_capacity = pyomo.Constraint(m.edge, m.hub, m.time)
@@ -208,8 +243,8 @@ def create_model(filename, vertex, edge):
     m.process_throughput = pyomo.Constraint(m.vertex, m.process, m.time)
     m.process_throughput_by_capacity = pyomo.Constraint(m.vertex, m.process, m.time)
     m.process_capacity = pyomo.Constraint(m.vertex, m.process)
-    m.process_input = pyomo.Constraint(m.vertex, m.process, m.commodity, m.time)
-    m.process_output = pyomo.Constraint(m.vertex, m.process, m.commodity, m.time)
+    m.process_input = pyomo.Constraint(m.vertex, m.process_input_tuples, m.time)
+    m.process_output = pyomo.Constraint(m.vertex, m.process_output_tuples, m.time)
 
     # costs
     m.def_costs = pyomo.Constraint(m.cost_type)
@@ -220,22 +255,22 @@ def create_model(filename, vertex, edge):
 
 
 
-def hub_balance(m, e, co, t):
-    """ Calculate commodity balance in an edge from/to hubs. """
+def hub_balance(m, i, j, co, t):
+    """ Calculate commodity balance in an edge {i,j} from/to hubs. """
     balance = 0
     for h in m.hub:
         if co in m.r_in.loc[h].index:
-            balance -= m.Epsilon_hub(e, h, t) * m.r_in.loc[h, co]
+            balance -= m.Epsilon_hub[i,j,h,t] * m.r_in.loc[h,co]
         if co in m.r_out.loc[h].index:
-            balance += m.Epsilon_hub(e, h, t) * m.r_out.loc[h, co]
+            balance += m.Epsilon_hub[i,j,h,t] * m.r_out.loc[h,co]
     return balance
     
 def flow_balance(m, v, co, t):
     """ Calculate commodity flow balance in a vertex from/to arcs. """
     balance = 0
     for w in m.neighbours[v]:        
-        balance += m.Pot[(w, v), co, t]
-        balance -= m.Pin[(v, w), co, t]
+        balance += m.Pot[w,v,co,t]
+        balance -= m.Pin[v,w,co,t]
     return balance
         
 def process_balance(m, v, co, t):
@@ -243,9 +278,9 @@ def process_balance(m, v, co, t):
     balance = 0
     for p in m.process:
         if co in m.r_in.loc[p].index:
-            balance -= m.Epsilon_in[v, p, co, t]
+            balance -= m.Epsilon_in[v,p,co,t]
         if co in m.r_out.loc[p].index:
-            balance += m.Epsilon_out[v, p, co, t]
+            balance += m.Epsilon_out[v,p,co,t]
     return balance
 
 def throughput_sum(m, v, p, t):
@@ -253,24 +288,14 @@ def throughput_sum(m, v, p, t):
     throughput = 0
     for co in m.commodity:
         if co in m.r_in.loc[p].index:
-            throughput += m.Epsilon_in[v, p, co, t] * m.r_rin.loc[p, co]
+            throughput += m.Epsilon_in[v,p,co,t] * m.r_in.loc[p,co]
     return throughput
 
-def find_matching_edge(m, a):
-    """ Return edge for a given arc. """
-    if a in m.edge:
-        return (a[0], a[1])
+def find_matching_edge(m, i, j):
+    """ Return corresponding edge for a given arc. """
+    if (i,j) in m.edge:
+        return (i,j)
     else:
-        return (a[1], a[0])
+        return (j,i)
 
-def create_arc_pair(e):
-    """ Return pair of arcs for a given edge. """
-    a = (e[0], e[1])
-    b = (e[1], e[0])
-    return (a, b)
-    
-def reverse_arc(a):
-    """ Return direction-inverted version of a given arc. """
-    return (a[1], a[0])
-    
 
