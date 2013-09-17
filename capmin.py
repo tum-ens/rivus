@@ -60,10 +60,6 @@ def create_model(filename, vertex, edge):
     m.peak = edge_areas.apply(lambda x: multiply_by_area_demand(x, 'peak')) \
                        .sum(axis=1) \
                        .unstack('Commodity')
-    # demand(edge, commodity) in GWh [due to /1e6]
-    m.demand = edge_areas.apply(lambda x: multiply_by_area_demand(x, 'demand')) \
-                         .sum(axis=1) \
-                         .unstack('Commodity') / 1e6
     
     # reindex edges to vertex tuple index
     vertex.set_index('Vertex', inplace=True)
@@ -146,8 +142,8 @@ def create_model(filename, vertex, edge):
         length = edge.loc[i, j]['geometry'].length
         
         flow_in = ( 1 - length * commodity.loc[co]['loss-var']) * \
-                  ( m.Pin[i,j,co,t] - m.Pin[j,i,co,t] )
-        flow_out =  m.Pot[i,j,co,t] - m.Pot[j,i,co,t]
+                  ( m.Pin[i,j,co,t] + m.Pin[j,i,co,t] )
+        flow_out =  m.Pot[i,j,co,t] + m.Pot[j,i,co,t]
         fixed_losses = ( m.Psi[i,j,co,t] + m.Psi[j,i,co,t] ) * \
                        length * commodity.loc[co]['loss-fix']
         
@@ -182,7 +178,10 @@ def create_model(filename, vertex, edge):
     def process_throughput_by_capacity_rule(m, v, p, t):
         return m.Tau[v,p,t] <= m.Kappa_process[v, p]
     
-    def process_capacity_rule(m, v, p):
+    def process_capacity_min_rule(m, v, p):
+        return m.Kappa_process[v, p] >= m.Phi[v, p] * process.loc[p]['cap-min']
+        
+    def process_capacity_max_rule(m, v, p):
         return m.Kappa_process[v, p] <= m.Phi[v, p] * process.loc[p]['cap-max']
         
     def process_input_rule(m, v, p, co, t):
@@ -242,7 +241,8 @@ def create_model(filename, vertex, edge):
     # process
     m.process_throughput = pyomo.Constraint(m.vertex, m.process, m.time)
     m.process_throughput_by_capacity = pyomo.Constraint(m.vertex, m.process, m.time)
-    m.process_capacity = pyomo.Constraint(m.vertex, m.process)
+    m.process_capacity_min = pyomo.Constraint(m.vertex, m.process)
+    m.process_capacity_max = pyomo.Constraint(m.vertex, m.process)
     m.process_input = pyomo.Constraint(m.vertex, m.process_input_tuples, m.time)
     m.process_output = pyomo.Constraint(m.vertex, m.process_output_tuples, m.time)
 
@@ -284,10 +284,10 @@ def process_balance(m, v, co, t):
     return balance
 
 def throughput_sum(m, v, p, t):
-    """ Calculate process throughput as sum of inputs. """
+    """ Calculate process throughput as the sum of inputs. """
     throughput = 0
-    for co in m.commodity:
-        if co in m.r_in.loc[p].index:
+    for (pro, co) in m.process_input_tuples:
+        if pro == p:
             throughput += m.Epsilon_in[v,p,co,t] * m.r_in.loc[p,co]
     return throughput
 
