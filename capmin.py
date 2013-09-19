@@ -1,7 +1,6 @@
 """ CAPMIN: optimization model for distributed urban energy systems
 
-CAPMIN optimizes topology and size of urban energy networks, energy conversion
-and [to be done] energy storage.
+CAPMIN optimizes topology and size of urban energy networks, energy conversion.
 
 """
 import coopr.pyomo as pyomo
@@ -65,7 +64,6 @@ def create_model(filename, vertex, edge):
     vertex.set_index('Vertex', inplace=True)
     edge.set_index(['Vertex1', 'Vertex2'], inplace=True)
     m.peak.index = edge.index
-    m.demand.index = edge.index
     
     # construct arc set of directed (i,j), (j,i) edges
     arcs = [arc for (v1, v2) in edge.index for arc in ((v1, v2), (v2, v1))]
@@ -82,13 +80,23 @@ def create_model(filename, vertex, edge):
     # MODEL
     
     # Sets
-    m.commodity = pyomo.Set(initialize=commodity.index)
-    m.co_demand = pyomo.Set(within=m.commodity, initialize=co_demand)
-    m.process = pyomo.Set(initialize=process.index)
-    m.process_input_tuples = pyomo.Set(within=m.process*m.commodity, initialize=m.r_in.index)
-    m.process_output_tuples = pyomo.Set(within=m.process*m.commodity, initialize=m.r_out.index)
-    m.hub = pyomo.Set(initialize=hub.index, within=m.process)
-    m.time = pyomo.Set(initialize=time.index)
+    m.commodity = pyomo.Set(initialize=commodity.index,
+                            doc='Commodities')
+    m.co_demand = pyomo.Set(within=m.commodity, 
+                            initialize=co_demand,
+                            doc='Commodities that have demand in edges')
+    m.process = pyomo.Set(initialize=process.index,
+                          doc='')
+    m.process_input_tuples = pyomo.Set(within=m.process*m.commodity, 
+                                       initialize=m.r_in.index,
+                                       doc='Commodities consumed by processes')
+    m.process_output_tuples = pyomo.Set(within=m.process*m.commodity, 
+                                        initialize=m.r_out.index,
+                                        doc='Commodities emitted by processes')
+    m.hub = pyomo.Set(within=m.process,
+                      initialize=hub.index,
+                      doc='Hub processes')
+    m.time = pyomo.Set(initialize=time.index, doc='Timesteps')
     #m.storage = pyomo.Set(initialize=storage.index.levels[
     #                                 storage.index.names.index('Storage')])
     m.vertex = pyomo.Set(initialize=vertex.index)
@@ -103,29 +111,59 @@ def create_model(filename, vertex, edge):
     # Variables
     
     # edges and arcs
-    m.Sigma = pyomo.Var(m.edge, m.commodity, m.time, within=pyomo.NonNegativeReals)
-    m.Pin = pyomo.Var(m.arc, m.commodity, m.time, within=pyomo.NonNegativeReals)
-    m.Pot = pyomo.Var(m.arc, m.commodity, m.time, within=pyomo.NonNegativeReals)
-    m.Psi = pyomo.Var(m.arc, m.commodity, m.time, within=pyomo.Binary)
-    m.Pmax = pyomo.Var(m.edge, m.commodity, within=pyomo.NonNegativeReals)
-    m.Xi = pyomo.Var(m.edge, m.commodity, within=pyomo.Binary)
+    m.Sigma = pyomo.Var(m.edge, m.commodity, m.time, 
+                        within=pyomo.NonNegativeReals, 
+                        doc='supply (kW) of commodity in edge at time')
+    m.Pin = pyomo.Var(m.arc, m.commodity, m.time, 
+                      within=pyomo.NonNegativeReals,
+                      doc='power flow (kW) of commodity into arc at time')
+    m.Pot = pyomo.Var(m.arc, m.commodity, m.time, 
+                      within=pyomo.NonNegativeReals,
+                      doc='power flow (kW) of commodity out of arc at time')
+    m.Psi = pyomo.Var(m.arc, m.commodity, m.time, 
+                      within=pyomo.Binary,
+                      doc='1 if (directed!) arc is used at time, 0 else')
+    m.Pmax = pyomo.Var(m.edge, m.commodity, 
+                       within=pyomo.NonNegativeReals,
+                       doc='power flow capacity (kW) for commodity in edge')
+    m.Xi = pyomo.Var(m.edge, m.commodity, 
+                     within=pyomo.Binary,
+                     doc='1 if (undirected!) edge is used for commodity at all, 0 else')
     
     # vertices
-    m.Rho = pyomo.Var(m.vertex, m.commodity, m.time, within=pyomo.NonNegativeReals)
+    m.Rho = pyomo.Var(m.vertex, m.commodity, m.time, 
+                      within=pyomo.NonNegativeReals,
+                      doc='source stream (kW) of commodity from vertex')
 
     # hubs
-    m.Kappa_hub = pyomo.Var(m.edge, m.hub, within=pyomo.NonNegativeReals)
-    m.Epsilon_hub = pyomo.Var(m.edge, m.hub, m.time, within=pyomo.NonNegativeReals)
+    m.Kappa_hub = pyomo.Var(m.edge, m.hub, 
+                            within=pyomo.NonNegativeReals,
+                            doc='capacity (kW) of hub process in an edge')
+    m.Epsilon_hub = pyomo.Var(m.edge, m.hub, m.time, 
+                              within=pyomo.NonNegativeReals,
+                              doc='acitvity (kW) of hub process in edge at time')
 
     # processes
-    m.Kappa_process = pyomo.Var(m.vertex, m.process, within=pyomo.NonNegativeReals)
-    m.Phi = pyomo.Var(m.vertex, m.process, within=pyomo.Binary)
-    m.Tau = pyomo.Var(m.vertex, m.process, m.time, within=pyomo.NonNegativeReals)
-    m.Epsilon_in = pyomo.Var(m.vertex, m.process, m.commodity, m.time, within=pyomo.NonNegativeReals)
-    m.Epsilon_out = pyomo.Var(m.vertex, m.process, m.commodity, m.time, within=pyomo.NonNegativeReals)
+    m.Kappa_process = pyomo.Var(m.vertex, m.process, 
+                                within=pyomo.NonNegativeReals,
+                                doc='capacity (kW) of process in vertex')
+    m.Phi = pyomo.Var(m.vertex, m.process, 
+                      within=pyomo.Binary,
+                      doc='1 if process in vertex has Kappa_process > 0, 0 else')
+    m.Tau = pyomo.Var(m.vertex, m.process, m.time, 
+                      within=pyomo.NonNegativeReals,
+                      doc='power flow (kW) through process')
+    m.Epsilon_in = pyomo.Var(m.vertex, m.process, m.commodity, m.time, 
+                             within=pyomo.NonNegativeReals,
+                             doc='power flow (kW) of commodity into process')
+    m.Epsilon_out = pyomo.Var(m.vertex, m.process, m.commodity, m.time, 
+                              within=pyomo.NonNegativeReals,
+                              doc='power flow (kW) of commodity out of process')
     
     # costs
-    m.costs = pyomo.Var(m.cost_type, within=pyomo.NonNegativeReals)
+    m.costs = pyomo.Var(m.cost_type, 
+                        within=pyomo.NonNegativeReals,
+                        doc='costs (EUR) by cost type')
     
     # Constraints
     
@@ -133,10 +171,6 @@ def create_model(filename, vertex, edge):
     def peak_satisfaction_rule(m, i, j, co, t):
         provided_power = hub_balance(m, i, j, co, t) + m.Sigma[i,j,co,t]
         return provided_power > m.peak.loc[i,j][co] * time.loc[t]['scale']
-
-    def edge_supply_rule(m, i, j, co, t):
-        power_required = - hub_balance(m, i, j, co, t)
-        return m.Sigma[i,j,co,t] >= power_required
     
     def edge_equation_rule(m, i, j, co, t):
         length = edge.loc[i, j]['geometry'].length
@@ -191,6 +225,7 @@ def create_model(filename, vertex, edge):
         return m.Epsilon_out[v, p, co, t] == m.Tau[v, p, t] * m.r_out.loc[p, co]
     
     # Objective
+    
     def def_costs_rule(m, cost_type):
         if cost_type == 'Inv':
             return m.costs['Inv'] == \
@@ -224,31 +259,44 @@ def create_model(filename, vertex, edge):
     # Equation declarations
     
     # edges/arcs
-    m.peak_satisfaction = pyomo.Constraint(m.edge, m.co_demand, m.time)
-    m.edge_supply = pyomo.Constraint(m.edge, m.co_demand, m.time)
-    m.edge_equation = pyomo.Constraint(m.edge, m.co_demand, m.time)
-    m.arc_flow_by_capacity = pyomo.Constraint(m.arc, m.co_demand, m.time)
-    m.arc_unidirectionality = pyomo.Constraint(m.arc, m.co_demand, m.time)
-    m.edge_capacity = pyomo.Constraint(m.edge, m.co_demand)
+    m.peak_satisfaction = pyomo.Constraint(m.edge, m.co_demand, m.time,
+        doc='peak must be satisfied by Sigma and hub process output')
+    m.edge_equation = pyomo.Constraint(m.edge, m.co_demand, m.time,
+        doc='Sigma is provided by arc flow difference Pin-Pot in either direction')
+    m.arc_flow_by_capacity = pyomo.Constraint(m.arc, m.co_demand, m.time,
+        doc='Pin <= Pmax')
+    m.arc_unidirectionality = pyomo.Constraint(m.arc, m.co_demand, m.time,
+        doc='Psi[i,j,t] + Psi[j,i,t] <= 1')
+    m.edge_capacity = pyomo.Constraint(m.edge, m.co_demand, 
+        doc='Pmax <= Cmax * Xi')
 
     # hubs
-    m.hub_output_by_capacity = pyomo.Constraint(m.edge, m.hub, m.time)
-    m.hub_capacity = pyomo.Constraint(m.edge, m.hub)
+    m.hub_output_by_capacity = pyomo.Constraint(m.edge, m.hub, m.time,
+        doc='Epsilon_hub <= Kappa_hub')
+    m.hub_capacity = pyomo.Constraint(m.edge, m.hub,
+        doc='Kappa_hub <= Cmax')
     
     # vertex
-    m.vertex_equation = pyomo.Constraint(m.vertex, m.commodity, m.time)
+    m.vertex_equation = pyomo.Constraint(m.vertex, m.commodity, m.time, 
+        doc='Rho >= Process balance + Arc flow balance')
     
     # process
-    m.process_throughput = pyomo.Constraint(m.vertex, m.process, m.time)
-    m.process_throughput_by_capacity = pyomo.Constraint(m.vertex, m.process, m.time)
-    m.process_capacity_min = pyomo.Constraint(m.vertex, m.process)
-    m.process_capacity_max = pyomo.Constraint(m.vertex, m.process)
-    m.process_input = pyomo.Constraint(m.vertex, m.process_input_tuples, m.time)
-    m.process_output = pyomo.Constraint(m.vertex, m.process_output_tuples, m.time)
+    m.process_throughput = pyomo.Constraint(m.vertex, m.process, m.time,
+        doc='process throughput (Tau) is equal to sum of process inputs flows')
+    m.process_throughput_by_capacity = pyomo.Constraint(m.vertex, m.process, m.time,
+        doc='Tau <= Kappa_process')
+    m.process_capacity_min = pyomo.Constraint(m.vertex, m.process,
+        doc='Kappa_process >= Cmin * Phi')
+    m.process_capacity_max = pyomo.Constraint(m.vertex, m.process,
+        doc='Kappa_process <= Cmax * Phi')
+    m.process_input = pyomo.Constraint(m.vertex, m.process_input_tuples, m.time,
+        doc='Epsilon_in = Tau * r_in')
+    m.process_output = pyomo.Constraint(m.vertex, m.process_output_tuples, m.time,
+        doc='Epsilon_out = Tau * r_out')
 
     # costs
-    m.def_costs = pyomo.Constraint(m.cost_type)
-    m.obj = pyomo.Objective(sense=pyomo.minimize)
+    m.def_costs = pyomo.Constraint(m.cost_type, doc='Costs = sum of activities')
+    m.obj = pyomo.Objective(sense=pyomo.minimize, doc='Sum costs by cost type')
     
     return m
 
