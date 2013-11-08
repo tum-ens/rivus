@@ -1,7 +1,9 @@
 import capmin
+import pandas as pd
 import pandashp as pdshp
 import pandaspyomo as pdpo
 import pyomotools
+import pdb
 from coopr.opt.base import SolverFactory
 from operator import itemgetter
 
@@ -26,25 +28,42 @@ total_area = buildings_grouped.sum()['total_area'].unstack()
 # 2. join DataFrame total_area on index (=ID)
 # 3. fill missing values with 0
 edge = pdshp.read_shp(edge_shapefile)
+edge = edge.set_index('Edge')
 edge = edge.join(total_area)
 edge = edge.fillna(0)
 
 # load nodes
 vertex = pdshp.read_shp(vertex_shapefile)
-
+pdb.set_trace()
 # create model
 model = capmin.create_model(data_spreadsheet, vertex, edge)
 instance = model.create()
+instance.write() # write CAPMIN.lp, just for reference
 solver = SolverFactory(solver_name)
 
 # solve problem
 result = solver.solve(instance)
+print(result['Solver'])
 instance.load(result)
-
-instance.write()
 
 # prepare input data similar to model for easier analysis
 ig=itemgetter('Commodity', 'Process', 'Process-Commodity', 'Time', 'Area-Demand')
 dfs = pyomotools.read_xls(data_spreadsheet)
 commodity, process, process_commodity, time, area_demand = ig(dfs)
 
+# read results to workspace
+Pin = pdpo.get_entity(instance, 'Pin').unstack().unstack()
+Pot = pdpo.get_entity(instance, 'Pot').unstack().unstack()
+Psi = pdpo.get_entity(instance, 'Psi').unstack().unstack()
+Pmax = pdpo.get_entity(instance, 'Pmax').unstack()
+Xi = pdpo.get_entity(instance, 'Xi').unstack()
+Sigma = pdpo.get_entity(instance, 'Sigma').unstack().unstack()
+Rho = pdpo.get_entity(instance, 'Rho').unstack().unstack()
+Epsilon_hub = pdpo.get_entity(instance, 'Epsilon_hub').unstack().unstack()
+Epsilon_in = pdpo.get_entity(instance, 'Epsilon_in').unstack().unstack()
+Epsilon_out = pdpo.get_entity(instance, 'Epsilon_out').unstack().unstack()
+Tau = pdpo.get_entity(instance, 'Tau').unstack().unstack()
+costs = pdp.get_entity(instance, 'costs')
+
+# alias for easier model inspection
+m = instance
