@@ -12,7 +12,7 @@ edge_shapefile = 'data/mnl/mnl_edge'
 vertex_shapefile = 'data/mnl/mnl_vertex'
 data_spreadsheet = 'data/mnl/mnl.xlsx'
 
-solver_name = 'glpk' # possible (if licensed and binary in path): cplex, gurobi 
+solver_name = 'gurobi' # possible (if licensed and binary in path): cplex, gurobi 
 
 # load buildings and sum by type and nearest edge ID
 # 1. read shapefile to DataFrame (with special geometry column)
@@ -34,7 +34,7 @@ edge = edge.fillna(0)
 
 # load nodes
 vertex = pdshp.read_shp(vertex_shapefile)
-pdb.set_trace()
+
 # create model
 model = capmin.create_model(data_spreadsheet, vertex, edge)
 instance = model.create()
@@ -42,8 +42,8 @@ instance.write() # write CAPMIN.lp, just for reference
 solver = SolverFactory(solver_name)
 
 # solve problem
-result = solver.solve(instance)
-print(result['Solver'])
+result = solver.solve(instance, tee=True)
+#print(result['Solver'])
 instance.load(result)
 
 # prepare input data similar to model for easier analysis
@@ -59,11 +59,13 @@ Pmax = pdpo.get_entity(instance, 'Pmax').unstack()
 Xi = pdpo.get_entity(instance, 'Xi').unstack()
 Sigma = pdpo.get_entity(instance, 'Sigma').unstack().unstack()
 Rho = pdpo.get_entity(instance, 'Rho').unstack().unstack()
+Kappa_hub = pdpo.get_entity(instance, 'Kappa_hub').unstack().unstack()
 Epsilon_hub = pdpo.get_entity(instance, 'Epsilon_hub').unstack().unstack()
 Epsilon_in = pdpo.get_entity(instance, 'Epsilon_in').unstack().unstack()
 Epsilon_out = pdpo.get_entity(instance, 'Epsilon_out').unstack().unstack()
 Tau = pdpo.get_entity(instance, 'Tau').unstack().unstack()
-costs = pdp.get_entity(instance, 'costs')
+costs = pdpo.get_entity(instance, 'costs')
 
 # alias for easier model inspection
 m = instance
+
