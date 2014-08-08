@@ -9,7 +9,43 @@ import pandas as pd
 import pyomotools
 import pdb
 
-def create_model(spreadsheet, vertex, edge):
+def read_excel(filename):
+    """Read Excel input file and prepare CAPMIN input data dict.
+    
+    Reads an Excel spreadsheet that adheres to the structure shown in the
+    example dataset data/mnl/mnl.xlsx. Must contain
+    
+    Args:
+        filename: filename to an Excel spreadsheet.
+    
+    Returns:
+        a dict of 6 DataFrames, one for each sheet
+    """
+    with pd.ExcelFile(filename) as xls:
+        commodity = xls.parse('Commodity', index_col=['Commodity'])
+        process = xls.parse('Process', index_col=['Process'])
+        time = xls.parse('Time', index_col=['Time'])
+        area_demand = xls.parse('Area-Demand', index_col=['Area', 'Commodity'])
+        process_commodity = xls.parse(
+            'Process-Commodity',
+            index_col=['Process', 'Commodity', 'Direction'])
+        
+    data = {
+        'commodity': commodity,
+        'process': process,
+        'process_commodity': process_commodity,
+        'time': time,
+        'area_demand': area_demand}
+    
+    # sort nested indexes to make direct assignments work, cf
+    # http://pandas.pydata.org/pandas-docs/stable/indexing.html#the-need-for-sortedness-with-multiindex
+    for key in data:
+        if isinstance(data[key].index, pd.core.index.MultiIndex):
+            data[key].sortlevel(inplace=True)
+    return data    
+    
+
+def create_model(data, vertex, edge):
     """Return a CAPMIN model instance from input file and spatial input. 
     
     Args:
@@ -30,13 +66,12 @@ def create_model(spreadsheet, vertex, edge):
     m.name = 'CAPMIN'
     
     # DataFrames
-    dfs = pyomotools.read_xls(spreadsheet)
-    commodity = dfs['Commodity']    
-    process = dfs['Process']
-    process_commodity = dfs['Process-Commodity']
+    commodity = data['commodity']    
+    process = data['process']
+    process_commodity = data['process_commodity']
     #storage = dfs['Storage']
-    time = dfs['Time']
-    area_demand = dfs['Area-Demand']   
+    time = data['time']
+    area_demand = data['area_demand']   
     
     # process input/output ratios
     m.r_in = process_commodity.xs('In', level='Direction')['ratio']
@@ -78,6 +113,7 @@ def create_model(spreadsheet, vertex, edge):
     vertex.set_index('Vertex', inplace=True)
     edge.set_index(['Vertex1', 'Vertex2'], inplace=True)
     m.peak.index = edge.index
+    m.peak.sortlevel(inplace=True)
     
     # construct arc set of directed (i,j), (j,i) edges
     arcs = [arc for (v1, v2) in edge.index for arc in ((v1, v2), (v2, v1))]
@@ -176,7 +212,7 @@ def create_model(spreadsheet, vertex, edge):
         doc='')
     
     # Parameters
-    # no or few will be needed
+    # none needed, DataFrames work directly in equation definitions
     
     # Variables
     
@@ -255,7 +291,7 @@ def create_model(spreadsheet, vertex, edge):
     # edges/arcs
     def peak_satisfaction_rule(m, i, j, co, t):
         provided_power = hub_balance(m, i, j, co, t) + m.Sigma[i,j,co,t]
-        return provided_power > m.peak.loc[i,j][co] * time.loc[t]['scale']
+        return provided_power >= m.peak.loc[i,j][co] * time.loc[t]['scale']
     
     def edge_equation_rule(m, i, j, co, t):
         length = edge.loc[i, j]['geometry'].length
@@ -472,5 +508,200 @@ def find_matching_edge(m, i, j):
         return (i,j)
     else:
         return (j,i)
+
+
+# Technical helper functions for data retrieval
+
+def get_entity(instance, name):
+    """ Return a DataFrame for an entity in model instance.
+
+    Args:
+        instance: a Pyomo ConcreteModel instance
+        name: name of a Set, Param, Var, Constraint or Objective
+
+    Returns:
+        a single-columned Pandas DataFrame with domain as index
+    """
+
+    # retrieve entity, its type and its onset names
+    entity = instance.__getattribute__(name)
+    labels = get_onset_names(entity)
+
+    # extract values
+    if isinstance(entity, pyomo.Set):
+        # Pyomo sets don't have values, only elements
+        results = pd.DataFrame([(v, 1) for v in entity.value])
+
+        # for unconstrained sets, the column label is identical to their index
+        # hence, make index equal to entity name and append underscore to name
+        # (=the later column title) to preserve identical index names for both
+        # unconstrained supersets
+        if not labels:
+            labels = [name]
+            name = name+'_'
+
+    elif isinstance(entity, pyomo.Param):
+        if entity.dim() > 1:
+            results = pd.DataFrame([v[0]+(v[1],) for v in entity.iteritems()])
+        else:
+            results = pd.DataFrame(entity.iteritems())
+    else:
+        # create DataFrame
+        if entity.dim() > 1:
+            # concatenate index tuples with value if entity has
+            # multidimensional indices v[0]
+            results = pd.DataFrame(
+                [v[0]+(v[1].value,) for v in entity.iteritems()])
+        else:
+            # otherwise, create tuple from scalar index v[0]
+            results = pd.DataFrame(
+                [(v[0], v[1].value) for v in entity.iteritems()])
+
+    # check for duplicate onset names and append one to several "_" to make
+    # them unique, e.g. ['sit', 'sit', 'com'] becomes ['sit', 'sit_', 'com']
+    for k, label in enumerate(labels):
+        if label in labels[:k]:
+            labels[k] = labels[k] + "_"
+
+    # name columns according to labels + entity name
+    results.columns = labels + [name]
+    results.set_index(labels, inplace=True)
+
+    return results
+
+
+def get_entities(instance, names):
+    """ Return one DataFrame with entities in columns and a common index.
+
+    Works only on entities that share a common domain (set or set_tuple), which
+    is used as index of the returned DataFrame.
+
+    Args:
+        instance: a Pyomo ConcreteModel instance
+        names: list of entity names (as returned by list_entities)
+
+    Returns:
+        a Pandas DataFrame with entities as columns and domains as index
+    """
+
+    df = pd.DataFrame()
+    for name in names:
+        other = get_entity(instance, name)
+
+        if df.empty:
+            df = other
+        else:
+            index_names_before = df.index.names
+
+            df = df.join(other, how='outer')
+
+            if index_names_before != df.index.names:
+                df.index.names = index_names_before
+
+    return df
+
+
+def list_entities(instance, entity_type):
+    """ Return list of sets, params, variables, constraints or objectives
+
+    Args:
+        instance: a Pyomo ConcreteModel object
+        entity_type: "set", "par", "var", "con" or "obj"
+
+    Returns:
+        DataFrame of entities
+
+    Example:
+        >>> data = read_excel('data-example.xlsx')
+        >>> model = create_model(data, range(1,25))
+        >>> list_entities(model, 'obj')  #doctest: +NORMALIZE_WHITESPACE
+                                         Description Domain
+        Name
+        obj   minimize(cost = sum of all cost types)     []
+        [1 rows x 2 columns]
+
+    """
+
+    iter_entities = instance.__dict__.iteritems()
+
+    if entity_type == 'set':
+        entities = sorted(
+            (x, y.doc, get_onset_names(y)) for (x, y) in iter_entities
+            if isinstance(y, pyomo.Set) and not y.virtual)
+
+    elif entity_type == 'par':
+        entities = sorted(
+            (x, y.doc, get_onset_names(y)) for (x, y) in iter_entities
+            if isinstance(y, pyomo.Param))
+
+    elif entity_type == 'var':
+        entities = sorted(
+            (x, y.doc, get_onset_names(y)) for (x, y) in iter_entities
+            if isinstance(y, pyomo.Var))
+
+    elif entity_type == 'con':
+        entities = sorted(
+            (x, y.doc, get_onset_names(y)) for (x, y) in iter_entities
+            if isinstance(y, pyomo.Constraint))
+
+    elif entity_type == 'obj':
+        entities = sorted(
+            (x, y.doc, get_onset_names(y)) for (x, y) in iter_entities
+            if isinstance(y, pyomo.Objective))
+
+    else:
+        raise ValueError("Unknown parameter entity_type")
+
+    entities = pd.DataFrame(entities,
+                            columns=['Name', 'Description', 'Domain'])
+    entities.set_index('Name', inplace=True)
+    return entities
+
+
+def get_onset_names(entity):
+    """
+        Example:
+            >>> data = read_excel('data-example.xlsx')
+            >>> model = create_model(data, range(1,25))
+            >>> get_onset_names(model.e_co_stock)
+            ['t', 'sit', 'com', 'com_type']
+    """
+    # get column titles for entities from domain set names
+    labels = []
+
+    if isinstance(entity, pyomo.Set):
+        if entity.dimen > 1:
+            # N-dimensional set tuples, possibly with nested set tuples within
+            if entity.domain:
+                domains = entity.domain.set_tuple
+            else:
+                domains = entity.set_tuple
+
+            for domain_set in domains:
+                labels.extend(get_onset_names(domain_set))
+
+        elif entity.dimen == 1:
+            if entity.domain:
+                # 1D subset; add domain name
+                labels.append(entity.domain.name)
+            else:
+                # unrestricted set; add entity name
+                labels.append(entity.name)
+        else:
+            # no domain, so no labels needed
+            pass
+
+    elif isinstance(entity, (pyomo.Param, pyomo.Var, pyomo.Constraint,
+                    pyomo.Objective)):
+        if entity.dim() > 0 and entity._index:
+            labels = get_onset_names(entity._index)
+        else:
+            # zero dimensions, so no onset labels
+            pass
+
+    else:
+        raise ValueError("Unknown entity type!")
+
+    return labels
 
 
