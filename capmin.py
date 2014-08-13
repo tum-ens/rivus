@@ -6,8 +6,6 @@ CAPMIN optimizes topology and size of urban energy networks, energy conversion.
 import coopr.pyomo as pyomo
 import itertools
 import pandas as pd
-import pyomotools
-import pdb
 
 def read_excel(filename):
     """Read Excel input file and prepare CAPMIN input data dict.
@@ -222,23 +220,23 @@ def create_model(data, vertex, edge):
         within=pyomo.NonNegativeReals, 
         doc='supply (kW) of commodity in edge at time')
     m.Pin = pyomo.Var(
-        m.arc, m.commodity, m.time, 
+        m.arc, m.co_transportable, m.time, 
         within=pyomo.NonNegativeReals,
         doc='power flow (kW) of commodity into arc at time')
     m.Pot = pyomo.Var(
-        m.arc, m.commodity, m.time, 
+        m.arc, m.co_transportable, m.time, 
         within=pyomo.NonNegativeReals,
         doc='power flow (kW) of commodity out of arc at time')
     m.Psi = pyomo.Var(
-        m.arc, m.commodity, m.time, 
+        m.arc, m.co_transportable, m.time, 
         within=pyomo.Binary,
         doc='1 if (directed!) arc is used at time, 0 else')
     m.Pmax = pyomo.Var(
-        m.edge, m.commodity, 
+        m.edge, m.co_transportable, 
         within=pyomo.NonNegativeReals,
         doc='power flow capacity (kW) for commodity in edge')
     m.Xi = pyomo.Var(
-        m.edge, m.commodity, 
+        m.edge, m.co_transportable, 
         within=pyomo.Binary,
         doc='1 if (undirected!) edge is used for commodity at all, 0 else')
     
@@ -294,15 +292,18 @@ def create_model(data, vertex, edge):
         return provided_power >= m.peak.loc[i,j][co] * time.loc[t]['scale']
     
     def edge_equation_rule(m, i, j, co, t):
-        length = edge.loc[i, j]['geometry'].length
-        
-        flow_in = ( 1 - length * commodity.loc[co]['loss-var']) * \
-                  ( m.Pin[i,j,co,t] + m.Pin[j,i,co,t] )
-        flow_out =  m.Pot[i,j,co,t] + m.Pot[j,i,co,t]
-        fixed_losses = ( m.Psi[i,j,co,t] + m.Psi[j,i,co,t] ) * \
-                       length * commodity.loc[co]['loss-fix']
-        
-        return m.Sigma[i,j,co,t] <= flow_in - flow_out - fixed_losses
+        if co in m.co_transportable:
+            length = edge.loc[i, j]['geometry'].length
+            
+            flow_in = ( 1 - length * commodity.loc[co]['loss-var']) * \
+                      ( m.Pin[i,j,co,t] + m.Pin[j,i,co,t] )
+            flow_out =  m.Pot[i,j,co,t] + m.Pot[j,i,co,t]
+            fixed_losses = ( m.Psi[i,j,co,t] + m.Psi[j,i,co,t] ) * \
+                           length * commodity.loc[co]['loss-fix']
+            
+            return m.Sigma[i,j,co,t] <= flow_in - flow_out - fixed_losses
+        else:
+            return m.Sigma[i,j,co,t] <= 0
         
     def arc_flow_by_capacity_rule(m, i, j, co, t):
         (v1, v2) = find_matching_edge(m, i, j)        
@@ -330,10 +331,13 @@ def create_model(data, vertex, edge):
         
     # vertex
     def vertex_equation_rule(m, v, co, t):
-        flow_required = - flow_balance(m, v, co, t)
+        if co in m.co_transportable:
+            flow_required = - flow_balance(m, v, co, t)
+        else:
+            flow_required = 0
         process_required = - process_balance(m, v, co, t)
         if co in m.co_source:
-            return m.Rho[v,co,t] >= flow_required + process_required # + storage_required
+            return m.Rho[v,co,t] >= flow_required + process_required
         else:
             return 0 >= flow_required + process_required
     
@@ -371,7 +375,7 @@ def create_model(data, vertex, edge):
                     for v in m.vertex for p in m.process) + \
                 sum(m.Pmax[i,j,co] * commodity.loc[co]['cost-inv-var'] + 
                     m.Xi[i,j,co] * commodity.loc[co]['cost-inv-fix']
-                    for (i,j) in m.edge for co in m.co_demand)
+                    for (i,j) in m.edge for co in m.co_transportable)
                     
         elif cost_type == 'Fix':
             return m.costs['Fix'] == m.costs['Inv'] * 0.05
@@ -398,7 +402,7 @@ def create_model(data, vertex, edge):
         m.edge, m.co_demand, m.time,
         doc='peak must be satisfied by Sigma and hub process output')
     m.edge_equation = pyomo.Constraint(
-        m.edge, m.co_transportable, m.time,
+        m.edge, m.commodity, m.time,
         doc='Sigma is provided by arc flow difference Pin-Pot in either direction')
     m.arc_flow_by_capacity = pyomo.Constraint(
         m.arc, m.co_transportable, m.time,
@@ -705,3 +709,68 @@ def get_onset_names(entity):
     return labels
 
 
+def get_constants(prob):
+    """Retrieve time-independent variables/quantities.
+
+    Usage:
+        costs, Pmax, Kappa_hub, Kappa_process = get_constants(prob)
+
+    Args:
+        prob: a CAPMIN model instance
+
+    Returns:
+        (costs, Pmax, Kappa_hub) tuple
+    """
+    costs = get_entity(prob, 'costs')
+    Pmax = get_entity(prob, 'Pmax').unstack()
+    Kappa_hub = get_entity(prob, 'Kappa_hub').unstack()
+    Kappa_process = get_entity(prob, 'Kappa_process').unstack()
+    
+    # drop all-zero rows and round to integers
+    Pmax = Pmax[
+        Pmax.sum(axis=1) > 0].applymap(round)
+    Kappa_hub = Kappa_hub[
+        Kappa_hub.sum(axis=1) > 0].applymap(round)
+    Kappa_process = Kappa_process[
+        Kappa_process.sum(axis=1) > 0].applymap(round)
+    costs = costs.applymap(round)
+    
+    # nicer index names
+    Pmax.index.names = ['vertex1', 'vertex2']
+    Kappa_hub.index.names = ['vertex1', 'vertex2']
+    
+    return costs, Pmax, Kappa_hub, Kappa_process
+    
+def get_timeseries(prob):
+    """Retrieve time-dependent variables/quantities for a given commodity."""
+    
+
+    source = get_entity(prob, 'Rho')
+    flows = get_entities(prob, ['Pin', 'Pot', 'Psi', 'Sigma'])
+    hubs = get_entity(prob, 'Epsilon_hub')
+    proc_io = get_entities(prob, ['Epsilon_in', 'Epsilon_out'])
+    proc_tau = get_entity(prob, 'Tau').unstack().unstack()
+
+    # fill NaN's
+    flows.fillna(0, inplace=True)
+    proc_io.fillna(0, inplace=True)
+
+    # drop all-zero rows
+    source = source[source.sum(axis=1) > 0].unstack()
+    flows = flows[flows.sum(axis=1) > 0].applymap(round)
+    hubs = hubs[hubs.sum(axis=1) > 0].unstack()
+    proc_io = proc_io[proc_io.sum(axis=1) > 0]
+    proc_tau = proc_tau[proc_tau.sum(axis=1) > 0].unstack()
+
+    return source, flows, hubs, proc_io, proc_tau
+
+
+def plot(prob, commodity):
+    """Plot a map of supply, conversion, transport and consumption.
+    
+    For given commodity, plot a map of all locations where the commodity is
+    introduced (Rho), transported (Pin/Pot/Pmax), converted (Epsilon_*) and
+    consumed (Sigma, peak).  
+    """
+    pass
+    
