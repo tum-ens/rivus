@@ -5,10 +5,10 @@
     <mapcanvas>
         <units>meters</units>
         <extent>
-            <xmin>1355333.67352394806221128</xmin>
-            <ymin>6132686.69004716817289591</ymin>
-            <xmax>1357587.94849070627242327</xmax>
-            <ymax>6133997.34529631678014994</ymax>
+            <xmin>1351747.17413284536451101</xmin>
+            <ymin>6134596.75772745627909899</ymin>
+            <xmax>1356322.40470907092094421</xmax>
+            <ymax>6137256.83693661261349916</ymax>
         </extent>
         <projections>1</projections>
         <destinationsrs>
@@ -30,7 +30,7 @@
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="blds_w_n20140813132418416"/>
         </layer_coordinate_transform_info>
     </mapcanvas>
-    <legend updateDrawingOrder="true" activeLayer="vs20140813132750838">
+    <legend updateDrawingOrder="true" activeLayer="es20140813131201072">
         <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="vs" showFeatureCount="0">
             <filegroup open="true" hidden="false">
                 <legendlayerfile isInOverview="0" layerid="vs20140813132750838" visible="1"/>
@@ -46,9 +46,9 @@
                 <legendlayerfile isInOverview="0" layerid="es20140813131201072" visible="1"/>
             </filegroup>
         </legendlayer>
-        <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="to_edge" showFeatureCount="0">
+        <legendlayer drawingOrder="-1" open="true" checked="Qt::Unchecked" name="to_edge" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="to_edge20140813110632079" visible="1"/>
+                <legendlayerfile isInOverview="0" layerid="to_edge20140813110632079" visible="0"/>
             </filegroup>
         </legendlayer>
     </legend>
@@ -691,7 +691,7 @@
             <excludeAttributesWFS/>
             <attributeactions/>
         </maplayer>
-        <maplayer minimumScale="-4.65661e-10" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" geometry="Line" simplifyMaxScale="1" type="vector" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
+        <maplayer minimumScale="0" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" geometry="Line" simplifyMaxScale="1" type="vector" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
             <id>es20140813131201072</id>
             <datasource>./es.shp</datasource>
             <title></title>
@@ -734,7 +734,7 @@
                         </layer>
                         <layer pass="14" class="SimpleLine" locked="0">
                             <prop k="capstyle" v="round"/>
-                            <prop k="color" v="248,248,248,255"/>
+                            <prop k="color" v="170,255,0,255"/>
                             <prop k="customdash" v="5;2"/>
                             <prop k="customdash_unit" v="MM"/>
                             <prop k="draw_inside_polygon" v="0"/>
@@ -1143,7 +1143,7 @@
                 </spatialrefsys>
             </srs>
             <provider encoding="System">ogr</provider>
-            <previewExpression></previewExpression>
+            <previewExpression>COALESCE( "x", '&lt;NULL>' )</previewExpression>
             <vectorjoins/>
             <renderer-v2 symbollevels="0" type="RuleRenderer">
                 <rules>

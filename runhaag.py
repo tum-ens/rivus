@@ -5,9 +5,9 @@ import pandashp as pdshp
 from coopr.opt.base import SolverFactory
 from operator import itemgetter
 
-building_shapefile = 'data/haag/blds_w_n'
-edge_shapefile = 'data/haag/es'
-vertex_shapefile = 'data/haag/vs'
+building_shapefile = 'data/haag_wgs84/building'
+edge_shapefile = 'data/haag_wgs84/edge'
+vertex_shapefile = 'data/haag_wgs84/vertex'
 data_spreadsheet = 'data/haag/haag.xlsx'
 
 
@@ -35,6 +35,18 @@ def setup_solver(optim):
 #    (residential, commercial, industrial, other)
 # 3. sum by group and unstack, i.e. convert secondary index 'type' to columns
 buildings = pdshp.read_shp(building_shapefile)
+building_type_mapping = { 
+'church': 'other', 
+'farm': 'other',
+'hospital': 'residential',  
+'hotel': 'commercial',
+'house': 'residential',
+'office': 'commercial',
+'retail': 'commercial', 
+'school': 'commercial',  
+'yes': 'other',
+}
+buildings.replace(to_replace={'type': building_type_mapping}, inplace=True)
 buildings_grouped = buildings.groupby(['nearest', 'type'])
 total_area = buildings_grouped.sum()['AREA'].unstack()
 
@@ -69,3 +81,10 @@ commodity, process, process_commodity, time, area_demand = entity_getter(data)
 
 costs, Pmax, Kappa_hub, Kappa_process = capmin.get_constants(prob)
 source, flows, hubs, proc_io, proc_tau = capmin.get_timeseries(prob)
+
+#
+edge_w_caps = edge.join(Pmax).fillna(0)
+pdshp.write_shp('data/haag_wgs84/edge_w_caps', edge_w_caps)
+
+edge_w_peak = edge.join(prob.peak).fillna(0)
+pdshp.write_shp('data/haag_wgs84/edge_w_peak', edge_w_peak)

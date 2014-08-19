@@ -6,6 +6,18 @@ CAPMIN optimizes topology and size of urban energy networks, energy conversion.
 import coopr.pyomo as pyomo
 import itertools
 import pandas as pd
+import pdb
+
+COLORS = {
+    'base': (.9, .9, .9),
+    'building': (0.95686274509803926, 0.95686274509803926, 0.7803921568627451),
+    'decoration': (.5, .5, .5),
+    'Heat': (1, 0, 0),
+    'Cool': (0, 0, 1),
+    'Elec': (1, .9, 0),
+    'Demand': (0, 1, 0),
+    'Gas': (.5, .25, 0),
+}
 
 def read_excel(filename):
     """Read Excel input file and prepare CAPMIN input data dict.
@@ -112,6 +124,10 @@ def create_model(data, vertex, edge):
     edge.set_index(['Vertex1', 'Vertex2'], inplace=True)
     m.peak.index = edge.index
     m.peak.sortlevel(inplace=True)
+    
+    # store geographic DataFrames vertex & edge for later use
+    m._vertex = vertex.copy()
+    m._edge = edge.copy()
     
     # construct arc set of directed (i,j), (j,i) edges
     arcs = [arc for (v1, v2) in edge.index for arc in ((v1, v2), (v2, v1))]
@@ -570,7 +586,7 @@ def get_entity(instance, name):
     # name columns according to labels + entity name
     results.columns = labels + [name]
     results.set_index(labels, inplace=True)
-
+    results = results[name]
     return results
 
 
@@ -591,6 +607,9 @@ def get_entities(instance, names):
     df = pd.DataFrame()
     for name in names:
         other = get_entity(instance, name)
+        
+        if isinstance(other, pd.Series):
+            other = other.to_frame()
 
         if df.empty:
             df = other
@@ -733,11 +752,11 @@ def get_constants(prob):
         Kappa_hub.sum(axis=1) > 0].applymap(round)
     Kappa_process = Kappa_process[
         Kappa_process.sum(axis=1) > 0].applymap(round)
-    costs = costs.applymap(round)
+    costs = costs.apply(round)
     
     # nicer index names
-    Pmax.index.names = ['vertex1', 'vertex2']
-    Kappa_hub.index.names = ['vertex1', 'vertex2']
+    Pmax.index.names = ['Vertex1', 'Vertex2']
+    Kappa_hub.index.names = ['Vertex1', 'Vertex2']
     
     return costs, Pmax, Kappa_hub, Kappa_process
     
@@ -756,9 +775,9 @@ def get_timeseries(prob):
     proc_io.fillna(0, inplace=True)
 
     # drop all-zero rows
-    source = source[source.sum(axis=1) > 0].unstack()
+    source = source[source > 0].unstack()
     flows = flows[flows.sum(axis=1) > 0].applymap(round)
-    hubs = hubs[hubs.sum(axis=1) > 0].unstack()
+    hubs = hubs[hubs > 0].unstack()
     proc_io = proc_io[proc_io.sum(axis=1) > 0]
     proc_tau = proc_tau[proc_tau.sum(axis=1) > 0].unstack()
 
@@ -772,5 +791,63 @@ def plot(prob, commodity):
     introduced (Rho), transported (Pin/Pot/Pmax), converted (Epsilon_*) and
     consumed (Sigma, peak).  
     """
-    pass
+    import math
+    import matplotlib as mpl
+    import matplotlib.pyplot as plt
+    from mpl_toolkits.basemap import Basemap
+    import numpy as np
+    import pandashp as pdshp
     
+    # set up Basemap for extent
+    bbox = pdshp.total_bounds(prob._vertex)
+    bbox = [bbox[1], bbox[0], bbox[3], bbox[2]]
+    
+    # set projection center to map center
+    central_parallel = (bbox[0] + bbox[2]) / 2
+    central_meridian = (bbox[1] + bbox[3]) / 2
+        
+    # increase map extent by 5% in each direction
+    height = bbox[2] - bbox[0]
+    width = bbox[3] - bbox[1] 
+    bbox[0] -= 0.05 * height
+    bbox[1] -= 0.05 * width
+    bbox[2] += 0.05 * height
+    bbox[3] += 0.05 * width
+    
+    fig = plt.figure()
+    map = Basemap(
+        projection='tmerc', resolution=None, 
+        llcrnrlat=bbox[0], llcrnrlon=bbox[1], 
+        urcrnrlat=bbox[2], urcrnrlon=bbox[3], 
+        lat_0=central_parallel, lon_0=central_meridian)
+    
+    costs, Pmax, Kappa_hub, Kappa_process = get_constants(prob)
+    
+    Pmax = Pmax.join(prob._edge.geometry)
+    demand = prob.peak.join(prob._edge.geometry)
+    Kappa_process = Kappa_process.join(prob._vertex.geometry)
+    
+    for k, row in Pmax.iterrows():
+        # coordinates
+        line = row['geometry']
+        lon, lat = zip(*line.coords)
+        # linewidth
+        line_width = math.sqrt(row[commodity]) * 0.05
+        # plot
+        map.plot(lon, lat, latlon=True, 
+                 color=COLORS[commodity], linewidth=line_width, 
+                 solid_capstyle='round', solid_joinstyle='round')
+    
+    # map decoration
+    map.drawmapboundary(linewidth=0)
+    map.drawparallels(
+        np.arange(48.11,48.2,.01), color=COLORS['decoration'], 
+        linewidth=0.1, labels=[1,0,0,0])
+    map.drawmeridians(
+        np.arange(12.11,12.2,0.02), color=COLORS['decoration'], 
+        linewidth=0.1, labels=[0,0,0,1])
+    
+    # export
+    for ext in ['png', 'pdf']:
+        plt.savefig('Pmax_{}.{}'.format(commodity, ext), 
+                    dpi=300, bbox_inches='tight')
