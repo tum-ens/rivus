@@ -645,39 +645,35 @@ def list_entities(instance, entity_type):
 
     """
 
+    # helper function to discern entities by type
+    def filter_by_type(entity, entity_type):
+        if entity_type == 'set':
+            return isinstance(entity, pyomo.Set) and not entity.virtual
+        elif entity_type == 'par':
+            return isinstance(entity, pyomo.Param)
+        elif entity_type == 'var':
+            return isinstance(entity, pyomo.Var)
+        elif entity_type == 'con':
+            return isinstance(entity, pyomo.Constraint)
+        elif entity_type == 'obj':
+            return isinstance(entity, pyomo.Objective)
+        else:
+            raise ValueError("Unknown entity_type '{}'".format(entity_type))
+
+    # iterate through all model components and keep only 
     iter_entities = instance.__dict__.iteritems()
+    entities = sorted(
+        (name, entity.doc, get_onset_names(entity))
+        for (name, entity) in iter_entities
+        if filter_by_type(entity, entity_type))
 
-    if entity_type == 'set':
-        entities = sorted(
-            (x, y.doc, get_onset_names(y)) for (x, y) in iter_entities
-            if isinstance(y, pyomo.Set) and not y.virtual)
-
-    elif entity_type == 'par':
-        entities = sorted(
-            (x, y.doc, get_onset_names(y)) for (x, y) in iter_entities
-            if isinstance(y, pyomo.Param))
-
-    elif entity_type == 'var':
-        entities = sorted(
-            (x, y.doc, get_onset_names(y)) for (x, y) in iter_entities
-            if isinstance(y, pyomo.Var))
-
-    elif entity_type == 'con':
-        entities = sorted(
-            (x, y.doc, get_onset_names(y)) for (x, y) in iter_entities
-            if isinstance(y, pyomo.Constraint))
-
-    elif entity_type == 'obj':
-        entities = sorted(
-            (x, y.doc, get_onset_names(y)) for (x, y) in iter_entities
-            if isinstance(y, pyomo.Objective))
-
+    # if something was found, wrap tuples in DataFrame, otherwise return empty
+    if entities:
+        entities = pd.DataFrame(entities,
+                                columns=['Name', 'Description', 'Domain'])
+        entities.set_index('Name', inplace=True)
     else:
-        raise ValueError("Unknown parameter entity_type")
-
-    entities = pd.DataFrame(entities,
-                            columns=['Name', 'Description', 'Domain'])
-    entities.set_index('Name', inplace=True)
+        entities = pd.DataFrame()
     return entities
 
 
@@ -827,6 +823,7 @@ def plot(prob, commodity):
     demand = prob.peak.join(prob._edge.geometry)
     Kappa_process = Kappa_process.join(prob._vertex.geometry)
     
+    # Pmax: pipe capacities
     for k, row in Pmax.iterrows():
         # coordinates
         line = row['geometry']
@@ -838,14 +835,16 @@ def plot(prob, commodity):
                  color=COLORS[commodity], linewidth=line_width, 
                  solid_capstyle='round', solid_joinstyle='round')
     
+    # Kappa_process: Process kapacities
+    
     # map decoration
     map.drawmapboundary(linewidth=0)
     map.drawparallels(
-        np.arange(48.11,48.2,.01), color=COLORS['decoration'], 
-        linewidth=0.1, labels=[1,0,0,0])
+        np.arange(bbox[0], bbox[2], height/4), color=COLORS['decoration'], 
+        linewidth=0.1, labels=[1,0,0,0], dashes=[1, 0])
     map.drawmeridians(
-        np.arange(12.11,12.2,0.02), color=COLORS['decoration'], 
-        linewidth=0.1, labels=[0,0,0,1])
+        np.arange(bbox[1], bbox[3], width/4), color=COLORS['decoration'], 
+        linewidth=0.1, labels=[0,0,0,1], dashes=[1, 0])
     
     # export
     for ext in ['png', 'pdf']:
