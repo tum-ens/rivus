@@ -9,7 +9,7 @@ import pandas as pd
 import pdb
 
 COLORS = {
-    'base': (.9, .9, .9),
+    'base': (.75, .75, .75),
     'building': (0.95686274509803926, 0.95686274509803926, 0.7803921568627451),
     'decoration': (.5, .5, .5),
     'Heat': (1, 0, 0),
@@ -758,7 +758,6 @@ def get_constants(prob):
     
 def get_timeseries(prob):
     """Retrieve time-dependent variables/quantities for a given commodity."""
-    
 
     source = get_entity(prob, 'Rho')
     flows = get_entities(prob, ['Pin', 'Pot', 'Psi', 'Sigma'])
@@ -816,13 +815,24 @@ def plot(prob, commodity):
         llcrnrlat=bbox[0], llcrnrlon=bbox[1], 
         urcrnrlat=bbox[2], urcrnrlon=bbox[3], 
         lat_0=central_parallel, lon_0=central_meridian)
-    
+
+    # basemap: plot street network
+    for k, row in prob._edge.iterrows():
+        line = row['geometry']
+        lon, lat = zip(*line.coords)
+        # linewidth
+        line_width = 0.1
+        # plot
+        map.plot(lon, lat, latlon=True, 
+                 color=COLORS['base'], linewidth=line_width, 
+                 solid_capstyle='round', solid_joinstyle='round')
+
     costs, Pmax, Kappa_hub, Kappa_process = get_constants(prob)
+    source, flows, hubs, proc_io, proc_tau = get_timeseries(prob)
     
     Pmax = Pmax.join(prob._edge.geometry)
     demand = prob.peak.join(prob._edge.geometry)
-    Kappa_process = Kappa_process.join(prob._vertex.geometry)
-    
+
     # Pmax: pipe capacities
     for k, row in Pmax.iterrows():
         # coordinates
@@ -835,15 +845,47 @@ def plot(prob, commodity):
                  color=COLORS[commodity], linewidth=line_width, 
                  solid_capstyle='round', solid_joinstyle='round')
     
-    # Kappa_process: Process kapacities
+    # Kappa_process: Process capacities consuming/producing a commodity
+    consumers = prob.r_in.xs(commodity, level='Commodity')
+    producers = prob.r_out.xs(commodity, level='Commodity')
+    sources = source.max(axis=1).xs(commodity, level='commodity')
+    
+    # multiply input/output ratios with capacities and drop non-matching 
+    # process types completely
+    consumers = Kappa_process.mul(consumers).dropna(how='all', axis=1).sum(axis=1)
+    producers = Kappa_process.mul(producers).dropna(how='all', axis=1).sum(axis=1)
+    
+    point_sources = [(consumers, 'v'), 
+                     (producers, '^'),
+                     (sources, 'D')]
+    
+    # iterate over both types (with different markers for both types) and plot
+    for kappas, marker_style in point_sources:
+        # sum consuming capacities
+        # and join with vertex coordinates
+        kappa_sum = kappas.to_frame(name=commodity)
+        kappa_sum = kappa_sum.join(prob._vertex.geometry)
+        
+        for k, row in kappa_sum.iterrows():
+            # coordinates
+            lon, lat = row['geometry'].xy
+            # size
+            marker_size = math.sqrt(row[commodity]) * 4
+            # plot
+            map.scatter(lon, lat, latlon=True,
+                        c=COLORS[commodity], s=marker_size, 
+                        marker=marker_style, lw=0.5,
+                        edgecolor=(1, 1, 1), zorder=10)
     
     # map decoration
     map.drawmapboundary(linewidth=0)
     map.drawparallels(
-        np.arange(bbox[0], bbox[2], height/4), color=COLORS['decoration'], 
+        np.arange(bbox[0], bbox[2], height / 4), 
+        color=COLORS['decoration'], 
         linewidth=0.1, labels=[1,0,0,0], dashes=[1, 0])
     map.drawmeridians(
-        np.arange(bbox[1], bbox[3], width/4), color=COLORS['decoration'], 
+        np.arange(bbox[1], bbox[3], width / 4), 
+        color=COLORS['decoration'], 
         linewidth=0.1, labels=[0,0,0,1], dashes=[1, 0])
     
     # export
