@@ -894,7 +894,6 @@ def plot(prob, commodity, plot_demand=False, mapscale=False):
                         fontsize=font_size, zorder=12, color=COLORS[commodity],
                         **annotate_defaults)
         
-        
         # Kappa_hub
         # reuse r_in, r_out from before to select hub processes
         consumers = Kappa_hub.mul(r_in).dropna(how='all', axis=1).sum(axis=1)
@@ -929,6 +928,7 @@ def plot(prob, commodity, plot_demand=False, mapscale=False):
                         fontsize=font_size, zorder=12, color=COLORS[commodity],
                         **annotate_defaults)
         plt.title("{} capacities".format(commodity))
+    
     else:
         # demand plot
         demand = prob.peak.join(prob._edge.geometry)
@@ -980,9 +980,4 @@ def plot(prob, commodity, plot_demand=False, mapscale=False):
             central_meridian, central_parallel, bar_length,
             barstyle='fancy', units='m', zorder=13)  
     
-    # export
-    plot_type = 'peak' if plot_demand else 'caps' 
-    for ext in ['png', 'pdf']:
-        plt.savefig('{}_{}.{}'.format(plot_type, commodity, ext), 
-                    dpi=300, bbox_inches='tight')
-    del fig
+    return fig

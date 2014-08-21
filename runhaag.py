@@ -1,14 +1,17 @@
 import capmin
 import coopr.environ
+import matplotlib.pyplot as plt
+import os
 import pandas as pd
 import pandashp as pdshp
 from coopr.opt.base import SolverFactory
 from operator import itemgetter
 
-building_shapefile = 'data/haag_wgs84/building'
-edge_shapefile = 'data/haag_wgs84/edge'
-vertex_shapefile = 'data/haag_wgs84/vertex'
-data_spreadsheet = 'data/haag_wgs84/haag.xlsx'
+base_directory = os.path.join('data', 'haag_wgs84')
+building_shapefile = os.path.join(base_directory, 'building')
+edge_shapefile = os.path.join(base_directory, 'edge')
+vertex_shapefile = os.path.join(base_directory, 'vertex')
+data_spreadsheet = os.path.join(base_directory, 'data.xlsx')
 
 
 def setup_solver(optim):
@@ -16,10 +19,10 @@ def setup_solver(optim):
     if optim.name == 'gurobi':
         # reference with list of option names
         # http://www.gurobi.com/documentation/5.6/reference-manual/parameters
-        optim.set_options("TimeLimit=600")  # seconds
-        optim.set_options("MIPFocus=2")  # 1=feasible, 2=optimal, 3=bound
-        optim.set_options("MIPGap=1e-6")  # default = 1e-4
-        optim.set_options("Threads=4")  # number of simultaneous CPU threads
+        optim.set_options("TimeLimit=36000")  # seconds
+        optim.set_options("MIPFocus=1")  # 1=feasible, 2=optimal, 3=bound
+        optim.set_options("MIPGap=1e-4")  # default = 1e-4
+        optim.set_options("Threads=6")  # number of simultaneous CPU threads
     elif optim.name == 'glpk':
         # reference with list of options
         # execute 'glpsol --help'
@@ -80,15 +83,27 @@ commodity, process, process_commodity, time, area_demand = entity_getter(data)
 
 
 costs, Pmax, Kappa_hub, Kappa_process = capmin.get_constants(prob)
-source, flows, hubs, proc_io, proc_tau = capmin.get_timeseries(prob)
+source, flows, hub_io, proc_io, proc_tau = capmin.get_timeseries(prob)
 
-#
-#edge_w_caps = edge.join(Pmax).fillna(0)
-#pdshp.write_shp('data/haag_wgs84/edge_w_caps', edge_w_caps)
+# plot all caps (and demands if existing)
+for com, plot_type in [('Elec', 'caps'), ('Heat', 'caps'), ('Gas', 'caps'),
+                       ('Elec', 'peak'), ('Heat', 'peak')]:
+    
+    # create plot
+    fig = capmin.plot(prob, com, 
+                      mapscale=(com=='Elec'), 
+                      plot_demand=(plot_type == 'peak'))
 
-#edge_w_peak = edge.join(prob.peak).fillna(0)
-#pdshp.write_shp('data/haag_wgs84/edge_w_peak', edge_w_peak)
-
-for co in ['Elec', 'Heat', 'Gas']:
-    capmin.plot(prob, co)
-
+    # save to file
+    for ext in ['png', 'pdf']:
+        result_dir = ps.path.join('result', os.path.basename(base_directory))
+        
+        # create result directory if not existing already
+        if not os.path.exists(result_dir):
+            os.makedirs(result_dir)
+            
+        # determine figure filename from plot type, commodity and extension
+        fig_filename = os.path.join(
+            result_dir, '{}-{}.{}').format(plot_type, com, ext)
+        fig.savefig(fig_filename, dpi=300, bbox_inches='tight', 
+                    transparent=(ext=='pdf'))

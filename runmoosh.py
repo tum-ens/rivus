@@ -1,5 +1,6 @@
 import capmin
 import coopr.environ
+import matplotlib.pyplot as plt
 import os
 import pandas as pd
 import pandashp as pdshp
@@ -82,16 +83,27 @@ commodity, process, process_commodity, time, area_demand = entity_getter(data)
 
 
 costs, Pmax, Kappa_hub, Kappa_process = capmin.get_constants(prob)
-source, flows, hubs, proc_io, proc_tau = capmin.get_timeseries(prob)
+source, flows, hub_io, proc_io, proc_tau = capmin.get_timeseries(prob)
 
-#
-#edge_w_caps = edge.join(Pmax).fillna(0)
-#pdshp.write_shp('data/haag_wgs84/edge_w_caps', edge_w_caps)
+# plot all caps (and demands if existing)
+for com, plot_type in [('Elec', 'caps'), ('Heat', 'caps'), ('Gas', 'caps'),
+                       ('Elec', 'peak'), ('Heat', 'peak')]:
+    
+    # create plot
+    fig = capmin.plot(prob, com, 
+                      mapscale=(com=='Elec'), 
+                      plot_demand=(plot_type == 'peak'))
 
-#edge_w_peak = edge.join(prob.peak).fillna(0)
-#pdshp.write_shp('data/haag_wgs84/edge_w_peak', edge_w_peak)
-
-for co in ['Elec', 'Heat', 'Gas']:
-    for both in [False, True]:
-        capmin.plot(prob, co, mapscale=(co=='Elec'), plot_demand=both)
-
+    # save to file
+    for ext in ['png', 'pdf']:
+        result_dir = ps.path.join('result', os.path.basename(base_directory))
+        
+        # create result directory if not existing already
+        if not os.path.exists(result_dir):
+            os.makedirs(result_dir)
+            
+        # determine figure filename from plot type, commodity and extension
+        fig_filename = os.path.join(
+            result_dir, '{}-{}.{}').format(plot_type, com, ext)
+        fig.savefig(fig_filename, dpi=300, bbox_inches='tight', 
+                    transparent=(ext=='pdf'))
