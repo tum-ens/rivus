@@ -90,13 +90,12 @@ for com, plot_type in [('Elec', 'caps'), ('Heat', 'caps'), ('Gas', 'caps'),
                        ('Elec', 'peak'), ('Heat', 'peak')]:
     
     # create plot
-    fig = capmin.plot(prob, com, 
-                      mapscale=(com=='Elec'), 
+    fig = capmin.plot(prob, com, mapscale=True, 
                       plot_demand=(plot_type == 'peak'))
 
     # save to file
     for ext in ['png', 'pdf']:
-        result_dir = ps.path.join('result', os.path.basename(base_directory))
+        result_dir = os.path.join('result', os.path.basename(base_directory))
         
         # create result directory if not existing already
         if not os.path.exists(result_dir):

@@ -21,7 +21,7 @@ def setup_solver(optim):
         # http://www.gurobi.com/documentation/5.6/reference-manual/parameters
         optim.set_options("TimeLimit=36000")  # seconds
         optim.set_options("MIPFocus=1")  # 1=feasible, 2=optimal, 3=bound
-        optim.set_options("MIPGap=1e-4")  # default = 1e-4
+        optim.set_options("MIPGap=4e-4")  # default = 1e-4
         optim.set_options("Threads=6")  # number of simultaneous CPU threads
     elif optim.name == 'glpk':
         # reference with list of options
@@ -90,13 +90,12 @@ for com, plot_type in [('Elec', 'caps'), ('Heat', 'caps'), ('Gas', 'caps'),
                        ('Elec', 'peak'), ('Heat', 'peak')]:
     
     # create plot
-    fig = capmin.plot(prob, com, 
-                      mapscale=(com=='Elec'), 
+    fig = capmin.plot(prob, com, mapscale=True, 
                       plot_demand=(plot_type == 'peak'))
 
     # save to file
     for ext in ['png', 'pdf']:
-        result_dir = ps.path.join('result', os.path.basename(base_directory))
+        result_dir = os.path.join('result', os.path.basename(base_directory))
         
         # create result directory if not existing already
         if not os.path.exists(result_dir):
