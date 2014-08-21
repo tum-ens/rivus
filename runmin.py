@@ -35,15 +35,14 @@ edge = edge.fillna(0)
 # load nodes
 vertex = pdshp.read_shp(vertex_shapefile)
 
-# create model
-model = capmin.create_model(data_spreadsheet, vertex, edge)
-instance = model.create()
-instance.write() # write CAPMIN.lp, just for reference
-solver = SolverFactory(solver_name)
+# load spreadsheet
+data = capmin.read_excel(data_spreadsheet)
 
-# solve problem
+# create and solve model
+model = capmin.create_model(data, vertex, edge)
+instance = model.create()
+solver = SolverFactory(solver_name)
 result = solver.solve(instance, tee=True)
-#print(result['Solver'])
 instance.load(result)
 
 # prepare input data similar to model for easier analysis

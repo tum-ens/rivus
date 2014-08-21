@@ -92,5 +92,6 @@ source, flows, hubs, proc_io, proc_tau = capmin.get_timeseries(prob)
 #pdshp.write_shp('data/haag_wgs84/edge_w_peak', edge_w_peak)
 
 for co in ['Elec', 'Heat', 'Gas']:
-    capmin.plot(prob, co)
+    for both in [False, True]:
+        capmin.plot(prob, co, mapscale=(co=='Elec'), plot_demand=both)
 

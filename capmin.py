@@ -6,15 +6,15 @@ CAPMIN optimizes topology and size of urban energy networks, energy conversion.
 import coopr.pyomo as pyomo
 import itertools
 import pandas as pd
-import pdb
+import warnings
 
 COLORS = {
-    'base': (.75, .75, .75),
+    'base': (.667, .667, .667),
     'building': (0.95686274509803926, 0.95686274509803926, 0.7803921568627451),
     'decoration': (.5, .5, .5),
     'Heat': (1, 0, 0),
     'Cool': (0, 0, 1),
-    'Elec': (1, .9, 0),
+    'Elec': (1, .667, 0),
     'Demand': (0, 1, 0),
     'Gas': (.5, .25, 0),
 }
@@ -741,18 +741,15 @@ def get_constants(prob):
     Kappa_hub = get_entity(prob, 'Kappa_hub').unstack()
     Kappa_process = get_entity(prob, 'Kappa_process').unstack()
     
-    # drop all-zero rows and round to integers
-    Pmax = Pmax[
-        Pmax.sum(axis=1) > 0].applymap(round)
-    Kappa_hub = Kappa_hub[
-        Kappa_hub.sum(axis=1) > 0].applymap(round)
-    Kappa_process = Kappa_process[
-        Kappa_process.sum(axis=1) > 0].applymap(round)
-    costs = costs.apply(round)
-    
     # nicer index names
     Pmax.index.names = ['Vertex1', 'Vertex2']
     Kappa_hub.index.names = ['Vertex1', 'Vertex2']
+    
+    # drop all-zero rows and round to integers
+    Pmax = Pmax.applymap(round)
+    Kappa_hub = Kappa_hub.applymap(round)
+    Kappa_process = Kappa_process.applymap(round)
+    costs = costs.apply(round)
     
     return costs, Pmax, Kappa_hub, Kappa_process
     
@@ -779,7 +776,7 @@ def get_timeseries(prob):
     return source, flows, hubs, proc_io, proc_tau
 
 
-def plot(prob, commodity):
+def plot(prob, commodity, plot_demand=False, mapscale=False):
     """Plot a map of supply, conversion, transport and consumption.
     
     For given commodity, plot a map of all locations where the commodity is
@@ -789,6 +786,7 @@ def plot(prob, commodity):
     import math
     import matplotlib as mpl
     import matplotlib.pyplot as plt
+    import matplotlib.patheffects as pe
     from mpl_toolkits.basemap import Basemap
     import numpy as np
     import pandashp as pdshp
@@ -809,6 +807,13 @@ def plot(prob, commodity):
     bbox[2] += 0.05 * height
     bbox[3] += 0.05 * width
     
+    # default settings for annotation labels
+    annotate_defaults = dict(
+        textcoords='offset points', ha='center', va='center', xytext=(0, 0),
+        path_effects=[pe.withStroke(linewidth=2, foreground="w")])
+    
+    # create new figure with basemap in Transverse Mercator projection
+    # centered on map location
     fig = plt.figure()
     map = Basemap(
         projection='tmerc', resolution=None, 
@@ -827,68 +832,157 @@ def plot(prob, commodity):
                  color=COLORS['base'], linewidth=line_width, 
                  solid_capstyle='round', solid_joinstyle='round')
 
-    costs, Pmax, Kappa_hub, Kappa_process = get_constants(prob)
-    source, flows, hubs, proc_io, proc_tau = get_timeseries(prob)
-    
-    Pmax = Pmax.join(prob._edge.geometry)
-    demand = prob.peak.join(prob._edge.geometry)
-
-    # Pmax: pipe capacities
-    for k, row in Pmax.iterrows():
-        # coordinates
-        line = row['geometry']
-        lon, lat = zip(*line.coords)
-        # linewidth
-        line_width = math.sqrt(row[commodity]) * 0.05
-        # plot
-        map.plot(lon, lat, latlon=True, 
-                 color=COLORS[commodity], linewidth=line_width, 
-                 solid_capstyle='round', solid_joinstyle='round')
-    
-    # Kappa_process: Process capacities consuming/producing a commodity
-    consumers = prob.r_in.xs(commodity, level='Commodity')
-    producers = prob.r_out.xs(commodity, level='Commodity')
-    sources = source.max(axis=1).xs(commodity, level='commodity')
-    
-    # multiply input/output ratios with capacities and drop non-matching 
-    # process types completely
-    consumers = Kappa_process.mul(consumers).dropna(how='all', axis=1).sum(axis=1)
-    producers = Kappa_process.mul(producers).dropna(how='all', axis=1).sum(axis=1)
-    
-    point_sources = [(consumers, 'v'), 
-                     (producers, '^'),
-                     (sources, 'D')]
-    
-    # iterate over both types (with different markers for both types) and plot
-    for kappas, marker_style in point_sources:
-        # sum consuming capacities
-        # and join with vertex coordinates
-        kappa_sum = kappas.to_frame(name=commodity)
-        kappa_sum = kappa_sum.join(prob._vertex.geometry)
+    if not plot_demand:
+        # default commodity plot with Pmax, Kappa_hub, Kappa_process, sources
         
-        for k, row in kappa_sum.iterrows():
+        # read data from solution
+        _, Pmax, Kappa_hub, Kappa_process = get_constants(prob)
+        source = get_timeseries(prob)[0]
+        
+        # Pmax: pipe capacities
+        Pmax = Pmax.join(prob._edge.geometry)
+        for k, row in Pmax.iterrows():
             # coordinates
-            lon, lat = row['geometry'].xy
-            # size
-            marker_size = math.sqrt(row[commodity]) * 4
+            line = row['geometry']
+            lon, lat = zip(*line.coords)
+            # linewidth
+            line_width = math.sqrt(row[commodity]) * 0.05
             # plot
-            map.scatter(lon, lat, latlon=True,
-                        c=COLORS[commodity], s=marker_size, 
-                        marker=marker_style, lw=0.5,
-                        edgecolor=(1, 1, 1), zorder=10)
+            map.plot(lon, lat, latlon=True, 
+                     color=COLORS[commodity], linewidth=line_width, 
+                     solid_capstyle='round', solid_joinstyle='round')
+        
+        # Kappa_process: Process capacities consuming/producing a commodity
+        r_in = prob.r_in.xs(commodity, level='Commodity')
+        r_out = prob.r_out.xs(commodity, level='Commodity')
+        sources = source.max(axis=1).xs(commodity, level='commodity')
+        
+        # multiply input/output ratios with capacities and drop non-matching 
+        # process types completely
+        consumers = Kappa_process.mul(r_in).dropna(how='all', axis=1).sum(axis=1)
+        producers = Kappa_process.mul(r_out).dropna(how='all', axis=1).sum(axis=1)
+        
+        
+        # iterate over all point types (consumers, producers, sources) with
+        # different markers
+        point_sources = [(consumers, 'v'), 
+                         (producers, '^'),
+                         (sources, 'D')]
+        
+        for kappas, marker_style in point_sources:
+            # sum capacities
+            # and add geometry (point coordinates)
+            kappa_sum = kappas.to_frame(name=commodity)
+            kappa_sum = kappa_sum.join(prob._vertex.geometry)
+            
+            for k, row in kappa_sum.iterrows():
+                # coordinates
+                lon, lat = row['geometry'].xy
+                # size
+                marker_size = math.sqrt(row[commodity]) * 4
+                font_size = 6 + 6 * math.sqrt(row[commodity]) / 200
+                # plot
+                map.scatter(lon, lat, latlon=True,
+                            c=COLORS[commodity], s=marker_size, 
+                            marker=marker_style, lw=0.5,
+                            edgecolor=(1, 1, 1), zorder=10)
+                # annotate at line midpoint
+                if row[commodity] > 0:
+                    (x, y) = map(lon[len(lon)/2], lat[len(lat)/2])
+                    plt.annotate(
+                        '%u'%row[commodity], xy=(x, y), 
+                        fontsize=font_size, zorder=12, color=COLORS[commodity],
+                        **annotate_defaults)
+        
+        
+        # Kappa_hub
+        # reuse r_in, r_out from before to select hub processes
+        consumers = Kappa_hub.mul(r_in).dropna(how='all', axis=1).sum(axis=1)
+        producers = Kappa_hub.mul(r_out).dropna(how='all', axis=1).sum(axis=1)
+        
+        # iterate over both types (with different markers for both types)
+        lines_sources = [(consumers, 'v'), 
+                         (producers, '^')]
+        for kappas, marker_style in lines_sources:
+            # sum consuming capacities
+            # and join with vertex coordinates
+            kappa_sum = kappas.to_frame(name=commodity)
+            kappa_sum = kappa_sum.join(prob._edge.geometry)
+            
+            for k, row in kappa_sum.iterrows():
+                # coordinates
+                lon, lat = zip(*row['geometry'].coords)
+                lon, lat = lon[len(lon)/2], lat[len(lat)/2]  # line midpoint
+                # size
+                marker_size = math.sqrt(row[commodity]) * 4
+                font_size = 6 + 6 * math.sqrt(row[commodity]) / 200
+                # plot
+                map.scatter(lon, lat, latlon=True,
+                            c=COLORS[commodity], s=marker_size, 
+                            marker=marker_style, lw=0.5,
+                            edgecolor=(1, 1, 1), zorder=11)
+                # annotate
+                if row[commodity] > 0:
+                    x, y = map(lon, lat)
+                    plt.annotate(
+                        text='%u'%row[commodity], xy=(x, y), 
+                        fontsize=font_size, zorder=12, color=COLORS[commodity],
+                        **annotate_defaults)
+        plt.title("{} capacities".format(commodity))
+    else:
+        # demand plot
+        demand = prob.peak.join(prob._edge.geometry)
+    
+        # demand: pipe capacities
+        for k, row in demand.iterrows():
+            # coordinates
+            line = row['geometry']
+            lon, lat = zip(*line.coords)
+            # linewidth
+            try:
+                line_width = math.sqrt(row[commodity]) * 0.05
+            except KeyError:
+                warnings.warn("Skipping commodity {} without "
+                              "demand.".format(commodity))
+                return
+            font_size = 6 + 6 * math.sqrt(row[commodity]) / 200
+            # plot
+            map.plot(lon, lat, latlon=True, 
+                     color=COLORS[commodity], linewidth=line_width, 
+                     solid_capstyle='round', solid_joinstyle='round')
+            # annotate at line midpoint
+            if row[commodity] > 0:
+                (x, y) = map(lon[len(lon)/2], lat[len(lat)/2])
+                plt.annotate(
+                    '%u'%row[commodity], xy=(x, y), 
+                    fontsize=font_size, zorder=12, color=COLORS[commodity],
+                    **annotate_defaults)
+        plt.title("{} demand".format(commodity))
     
     # map decoration
     map.drawmapboundary(linewidth=0)
     map.drawparallels(
-        np.arange(bbox[0], bbox[2], height / 4), 
+        np.arange(bbox[0] + height * .15, bbox[2], height * .25), 
         color=COLORS['decoration'], 
         linewidth=0.1, labels=[1,0,0,0], dashes=[1, 0])
     map.drawmeridians(
-        np.arange(bbox[1], bbox[3], width / 4), 
+        np.arange(bbox[1] + width * .15, bbox[3], width * .25), 
         color=COLORS['decoration'], 
         linewidth=0.1, labels=[0,0,0,1], dashes=[1, 0])
     
+    # bar length = (horizontal map extent) / 3, rounded to 100 (1e-2) metres
+    bar_length = round((map(bbox[3], bbox[2])[0] - 
+                        map(bbox[1], bbox[0])[0]) / 3, -2)
+    
+    if mapscale:
+        map.drawmapscale(
+            bbox[1]+ 0.22 * width, bbox[0] + 0.1 * height, 
+            central_meridian, central_parallel, bar_length,
+            barstyle='fancy', units='m', zorder=13)  
+    
     # export
+    plot_type = 'peak' if plot_demand else 'caps' 
     for ext in ['png', 'pdf']:
-        plt.savefig('Pmax_{}.{}'.format(commodity, ext), 
+        plt.savefig('{}_{}.{}'.format(plot_type, commodity, ext), 
                     dpi=300, bbox_inches='tight')
+    del fig

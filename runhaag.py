@@ -8,7 +8,7 @@ from operator import itemgetter
 building_shapefile = 'data/haag_wgs84/building'
 edge_shapefile = 'data/haag_wgs84/edge'
 vertex_shapefile = 'data/haag_wgs84/vertex'
-data_spreadsheet = 'data/haag/haag.xlsx'
+data_spreadsheet = 'data/haag_wgs84/haag.xlsx'
 
 
 def setup_solver(optim):
@@ -17,9 +17,9 @@ def setup_solver(optim):
         # reference with list of option names
         # http://www.gurobi.com/documentation/5.6/reference-manual/parameters
         optim.set_options("TimeLimit=600")  # seconds
-        optim.set_options("MIPFocus=1")  # 1=feasible, 2=optimal, 3=bound
-        optim.set_options("MIPGap=1e-4")  # default = 1e-4
-        optim.set_options("Threads=2")  # 
+        optim.set_options("MIPFocus=2")  # 1=feasible, 2=optimal, 3=bound
+        optim.set_options("MIPGap=1e-6")  # default = 1e-4
+        optim.set_options("Threads=4")  # number of simultaneous CPU threads
     elif optim.name == 'glpk':
         # reference with list of options
         # execute 'glpsol --help'
@@ -83,8 +83,12 @@ costs, Pmax, Kappa_hub, Kappa_process = capmin.get_constants(prob)
 source, flows, hubs, proc_io, proc_tau = capmin.get_timeseries(prob)
 
 #
-edge_w_caps = edge.join(Pmax).fillna(0)
-pdshp.write_shp('data/haag_wgs84/edge_w_caps', edge_w_caps)
+#edge_w_caps = edge.join(Pmax).fillna(0)
+#pdshp.write_shp('data/haag_wgs84/edge_w_caps', edge_w_caps)
 
-edge_w_peak = edge.join(prob.peak).fillna(0)
-pdshp.write_shp('data/haag_wgs84/edge_w_peak', edge_w_peak)
+#edge_w_peak = edge.join(prob.peak).fillna(0)
+#pdshp.write_shp('data/haag_wgs84/edge_w_peak', edge_w_peak)
+
+for co in ['Elec', 'Heat', 'Gas']:
+    capmin.plot(prob, co)
+
