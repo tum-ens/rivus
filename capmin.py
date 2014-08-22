@@ -924,9 +924,10 @@ def plot(prob, commodity, plot_demand=False, mapscale=False):
                 if row[commodity] > 0:
                     x, y = map(lon, lat)
                     plt.annotate(
-                        text='%u'%row[commodity], xy=(x, y), 
+                        '%u'%row[commodity], xy=(x, y), 
                         fontsize=font_size, zorder=12, color=COLORS[commodity],
                         **annotate_defaults)
+
         plt.title("{} capacities".format(commodity))
     
     else:

@@ -76,14 +76,20 @@ optim = setup_solver(optim)
 result = optim.solve(prob, tee=True)
 prob.load(result)
 
-# prepare input data similar to model for easier analysis
-entity_getter = itemgetter(
-    'commodity', 'process', 'process_commodity', 'time', 'area_demand')
-commodity, process, process_commodity, time, area_demand = entity_getter(data)
-
-
+# load results
 costs, Pmax, Kappa_hub, Kappa_process = capmin.get_constants(prob)
 source, flows, hub_io, proc_io, proc_tau = capmin.get_timeseries(prob)
+
+result_dir = os.path.join('result', os.path.basename(base_directory))
+
+# create result directory if not existing already
+if not os.path.exists(result_dir):
+    os.makedirs(result_dir)
+
+
+edge_w_peak = edge.join(prob.peak).fillna(0)
+pdshp.write_shp(os.path.join(result_dir, 'edge_w_peak'), edge_w_peak)
+
 
 # plot all caps (and demands if existing)
 for com, plot_type in [('Elec', 'caps'), ('Heat', 'caps'), ('Gas', 'caps'),
@@ -95,11 +101,6 @@ for com, plot_type in [('Elec', 'caps'), ('Heat', 'caps'), ('Gas', 'caps'),
 
     # save to file
     for ext in ['png', 'pdf']:
-        result_dir = os.path.join('result', os.path.basename(base_directory))
-        
-        # create result directory if not existing already
-        if not os.path.exists(result_dir):
-            os.makedirs(result_dir)
             
         # determine figure filename from plot type, commodity and extension
         fig_filename = os.path.join(
