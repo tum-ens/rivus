@@ -91,14 +91,16 @@ edge_w_peak = edge.join(prob.peak).fillna(0)
 pdshp.write_shp(os.path.join(result_dir, 'edge_w_peak'), edge_w_peak)
 
 
+capmin.report(prob, os.path.join(result_dir, 'report.xlsx'))
+
 # plot all caps (and demands if existing)
 for com, plot_type in [('Elec', 'caps'), ('Heat', 'caps'), ('Gas', 'caps'),
                        ('Elec', 'peak'), ('Heat', 'peak')]:
     
     # create plot
-    fig = capmin.plot(prob, com, mapscale=True, 
+    fig = capmin.plot(prob, com, mapscale=False, tick_labels=False, 
                       plot_demand=(plot_type == 'peak'))
-
+    plt.title('')
     # save to file
     for ext in ['png', 'pdf']:
             
