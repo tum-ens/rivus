@@ -745,7 +745,12 @@ def get_constants(prob):
     Pmax.index.names = ['Vertex1', 'Vertex2']
     Kappa_hub.index.names = ['Vertex1', 'Vertex2']
     
-    # drop all-zero rows and round to integers
+    # drop all-zero rows 
+    Pmax = Pmax[Pmax.sum(axis=1) > 0]
+    Kappa_hub = Kappa_hub[Kappa_hub.sum(axis=1) > 0]
+    Kappa_process = Kappa_process[Kappa_process.sum(axis=1) > 0]
+    
+    # round to integers
     Pmax = Pmax.applymap(round)
     Kappa_hub = Kappa_hub.applymap(round)
     Kappa_process = Kappa_process.applymap(round)
@@ -754,13 +759,23 @@ def get_constants(prob):
     return costs, Pmax, Kappa_hub, Kappa_process
     
 def get_timeseries(prob):
-    """Retrieve time-dependent variables/quantities for a given commodity."""
+    """Retrieve time-dependent variables/quantities.
+    
+    Usage:
+        source, flows, hubs, proc_io, proc_tau = get_timeseries(prob)
+
+    Args:
+        prob: a CAPMIN model instance
+
+    Returns:
+        (source, flows, hubs, proc_io, proc_tau) tuple
+    """
 
     source = get_entity(prob, 'Rho')
     flows = get_entities(prob, ['Pin', 'Pot', 'Psi', 'Sigma'])
     hubs = get_entity(prob, 'Epsilon_hub')
     proc_io = get_entities(prob, ['Epsilon_in', 'Epsilon_out'])
-    proc_tau = get_entity(prob, 'Tau').unstack().unstack()
+    proc_tau = get_entity(prob, 'Tau').unstack()
 
     # fill NaN's
     flows.fillna(0, inplace=True)
@@ -769,14 +784,14 @@ def get_timeseries(prob):
     # drop all-zero rows
     source = source[source > 0].unstack()
     flows = flows[flows.sum(axis=1) > 0].applymap(round)
-    hubs = hubs[hubs > 0].unstack()
-    proc_io = proc_io[proc_io.sum(axis=1) > 0]
-    proc_tau = proc_tau[proc_tau.sum(axis=1) > 0].unstack()
+    hubs = hubs[hubs > 0].unstack().fillna(0).applymap(round)
+    proc_io = proc_io[proc_io.sum(axis=1) > 0].applymap(round)
+    proc_tau = proc_tau[proc_tau.sum(axis=1).apply(round) > 0].applymap(round)
 
     return source, flows, hubs, proc_io, proc_tau
 
 
-def plot(prob, commodity, plot_demand=False, mapscale=False):
+def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True):
     """Plot a map of supply, conversion, transport and consumption.
     
     For given commodity, plot a map of all locations where the commodity is
@@ -876,10 +891,14 @@ def plot(prob, commodity, plot_demand=False, mapscale=False):
             kappa_sum = kappa_sum.join(prob._vertex.geometry)
             
             for k, row in kappa_sum.iterrows():
+                # skip if no capacity installed
+                if row[commodity] == 0:
+                    continue
+                    
                 # coordinates
                 lon, lat = row['geometry'].xy
                 # size
-                marker_size = math.sqrt(row[commodity]) * 4
+                marker_size = 50 + math.sqrt(row[commodity]) * 4
                 font_size = 6 + 6 * math.sqrt(row[commodity]) / 200
                 # plot
                 map.scatter(lon, lat, latlon=True,
@@ -887,17 +906,21 @@ def plot(prob, commodity, plot_demand=False, mapscale=False):
                             marker=marker_style, lw=0.5,
                             edgecolor=(1, 1, 1), zorder=10)
                 # annotate at line midpoint
-                if row[commodity] > 0:
-                    (x, y) = map(lon[len(lon)/2], lat[len(lat)/2])
-                    plt.annotate(
-                        '%u'%row[commodity], xy=(x, y), 
-                        fontsize=font_size, zorder=12, color=COLORS[commodity],
-                        **annotate_defaults)
+
+                (x, y) = map(lon[len(lon)/2], lat[len(lat)/2])
+                plt.annotate(
+                    '%u'%row[commodity], xy=(x, y), 
+                    fontsize=font_size, zorder=12, color=COLORS[commodity],
+                    **annotate_defaults)
         
         # Kappa_hub
         # reuse r_in, r_out from before to select hub processes
         consumers = Kappa_hub.mul(r_in).dropna(how='all', axis=1).sum(axis=1)
         producers = Kappa_hub.mul(r_out).dropna(how='all', axis=1).sum(axis=1)
+        
+        # drop zero-capacity hubs
+        consumers = consumers[consumers > 0]
+        producers = producers[producers > 0]
         
         # iterate over both types (with different markers for both types)
         lines_sources = [(consumers, 'v'), 
@@ -913,7 +936,7 @@ def plot(prob, commodity, plot_demand=False, mapscale=False):
                 lon, lat = zip(*row['geometry'].coords)
                 lon, lat = lon[len(lon)/2], lat[len(lat)/2]  # line midpoint
                 # size
-                marker_size = math.sqrt(row[commodity]) * 4
+                marker_size = 50 + math.sqrt(row[commodity]) * 4
                 font_size = 6 + 6 * math.sqrt(row[commodity]) / 200
                 # plot
                 map.scatter(lon, lat, latlon=True,
@@ -925,7 +948,7 @@ def plot(prob, commodity, plot_demand=False, mapscale=False):
                     x, y = map(lon, lat)
                     plt.annotate(
                         '%u'%row[commodity], xy=(x, y), 
-                        fontsize=font_size, zorder=12, color=COLORS[commodity],
+                        fontsize=font_size, zorder=12, color=COLORS['decoration'],
                         **annotate_defaults)
 
         plt.title("{} capacities".format(commodity))
@@ -962,14 +985,16 @@ def plot(prob, commodity, plot_demand=False, mapscale=False):
     
     # map decoration
     map.drawmapboundary(linewidth=0)
+    parallel_labels = [1,0,0,0] if tick_labels else [0,0,0,0]
+    meridian_labels = [0,0,0,1] if tick_labels else [0,0,0,0]
     map.drawparallels(
         np.arange(bbox[0] + height * .15, bbox[2], height * .25), 
         color=COLORS['decoration'], 
-        linewidth=0.1, labels=[1,0,0,0], dashes=[1, 0])
+        linewidth=0.1, labels=parallel_labels, dashes=[1, 0])
     map.drawmeridians(
         np.arange(bbox[1] + width * .15, bbox[3], width * .25), 
         color=COLORS['decoration'], 
-        linewidth=0.1, labels=[0,0,0,1], dashes=[1, 0])
+        linewidth=0.1, labels=meridian_labels, dashes=[1, 0])
     
     # bar length = (horizontal map extent) / 3, rounded to 100 (1e-2) metres
     bar_length = round((map(bbox[3], bbox[2])[0] - 
@@ -982,3 +1007,27 @@ def plot(prob, commodity, plot_demand=False, mapscale=False):
             barstyle='fancy', units='m', zorder=13)  
     
     return fig
+    
+def report(prob, filename):
+    """Write result summary to a spreadsheet file
+
+    Args:
+        prob: a capmin model instance
+        filename: Excel spreadsheet filename, will be overwritten if exists
+
+    Returns:
+        Nothing
+    """
+    costs, Pmax, Kappa_hub, Kappa_process = get_constants(prob)
+    source, flows, hubs, proc_io, proc_tau = get_timeseries(prob)
+    
+    with pd.ExcelWriter(filename) as writer:
+        costs.to_frame().to_excel(writer, 'Costs')
+        Pmax.to_excel(writer, 'Pmax')
+        Kappa_hub.to_excel(writer, 'Kappa_hub')
+        Kappa_process.to_excel(writer, 'Kappa_process')
+        
+        source.to_excel(writer, 'Source')
+        flows.to_excel(writer, 'Flows')
+        hubs.to_excel(writer, 'Hubs')
+        proc_tau.to_excel(writer, 'Process')
