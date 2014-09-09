@@ -1,13 +1,14 @@
 <!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
-<qgis projectname="" version="2.0.1-Dufour">
+<qgis projectname="" version="2.2.0-Valmiera">
     <title></title>
+    <relations/>
     <mapcanvas>
         <units>meters</units>
         <extent>
-            <xmin>1275116.91616836679168046</xmin>
-            <ymin>6131382.95871950406581163</ymin>
-            <xmax>1276054.75831638998351991</xmax>
-            <ymax>6132017.6408720975741744</ymax>
+            <xmin>1275259.41968941176310182</xmin>
+            <ymin>6131547.71326953824609518</ymin>
+            <xmax>1275842.68278440786525607</xmax>
+            <ymax>6131886.82755167502909899</ymax>
         </extent>
         <projections>1</projections>
         <destinationsrs>
@@ -22,61 +23,64 @@
                 <geographicflag>false</geographicflag>
             </spatialrefsys>
         </destinationsrs>
+        <layer_coordinate_transform_info>
+            <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="vertex20140909155751293"/>
+            <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="edge20140909155822206"/>
+            <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="to_edge20140909160023671"/>
+            <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="building20140909155906016"/>
+        </layer_coordinate_transform_info>
     </mapcanvas>
-    <legend updateDrawingOrder="true" activeLayer="bg20140528135005079">
-        <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="mnl_vertex" showFeatureCount="0">
+    <legend updateDrawingOrder="true" activeLayer="to_edge20140909160023671">
+        <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="vertex" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="mnl_vertex20130919170058153" visible="1"/>
+                <legendlayerfile isInOverview="0" layerid="vertex20140909155751293" visible="1"/>
             </filegroup>
         </legendlayer>
-        <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="edge" showFeatureCount="0">
-            <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="edge20130920135250934" visible="1"/>
+        <legendlayer drawingOrder="-1" open="false" checked="Qt::Checked" name="edge" showFeatureCount="0">
+            <filegroup open="false" hidden="false">
+                <legendlayerfile isInOverview="0" layerid="edge20140909155822206" visible="1"/>
             </filegroup>
         </legendlayer>
-        <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="mnl_edge" showFeatureCount="0">
+        <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="building" showFeatureCount="0">
             <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="mnl_edge20140528133744749" visible="1"/>
+                <legendlayerfile isInOverview="0" layerid="building20140909155906016" visible="1"/>
             </filegroup>
         </legendlayer>
-        <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="mnl_building" showFeatureCount="0">
-            <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="min_building20130830162008873" visible="1"/>
-            </filegroup>
-        </legendlayer>
-        <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="mnl_to_edge" showFeatureCount="0">
-            <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="mnl_to_edge20140528114717317" visible="1"/>
-            </filegroup>
-        </legendlayer>
-        <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="bg" showFeatureCount="0">
-            <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="bg20140528135005079" visible="1"/>
-            </filegroup>
-        </legendlayer>
-        <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="OpenStreetMap B/W" showFeatureCount="0">
-            <filegroup open="true" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="OpenLayers_plugin_layer20140528134627288" visible="1"/>
+        <legendlayer drawingOrder="-1" open="false" checked="Qt::Checked" name="to_edge" showFeatureCount="0">
+            <filegroup open="false" hidden="false">
+                <legendlayerfile isInOverview="0" layerid="to_edge20140909160023671" visible="1"/>
             </filegroup>
         </legendlayer>
     </legend>
     <Composer title="Druckzusammenstellung 1" visible="0">
-        <Composition printResolution="300" paperWidth="297" snapGridOffsetX="0" snapGridResolution="10" snapGridOffsetY="0" alignmentSnap="1" snapping="0" numPages="1" paperHeight="210" alignmentSnapTolerance="2" printAsRaster="1">
+        <Composition snapGridTolerance="2" gridVisible="0" printResolution="300" paperWidth="297" snapGridOffsetX="0" guidesVisible="1" snapGridResolution="10" snapGridOffsetY="0" alignmentSnap="1" snapping="0" numPages="1" paperHeight="210" alignmentSnapTolerance="2" smartGuides="1" printAsRaster="1" generateWorldFile="0">
+            <symbol alpha="1" type="fill" name="">
+                <layer pass="0" class="SimpleFill" locked="0">
+                    <prop k="border_width_unit" v="MM"/>
+                    <prop k="color" v="255,255,255,255"/>
+                    <prop k="color_border" v="0,0,0,255"/>
+                    <prop k="offset" v="0,0"/>
+                    <prop k="offset_unit" v="MM"/>
+                    <prop k="style" v="solid"/>
+                    <prop k="style_border" v="no"/>
+                    <prop k="width_border" v="0.26"/>
+                </layer>
+            </symbol>
             <ComposerLabel valign="64" labelText="Kartographie: Johannes Dorfner&#xa;Quelle: OpenStreetMap und Mitwirkende&#xa;" htmlState="0" halign="1" margin="2">
                 <LabelFont description="TUM Neue Helvetica 55 Regular,7,-1,5,50,0,0,0,0,0"/>
                 <FontColor red="100" blue="100" green="100"/>
-                <ComposerItem width="67.9601" x="68.4473" transparency="0" y="188.143" rotation="0" height="14.027" positionMode="6" frame="false" outlineWidth="0.3" zValue="8" lastValidViewScaleFactor="4.63507" uuid="{e815f885-b0c4-4591-868d-dc7ac6a9ee67}" id="" background="false" blendMode="0" positionLock="false">
+                <ComposerItem width="67.9601" x="68.4473" transparency="0" y="188.143" height="14.027" positionMode="6" frame="false" outlineWidth="0.3" zValue="4" itemRotation="0" lastValidViewScaleFactor="4.63507" uuid="{e815f885-b0c4-4591-868d-dc7ac6a9ee67}" id="" background="false" blendMode="0" positionLock="false">
                     <FrameColor alpha="255" red="0" blue="0" green="0"/>
                     <BackgroundColor alpha="255" red="255" blue="255" green="255"/>
                 </ComposerItem>
             </ComposerLabel>
-            <ComposerScaleBar penColor="#646464" style="Single Box" numMapUnitsPerScaleBarUnit="1" alignment="0" brushColor="#646464" numSegments="4" segmentMillimeters="31.3229" fontColor="#646464" font="TUM Neue Helvetica 55 Regular,8,-1,5,50,0,0,0,0,0" numUnitsPerSegment="100" units="1" labelBarSpace="2" outlineWidth="0.25" numSegmentsLeft="2" height="1" mapId="0" boxContentSpace="2" unitLabel="m">
-                <ComposerItem width="169.004" x="10.589" transparency="0" y="188.143" rotation="0" height="9.7" positionMode="6" frame="false" outlineWidth="0.3" zValue="4" lastValidViewScaleFactor="4.81043" uuid="{e6c588f8-307a-467a-b0be-6fc6c00d8db4}" id="" background="false" blendMode="0" positionLock="false">
+            <ComposerScaleBar penColor="#646464" style="Single Box" numMapUnitsPerScaleBarUnit="1" alignment="0" brushColor="#646464" numSegments="4" segmentMillimeters="42.8683" fontColor="#646464" font="TUM Neue Helvetica 55 Regular,8,-1,5,50,0,0,0,0,0" numUnitsPerSegment="100" units="1" labelBarSpace="2" outlineWidth="0.25" numSegmentsLeft="2" height="1" mapId="0" boxContentSpace="2" unitLabel="m">
+                <ComposerItem width="169.004" x="10.589" transparency="0" y="188.143" height="9.7" positionMode="6" frame="false" outlineWidth="0.3" zValue="3" itemRotation="0" lastValidViewScaleFactor="4.81043" uuid="{e6c588f8-307a-467a-b0be-6fc6c00d8db4}" id="" background="false" blendMode="0" positionLock="false">
                     <FrameColor alpha="255" red="0" blue="0" green="0"/>
                     <BackgroundColor alpha="255" red="255" blue="255" green="255"/>
                 </ComposerItem>
             </ComposerScaleBar>
-            <ComposerLegend symbolWidth="5" title="" boxSpace="2" splitLayer="0" equalColumnWidth="1" map="0" symbolHeight="3" wrapChar="" fontColor="#000000" columnSpace="8" columnCount="2">
+            <ComposerLegend symbolWidth="5" title="" boxSpace="2" splitLayer="0" equalColumnWidth="1" map="0" symbolHeight="3" wmsLegendHeight="25" wrapChar="" fontColor="#000000" columnSpace="8" wmsLegendWidth="50" columnCount="2">
                 <styles>
                     <style marginBottom="2" name="title" font="MS Shell Dlg 2,16,-1,5,50,0,0,0,0,0"/>
                     <style marginTop="2" name="group" font="TUM Neue Helvetica 55 Regular,8,-1,5,50,0,0,0,0,0"/>
@@ -95,6 +99,7 @@
                                             <prop k="color" v="100,100,100,255"/>
                                             <prop k="customdash" v="5;2"/>
                                             <prop k="customdash_unit" v="MM"/>
+                                            <prop k="draw_inside_polygon" v="0"/>
                                             <prop k="joinstyle" v="round"/>
                                             <prop k="offset" v="0"/>
                                             <prop k="offset_unit" v="MM"/>
@@ -108,6 +113,7 @@
                                             <prop k="color" v="250,250,250,255"/>
                                             <prop k="customdash" v="5;2"/>
                                             <prop k="customdash_unit" v="MM"/>
+                                            <prop k="draw_inside_polygon" v="0"/>
                                             <prop k="joinstyle" v="round"/>
                                             <prop k="offset" v="0"/>
                                             <prop k="offset_unit" v="MM"/>
@@ -121,72 +127,6 @@
                             </VectorClassificationItemNg>
                         </LayerItem>
                     </GroupItem>
-                    <LayerItem layerId="min_building20130830162008873" userText="" style="subgroup" text="min_building" showFeatureCount="0">
-                        <VectorClassificationItemNg userText="" text="industrial">
-                            <symbols>
-                                <symbol alpha="1" type="fill" name="classificationSymbol">
-                                    <layer pass="0" class="SimpleFill" locked="0">
-                                        <prop k="border_width_unit" v="MM"/>
-                                        <prop k="color" v="240,198,116,255"/>
-                                        <prop k="color_border" v="0,0,0,255"/>
-                                        <prop k="offset" v="0,0"/>
-                                        <prop k="offset_unit" v="MM"/>
-                                        <prop k="style" v="solid"/>
-                                        <prop k="style_border" v="no"/>
-                                        <prop k="width_border" v="0.26"/>
-                                    </layer>
-                                </symbol>
-                            </symbols>
-                        </VectorClassificationItemNg>
-                        <VectorClassificationItemNg userText="" text="residential">
-                            <symbols>
-                                <symbol alpha="1" type="fill" name="classificationSymbol">
-                                    <layer pass="0" class="SimpleFill" locked="0">
-                                        <prop k="border_width_unit" v="MM"/>
-                                        <prop k="color" v="181,189,104,255"/>
-                                        <prop k="color_border" v="0,0,0,255"/>
-                                        <prop k="offset" v="0,0"/>
-                                        <prop k="offset_unit" v="MM"/>
-                                        <prop k="style" v="solid"/>
-                                        <prop k="style_border" v="no"/>
-                                        <prop k="width_border" v="0.26"/>
-                                    </layer>
-                                </symbol>
-                            </symbols>
-                        </VectorClassificationItemNg>
-                        <VectorClassificationItemNg userText="" text="commercial">
-                            <symbols>
-                                <symbol alpha="1" type="fill" name="classificationSymbol">
-                                    <layer pass="0" class="SimpleFill" locked="0">
-                                        <prop k="border_width_unit" v="MM"/>
-                                        <prop k="color" v="129,162,190,255"/>
-                                        <prop k="color_border" v="0,0,0,255"/>
-                                        <prop k="offset" v="0,0"/>
-                                        <prop k="offset_unit" v="MM"/>
-                                        <prop k="style" v="solid"/>
-                                        <prop k="style_border" v="no"/>
-                                        <prop k="width_border" v="0.26"/>
-                                    </layer>
-                                </symbol>
-                            </symbols>
-                        </VectorClassificationItemNg>
-                        <VectorClassificationItemNg userText="" text="other">
-                            <symbols>
-                                <symbol alpha="1" type="fill" name="classificationSymbol">
-                                    <layer pass="0" class="SimpleFill" locked="0">
-                                        <prop k="border_width_unit" v="MM"/>
-                                        <prop k="color" v="150,152,150,255"/>
-                                        <prop k="color_border" v="0,0,0,255"/>
-                                        <prop k="offset" v="0,0"/>
-                                        <prop k="offset_unit" v="MM"/>
-                                        <prop k="style" v="solid"/>
-                                        <prop k="style_border" v="no"/>
-                                        <prop k="width_border" v="0.26"/>
-                                    </layer>
-                                </symbol>
-                            </symbols>
-                        </VectorClassificationItemNg>
-                    </LayerItem>
                     <LayerItem layerId="min_building_centroid20130902130402069" userText="" style="hidden" text="min_building_centroid" showFeatureCount="0">
                         <VectorClassificationItemNg userText="" text="">
                             <symbols>
@@ -195,14 +135,17 @@
                                         <prop k="angle" v="0"/>
                                         <prop k="color" v="185,132,70,255"/>
                                         <prop k="color_border" v="0,0,0,255"/>
+                                        <prop k="horizontal_anchor_point" v="1"/>
                                         <prop k="name" v="circle"/>
                                         <prop k="offset" v="0,0"/>
                                         <prop k="offset_unit" v="MM"/>
+                                        <prop k="outline_style" v="solid"/>
                                         <prop k="outline_width" v="0"/>
                                         <prop k="outline_width_unit" v="MM"/>
                                         <prop k="scale_method" v="area"/>
                                         <prop k="size" v="2"/>
                                         <prop k="size_unit" v="MM"/>
+                                        <prop k="vertical_anchor_point" v="1"/>
                                     </layer>
                                 </symbol>
                             </symbols>
@@ -217,6 +160,7 @@
                                         <prop k="color" v="186,57,128,255"/>
                                         <prop k="customdash" v="5;2"/>
                                         <prop k="customdash_unit" v="MM"/>
+                                        <prop k="draw_inside_polygon" v="0"/>
                                         <prop k="joinstyle" v="bevel"/>
                                         <prop k="offset" v="0"/>
                                         <prop k="offset_unit" v="MM"/>
@@ -237,68 +181,56 @@
                                         <prop k="angle" v="0"/>
                                         <prop k="color" v="162,222,11,255"/>
                                         <prop k="color_border" v="0,0,0,255"/>
+                                        <prop k="horizontal_anchor_point" v="1"/>
                                         <prop k="name" v="circle"/>
                                         <prop k="offset" v="0,0"/>
                                         <prop k="offset_unit" v="MM"/>
+                                        <prop k="outline_style" v="solid"/>
                                         <prop k="outline_width" v="0"/>
                                         <prop k="outline_width_unit" v="MM"/>
                                         <prop k="scale_method" v="area"/>
                                         <prop k="size" v="2"/>
                                         <prop k="size_unit" v="MM"/>
+                                        <prop k="vertical_anchor_point" v="1"/>
                                     </layer>
                                 </symbol>
                             </symbols>
                         </VectorClassificationItemNg>
                     </LayerItem>
-                    <LayerItem layerId="mnl_vertex20130919170058153" userText="" style="subgroup" text="mnl_vertex" showFeatureCount="0">
-                        <VectorClassificationItemNg userText="" text="Init">
+                    <LayerItem layerId="vertex20140909155751293" userText="" style="hidden" text="vertex" showFeatureCount="0">
+                        <VectorClassificationItemNg userText="" text="vertex">
                             <symbols>
                                 <symbol alpha="1" type="marker" name="classificationSymbol">
                                     <layer pass="0" class="SimpleMarker" locked="0">
                                         <prop k="angle" v="0"/>
-                                        <prop k="color" v="255,234,223,255"/>
-                                        <prop k="color_border" v="255,85,0,255"/>
+                                        <prop k="color" v="149,92,89,255"/>
+                                        <prop k="color_border" v="0,0,0,255"/>
+                                        <prop k="horizontal_anchor_point" v="1"/>
                                         <prop k="name" v="circle"/>
                                         <prop k="offset" v="0,0"/>
                                         <prop k="offset_unit" v="MM"/>
+                                        <prop k="outline_style" v="solid"/>
                                         <prop k="outline_width" v="0"/>
                                         <prop k="outline_width_unit" v="MM"/>
                                         <prop k="scale_method" v="area"/>
-                                        <prop k="size" v="7"/>
+                                        <prop k="size" v="2"/>
                                         <prop k="size_unit" v="MM"/>
-                                    </layer>
-                                </symbol>
-                            </symbols>
-                        </VectorClassificationItemNg>
-                        <VectorClassificationItemNg userText="" text="">
-                            <symbols>
-                                <symbol alpha="1" type="marker" name="classificationSymbol">
-                                    <layer pass="0" class="SimpleMarker" locked="0">
-                                        <prop k="angle" v="0"/>
-                                        <prop k="color" v="255,255,255,255"/>
-                                        <prop k="color_border" v="100,100,100,255"/>
-                                        <prop k="name" v="circle"/>
-                                        <prop k="offset" v="0,0"/>
-                                        <prop k="offset_unit" v="MM"/>
-                                        <prop k="outline_width" v="0.2"/>
-                                        <prop k="outline_width_unit" v="MM"/>
-                                        <prop k="scale_method" v="area"/>
-                                        <prop k="size" v="5"/>
-                                        <prop k="size_unit" v="MM"/>
+                                        <prop k="vertical_anchor_point" v="1"/>
                                     </layer>
                                 </symbol>
                             </symbols>
                         </VectorClassificationItemNg>
                     </LayerItem>
-                    <LayerItem layerId="edge20130920135250934" userText="" style="hidden" text="edge" showFeatureCount="0">
-                        <VectorClassificationItemNg userText="" text="">
+                    <LayerItem layerId="edge20140909155822206" userText="" style="hidden" text="edge" showFeatureCount="0">
+                        <VectorClassificationItemNg userText="" text="edge">
                             <symbols>
                                 <symbol alpha="1" type="line" name="classificationSymbol">
                                     <layer pass="0" class="SimpleLine" locked="0">
                                         <prop k="capstyle" v="square"/>
-                                        <prop k="color" v="187,6,247,255"/>
+                                        <prop k="color" v="161,185,125,255"/>
                                         <prop k="customdash" v="5;2"/>
                                         <prop k="customdash_unit" v="MM"/>
+                                        <prop k="draw_inside_polygon" v="0"/>
                                         <prop k="joinstyle" v="bevel"/>
                                         <prop k="offset" v="0"/>
                                         <prop k="offset_unit" v="MM"/>
@@ -311,69 +243,13 @@
                             </symbols>
                         </VectorClassificationItemNg>
                     </LayerItem>
-                    <LayerItem layerId="mnl_to_edge20140528114717317" userText="" style="hidden" text="mnl_to_edge" showFeatureCount="0">
-                        <VectorClassificationItemNg userText="" text="mnl_to_edge">
-                            <symbols>
-                                <symbol alpha="1" type="line" name="classificationSymbol">
-                                    <layer pass="0" class="SimpleLine" locked="0">
-                                        <prop k="capstyle" v="square"/>
-                                        <prop k="color" v="160,87,162,255"/>
-                                        <prop k="customdash" v="5;2"/>
-                                        <prop k="customdash_unit" v="MM"/>
-                                        <prop k="joinstyle" v="bevel"/>
-                                        <prop k="offset" v="0"/>
-                                        <prop k="offset_unit" v="MM"/>
-                                        <prop k="penstyle" v="solid"/>
-                                        <prop k="use_custom_dash" v="0"/>
-                                        <prop k="width" v="0.26"/>
-                                        <prop k="width_unit" v="MM"/>
-                                    </layer>
-                                </symbol>
-                            </symbols>
-                        </VectorClassificationItemNg>
-                    </LayerItem>
-                    <LayerItem layerId="mnl_edge20140528133744749" userText="" style="hidden" text="mnl_edge" showFeatureCount="0">
-                        <VectorClassificationItemNg userText="" text="mnl_edge">
-                            <symbols>
-                                <symbol alpha="1" type="line" name="classificationSymbol">
-                                    <layer pass="7" class="SimpleLine" locked="1">
-                                        <prop k="capstyle" v="round"/>
-                                        <prop k="color" v="80,80,80,255"/>
-                                        <prop k="customdash" v="5;2"/>
-                                        <prop k="customdash_unit" v="MM"/>
-                                        <prop k="joinstyle" v="round"/>
-                                        <prop k="offset" v="0"/>
-                                        <prop k="offset_unit" v="MM"/>
-                                        <prop k="penstyle" v="solid"/>
-                                        <prop k="use_custom_dash" v="0"/>
-                                        <prop k="width" v="3.36"/>
-                                        <prop k="width_unit" v="MM"/>
-                                    </layer>
-                                    <layer pass="14" class="SimpleLine" locked="0">
-                                        <prop k="capstyle" v="round"/>
-                                        <prop k="color" v="248,248,248,255"/>
-                                        <prop k="customdash" v="5;2"/>
-                                        <prop k="customdash_unit" v="MM"/>
-                                        <prop k="joinstyle" v="round"/>
-                                        <prop k="offset" v="0"/>
-                                        <prop k="offset_unit" v="MM"/>
-                                        <prop k="penstyle" v="solid"/>
-                                        <prop k="use_custom_dash" v="0"/>
-                                        <prop k="width" v="3.16"/>
-                                        <prop k="width_unit" v="MM"/>
-                                    </layer>
-                                </symbol>
-                            </symbols>
-                        </VectorClassificationItemNg>
-                    </LayerItem>
-                    <LayerItem layerId="OpenLayers_plugin_layer20140528134627288" userText="" style="subgroup" text="OpenStreetMap B/W" showFeatureCount="0"/>
-                    <LayerItem layerId="bg20140528135005079" userText="" style="hidden" text="bg" showFeatureCount="0">
-                        <VectorClassificationItemNg userText="" text="bg">
+                    <LayerItem layerId="building20140909155906016" userText="" style="hidden" text="building" showFeatureCount="0">
+                        <VectorClassificationItemNg userText="" text="building">
                             <symbols>
                                 <symbol alpha="1" type="fill" name="classificationSymbol">
                                     <layer pass="0" class="SimpleFill" locked="0">
                                         <prop k="border_width_unit" v="MM"/>
-                                        <prop k="color" v="240,165,24,255"/>
+                                        <prop k="color" v="4,77,180,255"/>
                                         <prop k="color_border" v="0,0,0,255"/>
                                         <prop k="offset" v="0,0"/>
                                         <prop k="offset_unit" v="MM"/>
@@ -385,14 +261,36 @@
                             </symbols>
                         </VectorClassificationItemNg>
                     </LayerItem>
+                    <LayerItem layerId="to_edge20140909160023671" userText="" style="hidden" text="to_edge" showFeatureCount="0">
+                        <VectorClassificationItemNg userText="" text="to_edge">
+                            <symbols>
+                                <symbol alpha="1" type="line" name="classificationSymbol">
+                                    <layer pass="0" class="SimpleLine" locked="0">
+                                        <prop k="capstyle" v="square"/>
+                                        <prop k="color" v="8,87,235,255"/>
+                                        <prop k="customdash" v="5;2"/>
+                                        <prop k="customdash_unit" v="MM"/>
+                                        <prop k="draw_inside_polygon" v="0"/>
+                                        <prop k="joinstyle" v="bevel"/>
+                                        <prop k="offset" v="0"/>
+                                        <prop k="offset_unit" v="MM"/>
+                                        <prop k="penstyle" v="solid"/>
+                                        <prop k="use_custom_dash" v="0"/>
+                                        <prop k="width" v="0.26"/>
+                                        <prop k="width_unit" v="MM"/>
+                                    </layer>
+                                </symbol>
+                            </symbols>
+                        </VectorClassificationItemNg>
+                    </LayerItem>
                 </Model>
-                <ComposerItem width="64.2" x="225" transparency="0" y="162.6" rotation="0" height="64.4" positionMode="8" frame="false" outlineWidth="0" zValue="3" lastValidViewScaleFactor="2.31754" uuid="{500f8c02-a87c-4353-8a87-e292fbf6f0fa}" id="" background="false" blendMode="0" positionLock="false">
+                <ComposerItem width="44.4" x="225" transparency="0" y="162.6" height="29" positionMode="8" frame="false" outlineWidth="0" zValue="2" itemRotation="0" lastValidViewScaleFactor="2.31754" uuid="{500f8c02-a87c-4353-8a87-e292fbf6f0fa}" id="" background="false" blendMode="0" positionLock="false">
                     <FrameColor alpha="255" red="100" blue="100" green="100"/>
                     <BackgroundColor alpha="255" red="255" blue="255" green="255"/>
                 </ComposerItem>
             </ComposerLegend>
-            <ComposerMap keepLayerSet="false" overviewFrameMap="-1" id="0" previewMode="Cache" drawCanvasItems="true">
-                <overviewFrame overviewBlendMode="0" overviewFrameMap="-1" overviewInverted="false">
+            <ComposerMap mapRotation="0" keepLayerSet="false" overviewFrameMap="-1" id="0" previewMode="Cache" drawCanvasItems="true">
+                <overviewFrame overviewBlendMode="0" overviewFrameMap="-1" overviewCentered="false" overviewInverted="false">
                     <symbol alpha="0.3" type="fill" name="">
                         <layer pass="0" class="SimpleFill" locked="0">
                             <prop k="border_width_unit" v="MM"/>
@@ -406,15 +304,19 @@
                         </layer>
                     </symbol>
                 </overviewFrame>
-                <Extent ymin="5.33538e+06" xmin="682469" ymax="5.33599e+06" xmax="683331"/>
+                <Extent ymin="5335380" xmin="682469" ymax="5335986.59259259235113859" xmax="683331"/>
                 <LayerSet/>
-                <Grid gridStyle="0" crossLength="3" intervalX="0" offsetX="0" intervalY="0" offsetY="0" gridFrameStyle="0" gridFrameWidth="2" gridBlendMode="0" show="0">
+                <Grid gridStyle="0" crossLength="3" gridFramePenThickness="0.5" intervalX="0" offsetX="0" intervalY="0" offsetY="0" gridFrameStyle="0" gridFrameWidth="2" gridBlendMode="0" show="0">
+                    <framePenColor alpha="255" red="0" blue="0" green="0"/>
+                    <frameFillColor1 alpha="255" red="255" blue="255" green="255"/>
+                    <frameFillColor2 alpha="255" red="0" blue="0" green="0"/>
                     <symbol alpha="1" type="line" name="">
                         <layer pass="0" class="SimpleLine" locked="0">
                             <prop k="capstyle" v="flat"/>
                             <prop k="color" v="0,0,0,255"/>
                             <prop k="customdash" v="5;2"/>
                             <prop k="customdash_unit" v="MM"/>
+                            <prop k="draw_inside_polygon" v="0"/>
                             <prop k="joinstyle" v="bevel"/>
                             <prop k="offset" v="0"/>
                             <prop k="offset_unit" v="MM"/>
@@ -425,10 +327,11 @@
                         </layer>
                     </symbol>
                     <Annotation rightDirection="0" bottomDirection="0" format="0" topPosition="1" precision="3" leftDirection="0" rightPosition="1" bottomPosition="1" frameDistance="1" show="0" font="MS Shell Dlg 2,8.25,-1,5,50,0,0,0,0,0" leftPosition="1" topDirection="0">
-                        <fontColor red="0" blue="0" green="0"/>
+                        <fontColor alpha="255" red="0" blue="0" green="0"/>
                     </Annotation>
                 </Grid>
-                <ComposerItem width="270" x="10" transparency="0" y="10" rotation="0" height="190" positionMode="0" frame="true" outlineWidth="0" zValue="2" lastValidViewScaleFactor="4.81043" uuid="{c611887f-d688-4315-82c1-8f22f3d822de}" id="" background="true" blendMode="0" positionLock="false">
+                <AtlasMap fixedScale="0" atlasDriven="0" margin="0.10000000000000001"/>
+                <ComposerItem width="270" x="10" transparency="0" y="10" height="190" positionMode="0" frame="true" outlineWidth="0" zValue="1" itemRotation="0" lastValidViewScaleFactor="4.81043" uuid="{c611887f-d688-4315-82c1-8f22f3d822de}" id="" background="true" blendMode="0" positionLock="false">
                     <FrameColor alpha="255" red="100" blue="100" green="100"/>
                     <BackgroundColor alpha="255" red="255" blue="255" green="255"/>
                 </ComposerItem>
@@ -436,9 +339,21 @@
         </Composition>
     </Composer>
     <Composer title="Druckzusammenstellung 2" visible="0">
-        <Composition printResolution="300" paperWidth="297" snapGridOffsetX="0" snapGridResolution="10" snapGridOffsetY="0" alignmentSnap="1" snapping="0" numPages="1" paperHeight="210" alignmentSnapTolerance="2" printAsRaster="0">
-            <ComposerMap keepLayerSet="false" overviewFrameMap="-1" id="0" previewMode="Cache" drawCanvasItems="true">
-                <overviewFrame overviewBlendMode="0" overviewFrameMap="-1" overviewInverted="false">
+        <Composition snapGridTolerance="2" gridVisible="0" printResolution="300" paperWidth="297" snapGridOffsetX="0" guidesVisible="1" snapGridResolution="10" snapGridOffsetY="0" alignmentSnap="1" snapping="0" numPages="1" paperHeight="210" alignmentSnapTolerance="2" smartGuides="1" printAsRaster="0" generateWorldFile="0">
+            <symbol alpha="1" type="fill" name="">
+                <layer pass="0" class="SimpleFill" locked="0">
+                    <prop k="border_width_unit" v="MM"/>
+                    <prop k="color" v="255,255,255,255"/>
+                    <prop k="color_border" v="0,0,0,255"/>
+                    <prop k="offset" v="0,0"/>
+                    <prop k="offset_unit" v="MM"/>
+                    <prop k="style" v="solid"/>
+                    <prop k="style_border" v="no"/>
+                    <prop k="width_border" v="0.26"/>
+                </layer>
+            </symbol>
+            <ComposerMap mapRotation="0" keepLayerSet="false" overviewFrameMap="-1" id="0" previewMode="Cache" drawCanvasItems="true">
+                <overviewFrame overviewBlendMode="0" overviewFrameMap="-1" overviewCentered="false" overviewInverted="false">
                     <symbol alpha="0.3" type="fill" name="">
                         <layer pass="0" class="SimpleFill" locked="0">
                             <prop k="border_width_unit" v="MM"/>
@@ -452,15 +367,19 @@
                         </layer>
                     </symbol>
                 </overviewFrame>
-                <Extent ymin="5.33547e+06" xmin="682534" ymax="5.33594e+06" xmax="683212"/>
+                <Extent ymin="5335470" xmin="682534" ymax="5335936.58022267743945122" xmax="683212"/>
                 <LayerSet/>
-                <Grid gridStyle="0" crossLength="3" intervalX="0" offsetX="0" intervalY="0" offsetY="0" gridFrameStyle="0" gridFrameWidth="2" gridBlendMode="0" show="0">
+                <Grid gridStyle="0" crossLength="3" gridFramePenThickness="0.5" intervalX="0" offsetX="0" intervalY="0" offsetY="0" gridFrameStyle="0" gridFrameWidth="2" gridBlendMode="0" show="0">
+                    <framePenColor alpha="255" red="0" blue="0" green="0"/>
+                    <frameFillColor1 alpha="255" red="255" blue="255" green="255"/>
+                    <frameFillColor2 alpha="255" red="0" blue="0" green="0"/>
                     <symbol alpha="1" type="line" name="">
                         <layer pass="0" class="SimpleLine" locked="0">
                             <prop k="capstyle" v="flat"/>
                             <prop k="color" v="0,0,0,255"/>
                             <prop k="customdash" v="5;2"/>
                             <prop k="customdash_unit" v="MM"/>
+                            <prop k="draw_inside_polygon" v="0"/>
                             <prop k="joinstyle" v="bevel"/>
                             <prop k="offset" v="0"/>
                             <prop k="offset_unit" v="MM"/>
@@ -471,566 +390,52 @@
                         </layer>
                     </symbol>
                     <Annotation rightDirection="0" bottomDirection="0" format="0" topPosition="1" precision="3" leftDirection="0" rightPosition="1" bottomPosition="1" frameDistance="1" show="0" font="MS Shell Dlg 2,8.25,-1,5,50,0,0,0,0,0" leftPosition="1" topDirection="0">
-                        <fontColor red="0" blue="0" green="0"/>
+                        <fontColor alpha="255" red="0" blue="0" green="0"/>
                     </Annotation>
                 </Grid>
-                <ComposerItem width="276.094" x="10" transparency="0" y="10" rotation="0" height="190" positionMode="0" frame="false" outlineWidth="0.3" zValue="1" lastValidViewScaleFactor="4.62085" uuid="{ec7fb53a-05dd-4ed9-a779-69763815f2bc}" id="" background="true" blendMode="0" positionLock="false">
+                <AtlasMap fixedScale="0" atlasDriven="0" margin="0.10000000000000001"/>
+                <ComposerItem width="276.094" x="10" transparency="0" y="10" height="190" positionMode="0" frame="false" outlineWidth="0.3" zValue="1" itemRotation="0" lastValidViewScaleFactor="4.62085" uuid="{ec7fb53a-05dd-4ed9-a779-69763815f2bc}" id="" background="true" blendMode="0" positionLock="false">
                     <FrameColor alpha="255" red="0" blue="0" green="0"/>
                     <BackgroundColor alpha="255" red="255" blue="255" green="255"/>
                 </ComposerItem>
             </ComposerMap>
         </Composition>
     </Composer>
-    <projectlayers layercount="7">
-        <maplayer minimumScale="0" maximumScale="1e+08" ol_layer_type="5" type="plugin" hasScaleBasedVisibilityFlag="0" name="openlayers">
-            <id>OpenLayers_plugin_layer20140528134627288</id>
-            <datasource></datasource>
+    <projectlayers layercount="4">
+        <maplayer minimumScale="-4.65661e-10" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="1" maxLabelScale="1e+08" simplifyDrawingTol="1" geometry="Polygon" simplifyMaxScale="1" type="vector" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
+            <id>building20140909155906016</id>
+            <datasource>./building.shp</datasource>
             <title></title>
             <abstract></abstract>
             <keywordList>
                 <value></value>
             </keywordList>
-            <layername>OpenStreetMap B/W</layername>
+            <layername>building</layername>
             <srs>
                 <spatialrefsys>
-                    <proj4>+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs</proj4>
-                    <srsid>3857</srsid>
-                    <srid>3857</srid>
-                    <authid>EPSG:3857</authid>
-                    <description>WGS 84 / Pseudo Mercator</description>
-                    <projectionacronym>merc</projectionacronym>
+                    <proj4>+proj=longlat +datum=WGS84 +no_defs</proj4>
+                    <srsid>3452</srsid>
+                    <srid>4326</srid>
+                    <authid>EPSG:4326</authid>
+                    <description>WGS 84</description>
+                    <projectionacronym>longlat</projectionacronym>
                     <ellipsoidacronym>WGS84</ellipsoidacronym>
-                    <geographicflag>false</geographicflag>
+                    <geographicflag>true</geographicflag>
                 </spatialrefsys>
             </srs>
-            <customproperties/>
-        </maplayer>
-        <maplayer minimumScale="0" maximumScale="1e+08" minLabelScale="0" maxLabelScale="1e+08" geometry="Polygon" type="vector" hasScaleBasedVisibilityFlag="0" scaleBasedLabelVisibilityFlag="0">
-            <id>bg20140528135005079</id>
-            <datasource>./bg.shp</datasource>
-            <title></title>
-            <abstract></abstract>
-            <keywordList>
-                <value></value>
-            </keywordList>
-            <layername>bg</layername>
-            <srs>
-                <spatialrefsys>
-                    <proj4>+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs</proj4>
-                    <srsid>3857</srsid>
-                    <srid>3857</srid>
-                    <authid>EPSG:3857</authid>
-                    <description>WGS 84 / Pseudo Mercator</description>
-                    <projectionacronym>merc</projectionacronym>
-                    <ellipsoidacronym>WGS84</ellipsoidacronym>
-                    <geographicflag>false</geographicflag>
-                </spatialrefsys>
-            </srs>
-            <provider encoding="System">ogr</provider>
+            <provider encoding="UTF-8">ogr</provider>
             <previewExpression></previewExpression>
             <vectorjoins/>
-            <renderer-v2 symbollevels="0" type="singleSymbol">
-                <symbols>
-                    <symbol alpha="1" type="fill" name="0">
-                        <layer pass="0" class="SimpleFill" locked="0">
-                            <prop k="border_width_unit" v="MM"/>
-                            <prop k="color" v="255,255,255,255"/>
-                            <prop k="color_border" v="0,0,0,255"/>
-                            <prop k="offset" v="0,0"/>
-                            <prop k="offset_unit" v="MM"/>
-                            <prop k="style" v="solid"/>
-                            <prop k="style_border" v="no"/>
-                            <prop k="width_border" v="0.26"/>
-                        </layer>
-                    </symbol>
-                </symbols>
-                <rotation field=""/>
-                <sizescale field="" scalemethod="area"/>
-            </renderer-v2>
-            <customproperties>
-                <property key="labeling" value="pal"/>
-                <property key="labeling/addDirectionSymbol" value="false"/>
-                <property key="labeling/angleOffset" value="0"/>
-                <property key="labeling/blendMode" value="0"/>
-                <property key="labeling/bufferBlendMode" value="0"/>
-                <property key="labeling/bufferColorA" value="255"/>
-                <property key="labeling/bufferColorB" value="255"/>
-                <property key="labeling/bufferColorG" value="255"/>
-                <property key="labeling/bufferColorR" value="255"/>
-                <property key="labeling/bufferDraw" value="false"/>
-                <property key="labeling/bufferJoinStyle" value="64"/>
-                <property key="labeling/bufferNoFill" value="false"/>
-                <property key="labeling/bufferSize" value="1"/>
-                <property key="labeling/bufferSizeInMapUnits" value="false"/>
-                <property key="labeling/bufferTransp" value="0"/>
-                <property key="labeling/centroidWhole" value="false"/>
-                <property key="labeling/decimals" value="3"/>
-                <property key="labeling/displayAll" value="false"/>
-                <property key="labeling/dist" value="0"/>
-                <property key="labeling/distInMapUnits" value="false"/>
-                <property key="labeling/enabled" value="false"/>
-                <property key="labeling/fieldName" value=""/>
-                <property key="labeling/fontBold" value="false"/>
-                <property key="labeling/fontCapitals" value="0"/>
-                <property key="labeling/fontFamily" value="MS Shell Dlg 2"/>
-                <property key="labeling/fontItalic" value="false"/>
-                <property key="labeling/fontLetterSpacing" value="0"/>
-                <property key="labeling/fontLimitPixelSize" value="false"/>
-                <property key="labeling/fontMaxPixelSize" value="10000"/>
-                <property key="labeling/fontMinPixelSize" value="3"/>
-                <property key="labeling/fontSize" value="8.25"/>
-                <property key="labeling/fontSizeInMapUnits" value="false"/>
-                <property key="labeling/fontStrikeout" value="false"/>
-                <property key="labeling/fontUnderline" value="false"/>
-                <property key="labeling/fontWeight" value="50"/>
-                <property key="labeling/fontWordSpacing" value="0"/>
-                <property key="labeling/formatNumbers" value="false"/>
-                <property key="labeling/isExpression" value="false"/>
-                <property key="labeling/labelOffsetInMapUnits" value="true"/>
-                <property key="labeling/labelPerPart" value="false"/>
-                <property key="labeling/leftDirectionSymbol" value="&lt;"/>
-                <property key="labeling/limitNumLabels" value="false"/>
-                <property key="labeling/maxCurvedCharAngleIn" value="20"/>
-                <property key="labeling/maxCurvedCharAngleOut" value="-20"/>
-                <property key="labeling/maxNumLabels" value="2000"/>
-                <property key="labeling/mergeLines" value="false"/>
-                <property key="labeling/minFeatureSize" value="0"/>
-                <property key="labeling/multilineAlign" value="0"/>
-                <property key="labeling/multilineHeight" value="1"/>
-                <property key="labeling/namedStyle" value="Normal"/>
-                <property key="labeling/obstacle" value="true"/>
-                <property key="labeling/placeDirectionSymbol" value="0"/>
-                <property key="labeling/placement" value="0"/>
-                <property key="labeling/placementFlags" value="0"/>
-                <property key="labeling/plussign" value="false"/>
-                <property key="labeling/preserveRotation" value="true"/>
-                <property key="labeling/previewBkgrdColor" value="#ffffff"/>
-                <property key="labeling/priority" value="5"/>
-                <property key="labeling/quadOffset" value="4"/>
-                <property key="labeling/reverseDirectionSymbol" value="false"/>
-                <property key="labeling/rightDirectionSymbol" value=">"/>
-                <property key="labeling/scaleMax" value="10000000"/>
-                <property key="labeling/scaleMin" value="1"/>
-                <property key="labeling/scaleVisibility" value="false"/>
-                <property key="labeling/shadowBlendMode" value="6"/>
-                <property key="labeling/shadowColorB" value="0"/>
-                <property key="labeling/shadowColorG" value="0"/>
-                <property key="labeling/shadowColorR" value="0"/>
-                <property key="labeling/shadowDraw" value="false"/>
-                <property key="labeling/shadowOffsetAngle" value="135"/>
-                <property key="labeling/shadowOffsetDist" value="1"/>
-                <property key="labeling/shadowOffsetGlobal" value="true"/>
-                <property key="labeling/shadowOffsetUnits" value="1"/>
-                <property key="labeling/shadowRadius" value="1.5"/>
-                <property key="labeling/shadowRadiusAlphaOnly" value="false"/>
-                <property key="labeling/shadowRadiusUnits" value="1"/>
-                <property key="labeling/shadowScale" value="100"/>
-                <property key="labeling/shadowTransparency" value="30"/>
-                <property key="labeling/shadowUnder" value="0"/>
-                <property key="labeling/shapeBlendMode" value="0"/>
-                <property key="labeling/shapeBorderColorA" value="255"/>
-                <property key="labeling/shapeBorderColorB" value="128"/>
-                <property key="labeling/shapeBorderColorG" value="128"/>
-                <property key="labeling/shapeBorderColorR" value="128"/>
-                <property key="labeling/shapeBorderWidth" value="0"/>
-                <property key="labeling/shapeBorderWidthUnits" value="1"/>
-                <property key="labeling/shapeDraw" value="false"/>
-                <property key="labeling/shapeFillColorA" value="255"/>
-                <property key="labeling/shapeFillColorB" value="255"/>
-                <property key="labeling/shapeFillColorG" value="255"/>
-                <property key="labeling/shapeFillColorR" value="255"/>
-                <property key="labeling/shapeJoinStyle" value="64"/>
-                <property key="labeling/shapeOffsetUnits" value="1"/>
-                <property key="labeling/shapeOffsetX" value="0"/>
-                <property key="labeling/shapeOffsetY" value="0"/>
-                <property key="labeling/shapeRadiiUnits" value="1"/>
-                <property key="labeling/shapeRadiiX" value="0"/>
-                <property key="labeling/shapeRadiiY" value="0"/>
-                <property key="labeling/shapeRotation" value="0"/>
-                <property key="labeling/shapeRotationType" value="0"/>
-                <property key="labeling/shapeSVGFile" value=""/>
-                <property key="labeling/shapeSizeType" value="0"/>
-                <property key="labeling/shapeSizeUnits" value="1"/>
-                <property key="labeling/shapeSizeX" value="0"/>
-                <property key="labeling/shapeSizeY" value="0"/>
-                <property key="labeling/shapeTransparency" value="0"/>
-                <property key="labeling/shapeType" value="0"/>
-                <property key="labeling/textColorA" value="255"/>
-                <property key="labeling/textColorB" value="0"/>
-                <property key="labeling/textColorG" value="0"/>
-                <property key="labeling/textColorR" value="0"/>
-                <property key="labeling/textTransp" value="0"/>
-                <property key="labeling/upsidedownLabels" value="0"/>
-                <property key="labeling/wrapChar" value=""/>
-                <property key="labeling/xOffset" value="0"/>
-                <property key="labeling/yOffset" value="0"/>
-            </customproperties>
-            <blendMode>0</blendMode>
-            <featureBlendMode>0</featureBlendMode>
-            <layerTransparency>56</layerTransparency>
-            <displayfield>id</displayfield>
-            <label>0</label>
-            <labelattributes>
-                <label fieldname="" text="Beschriftung"/>
-                <family fieldname="" name="MS Shell Dlg 2"/>
-                <size fieldname="" units="pt" value="12"/>
-                <bold fieldname="" on="0"/>
-                <italic fieldname="" on="0"/>
-                <underline fieldname="" on="0"/>
-                <strikeout fieldname="" on="0"/>
-                <color fieldname="" red="0" blue="0" green="0"/>
-                <x fieldname=""/>
-                <y fieldname=""/>
-                <offset x="0" y="0" units="pt" yfieldname="" xfieldname=""/>
-                <angle fieldname="" value="0" auto="0"/>
-                <alignment fieldname="" value="center"/>
-                <buffercolor fieldname="" red="255" blue="255" green="255"/>
-                <buffersize fieldname="" units="pt" value="1"/>
-                <bufferenabled fieldname="" on=""/>
-                <multilineenabled fieldname="" on=""/>
-                <selectedonly on=""/>
-            </labelattributes>
-            <edittypes>
-                <edittype labelontop="0" editable="1" type="0" name="id"/>
-            </edittypes>
-            <editform></editform>
-            <editforminit></editforminit>
-            <annotationform></annotationform>
-            <editorlayout>generatedlayout</editorlayout>
-            <excludeAttributesWMS/>
-            <excludeAttributesWFS/>
-            <attributeactions/>
-        </maplayer>
-        <maplayer minimumScale="0" maximumScale="1e+08" minLabelScale="0" maxLabelScale="1e+08" geometry="Line" type="vector" hasScaleBasedVisibilityFlag="0" scaleBasedLabelVisibilityFlag="0">
-            <id>edge20130920135250934</id>
-            <datasource>./edge.shp</datasource>
-            <title></title>
-            <abstract></abstract>
-            <keywordList>
-                <value></value>
-            </keywordList>
-            <layername>edge</layername>
-            <srs>
-                <spatialrefsys>
-                    <proj4>+proj=utm +zone=32 +datum=WGS84 +units=m +no_defs</proj4>
-                    <srsid>3116</srsid>
-                    <srid>32632</srid>
-                    <authid>EPSG:32632</authid>
-                    <description>WGS 84 / UTM zone 32N</description>
-                    <projectionacronym>utm</projectionacronym>
-                    <ellipsoidacronym>WGS84</ellipsoidacronym>
-                    <geographicflag>false</geographicflag>
-                </spatialrefsys>
-            </srs>
-            <provider encoding="System">ogr</provider>
-            <previewExpression>COALESCE( "id_str", '&lt;NULL>' )</previewExpression>
-            <vectorjoins/>
-            <renderer-v2 attr="Heat" symbollevels="0" type="graduatedSymbol">
-                <ranges>
-                    <range symbol="0" lower="0.000000" upper="100.000000" label="0-100"/>
-                    <range symbol="1" lower="100.000000" upper="200.000000" label="100-200"/>
-                    <range symbol="2" lower="200.000000" upper="300.000000" label="200-300"/>
-                    <range symbol="3" lower="300.000000" upper="400.000000" label="300-400"/>
-                    <range symbol="4" lower="400.000000" upper="472.795000" label="400-500"/>
-                </ranges>
-                <symbols>
-                    <symbol alpha="1" type="line" name="0">
-                        <layer pass="0" class="SimpleLine" locked="0">
-                            <prop k="capstyle" v="square"/>
-                            <prop k="color" v="254,240,217,255"/>
-                            <prop k="customdash" v="5;2"/>
-                            <prop k="customdash_unit" v="MM"/>
-                            <prop k="joinstyle" v="bevel"/>
-                            <prop k="offset" v="0"/>
-                            <prop k="offset_unit" v="MM"/>
-                            <prop k="penstyle" v="solid"/>
-                            <prop k="use_custom_dash" v="0"/>
-                            <prop k="width" v="0.26"/>
-                            <prop k="width_unit" v="MM"/>
-                        </layer>
-                    </symbol>
-                    <symbol alpha="1" type="line" name="1">
-                        <layer pass="0" class="SimpleLine" locked="0">
-                            <prop k="capstyle" v="square"/>
-                            <prop k="color" v="253,204,138,255"/>
-                            <prop k="customdash" v="5;2"/>
-                            <prop k="customdash_unit" v="MM"/>
-                            <prop k="joinstyle" v="bevel"/>
-                            <prop k="offset" v="0"/>
-                            <prop k="offset_unit" v="MM"/>
-                            <prop k="penstyle" v="solid"/>
-                            <prop k="use_custom_dash" v="0"/>
-                            <prop k="width" v="0.6"/>
-                            <prop k="width_unit" v="MM"/>
-                        </layer>
-                    </symbol>
-                    <symbol alpha="1" type="line" name="2">
-                        <layer pass="0" class="SimpleLine" locked="0">
-                            <prop k="capstyle" v="square"/>
-                            <prop k="color" v="252,141,89,255"/>
-                            <prop k="customdash" v="5;2"/>
-                            <prop k="customdash_unit" v="MM"/>
-                            <prop k="joinstyle" v="bevel"/>
-                            <prop k="offset" v="0"/>
-                            <prop k="offset_unit" v="MM"/>
-                            <prop k="penstyle" v="solid"/>
-                            <prop k="use_custom_dash" v="0"/>
-                            <prop k="width" v="0.9"/>
-                            <prop k="width_unit" v="MM"/>
-                        </layer>
-                    </symbol>
-                    <symbol alpha="1" type="line" name="3">
-                        <layer pass="0" class="SimpleLine" locked="0">
-                            <prop k="capstyle" v="square"/>
-                            <prop k="color" v="227,74,51,255"/>
-                            <prop k="customdash" v="5;2"/>
-                            <prop k="customdash_unit" v="MM"/>
-                            <prop k="joinstyle" v="bevel"/>
-                            <prop k="offset" v="0"/>
-                            <prop k="offset_unit" v="MM"/>
-                            <prop k="penstyle" v="solid"/>
-                            <prop k="use_custom_dash" v="0"/>
-                            <prop k="width" v="1.2"/>
-                            <prop k="width_unit" v="MM"/>
-                        </layer>
-                    </symbol>
-                    <symbol alpha="1" type="line" name="4">
-                        <layer pass="0" class="SimpleLine" locked="0">
-                            <prop k="capstyle" v="square"/>
-                            <prop k="color" v="179,0,0,255"/>
-                            <prop k="customdash" v="5;2"/>
-                            <prop k="customdash_unit" v="MM"/>
-                            <prop k="joinstyle" v="bevel"/>
-                            <prop k="offset" v="0"/>
-                            <prop k="offset_unit" v="MM"/>
-                            <prop k="penstyle" v="solid"/>
-                            <prop k="use_custom_dash" v="0"/>
-                            <prop k="width" v="1.5"/>
-                            <prop k="width_unit" v="MM"/>
-                        </layer>
-                    </symbol>
-                </symbols>
-                <source-symbol>
-                    <symbol alpha="1" type="line" name="0">
-                        <layer pass="0" class="SimpleLine" locked="0">
-                            <prop k="capstyle" v="square"/>
-                            <prop k="color" v="135,140,231,255"/>
-                            <prop k="customdash" v="5;2"/>
-                            <prop k="customdash_unit" v="MM"/>
-                            <prop k="joinstyle" v="bevel"/>
-                            <prop k="offset" v="0"/>
-                            <prop k="offset_unit" v="MM"/>
-                            <prop k="penstyle" v="solid"/>
-                            <prop k="use_custom_dash" v="0"/>
-                            <prop k="width" v="0.26"/>
-                            <prop k="width_unit" v="MM"/>
-                        </layer>
-                    </symbol>
-                </source-symbol>
-                <colorramp type="gradient" name="[source]">
-                    <prop k="color1" v="254,240,217,255"/>
-                    <prop k="color2" v="179,0,0,255"/>
-                    <prop k="discrete" v="0"/>
-                    <prop k="stops" v="0.25;253,204,138,255:0.5;252,141,89,255:0.75;227,74,51,255"/>
-                </colorramp>
-                <mode name="pretty"/>
-                <rotation field=""/>
-                <sizescale field="" scalemethod="area"/>
-            </renderer-v2>
-            <customproperties>
-                <property key="labeling" value="pal"/>
-                <property key="labeling/addDirectionSymbol" value="false"/>
-                <property key="labeling/angleOffset" value="0"/>
-                <property key="labeling/blendMode" value="0"/>
-                <property key="labeling/bufferBlendMode" value="0"/>
-                <property key="labeling/bufferColorA" value="255"/>
-                <property key="labeling/bufferColorB" value="255"/>
-                <property key="labeling/bufferColorG" value="255"/>
-                <property key="labeling/bufferColorR" value="255"/>
-                <property key="labeling/bufferDraw" value="false"/>
-                <property key="labeling/bufferJoinStyle" value="64"/>
-                <property key="labeling/bufferNoFill" value="false"/>
-                <property key="labeling/bufferSize" value="1"/>
-                <property key="labeling/bufferSizeInMapUnits" value="false"/>
-                <property key="labeling/bufferTransp" value="0"/>
-                <property key="labeling/centroidWhole" value="false"/>
-                <property key="labeling/decimals" value="3"/>
-                <property key="labeling/displayAll" value="false"/>
-                <property key="labeling/dist" value="0"/>
-                <property key="labeling/distInMapUnits" value="false"/>
-                <property key="labeling/enabled" value="false"/>
-                <property key="labeling/fieldName" value=""/>
-                <property key="labeling/fontBold" value="false"/>
-                <property key="labeling/fontCapitals" value="0"/>
-                <property key="labeling/fontFamily" value="MS Shell Dlg 2"/>
-                <property key="labeling/fontItalic" value="false"/>
-                <property key="labeling/fontLetterSpacing" value="0"/>
-                <property key="labeling/fontLimitPixelSize" value="false"/>
-                <property key="labeling/fontMaxPixelSize" value="10000"/>
-                <property key="labeling/fontMinPixelSize" value="3"/>
-                <property key="labeling/fontSize" value="8.25"/>
-                <property key="labeling/fontSizeInMapUnits" value="false"/>
-                <property key="labeling/fontStrikeout" value="false"/>
-                <property key="labeling/fontUnderline" value="false"/>
-                <property key="labeling/fontWeight" value="50"/>
-                <property key="labeling/fontWordSpacing" value="0"/>
-                <property key="labeling/formatNumbers" value="false"/>
-                <property key="labeling/isExpression" value="false"/>
-                <property key="labeling/labelOffsetInMapUnits" value="true"/>
-                <property key="labeling/labelPerPart" value="false"/>
-                <property key="labeling/leftDirectionSymbol" value="&lt;"/>
-                <property key="labeling/limitNumLabels" value="false"/>
-                <property key="labeling/maxCurvedCharAngleIn" value="20"/>
-                <property key="labeling/maxCurvedCharAngleOut" value="-20"/>
-                <property key="labeling/maxNumLabels" value="2000"/>
-                <property key="labeling/mergeLines" value="false"/>
-                <property key="labeling/minFeatureSize" value="0"/>
-                <property key="labeling/multilineAlign" value="0"/>
-                <property key="labeling/multilineHeight" value="1"/>
-                <property key="labeling/namedStyle" value="Normal"/>
-                <property key="labeling/obstacle" value="true"/>
-                <property key="labeling/placeDirectionSymbol" value="0"/>
-                <property key="labeling/placement" value="2"/>
-                <property key="labeling/placementFlags" value="10"/>
-                <property key="labeling/plussign" value="false"/>
-                <property key="labeling/preserveRotation" value="true"/>
-                <property key="labeling/previewBkgrdColor" value="#ffffff"/>
-                <property key="labeling/priority" value="5"/>
-                <property key="labeling/quadOffset" value="4"/>
-                <property key="labeling/reverseDirectionSymbol" value="false"/>
-                <property key="labeling/rightDirectionSymbol" value=">"/>
-                <property key="labeling/scaleMax" value="10000000"/>
-                <property key="labeling/scaleMin" value="1"/>
-                <property key="labeling/scaleVisibility" value="false"/>
-                <property key="labeling/shadowBlendMode" value="6"/>
-                <property key="labeling/shadowColorB" value="0"/>
-                <property key="labeling/shadowColorG" value="0"/>
-                <property key="labeling/shadowColorR" value="0"/>
-                <property key="labeling/shadowDraw" value="false"/>
-                <property key="labeling/shadowOffsetAngle" value="135"/>
-                <property key="labeling/shadowOffsetDist" value="1"/>
-                <property key="labeling/shadowOffsetGlobal" value="true"/>
-                <property key="labeling/shadowOffsetUnits" value="1"/>
-                <property key="labeling/shadowRadius" value="1.5"/>
-                <property key="labeling/shadowRadiusAlphaOnly" value="false"/>
-                <property key="labeling/shadowRadiusUnits" value="1"/>
-                <property key="labeling/shadowScale" value="100"/>
-                <property key="labeling/shadowTransparency" value="30"/>
-                <property key="labeling/shadowUnder" value="0"/>
-                <property key="labeling/shapeBlendMode" value="0"/>
-                <property key="labeling/shapeBorderColorA" value="255"/>
-                <property key="labeling/shapeBorderColorB" value="128"/>
-                <property key="labeling/shapeBorderColorG" value="128"/>
-                <property key="labeling/shapeBorderColorR" value="128"/>
-                <property key="labeling/shapeBorderWidth" value="0"/>
-                <property key="labeling/shapeBorderWidthUnits" value="1"/>
-                <property key="labeling/shapeDraw" value="false"/>
-                <property key="labeling/shapeFillColorA" value="255"/>
-                <property key="labeling/shapeFillColorB" value="255"/>
-                <property key="labeling/shapeFillColorG" value="255"/>
-                <property key="labeling/shapeFillColorR" value="255"/>
-                <property key="labeling/shapeJoinStyle" value="64"/>
-                <property key="labeling/shapeOffsetUnits" value="1"/>
-                <property key="labeling/shapeOffsetX" value="0"/>
-                <property key="labeling/shapeOffsetY" value="0"/>
-                <property key="labeling/shapeRadiiUnits" value="1"/>
-                <property key="labeling/shapeRadiiX" value="0"/>
-                <property key="labeling/shapeRadiiY" value="0"/>
-                <property key="labeling/shapeRotation" value="0"/>
-                <property key="labeling/shapeRotationType" value="0"/>
-                <property key="labeling/shapeSVGFile" value=""/>
-                <property key="labeling/shapeSizeType" value="0"/>
-                <property key="labeling/shapeSizeUnits" value="1"/>
-                <property key="labeling/shapeSizeX" value="0"/>
-                <property key="labeling/shapeSizeY" value="0"/>
-                <property key="labeling/shapeTransparency" value="0"/>
-                <property key="labeling/shapeType" value="0"/>
-                <property key="labeling/textColorA" value="255"/>
-                <property key="labeling/textColorB" value="0"/>
-                <property key="labeling/textColorG" value="0"/>
-                <property key="labeling/textColorR" value="0"/>
-                <property key="labeling/textTransp" value="0"/>
-                <property key="labeling/upsidedownLabels" value="0"/>
-                <property key="labeling/wrapChar" value=""/>
-                <property key="labeling/xOffset" value="0"/>
-                <property key="labeling/yOffset" value="0"/>
-            </customproperties>
-            <blendMode>0</blendMode>
-            <featureBlendMode>0</featureBlendMode>
-            <layerTransparency>0</layerTransparency>
-            <displayfield>id_str</displayfield>
-            <label>0</label>
-            <labelattributes>
-                <label fieldname="" text="Beschriftung"/>
-                <family fieldname="" name="MS Shell Dlg 2"/>
-                <size fieldname="" units="pt" value="12"/>
-                <bold fieldname="" on="0"/>
-                <italic fieldname="" on="0"/>
-                <underline fieldname="" on="0"/>
-                <strikeout fieldname="" on="0"/>
-                <color fieldname="" red="0" blue="0" green="0"/>
-                <x fieldname=""/>
-                <y fieldname=""/>
-                <offset x="0" y="0" units="pt" yfieldname="" xfieldname=""/>
-                <angle fieldname="" value="0" auto="0"/>
-                <alignment fieldname="" value="center"/>
-                <buffercolor fieldname="" red="255" blue="255" green="255"/>
-                <buffersize fieldname="" units="pt" value="1"/>
-                <bufferenabled fieldname="" on=""/>
-                <multilineenabled fieldname="" on=""/>
-                <selectedonly on=""/>
-            </labelattributes>
-            <edittypes>
-                <edittype labelontop="0" editable="1" type="0" name="Heat"/>
-                <edittype labelontop="0" editable="1" type="0" name="Vertex1"/>
-                <edittype labelontop="0" editable="1" type="0" name="Vertex2"/>
-                <edittype labelontop="0" editable="1" type="0" name="cat"/>
-                <edittype labelontop="0" editable="1" type="0" name="id_str"/>
-                <edittype labelontop="0" editable="1" type="0" name="industrial"/>
-                <edittype labelontop="0" editable="1" type="0" name="residential"/>
-            </edittypes>
-            <editform>.</editform>
-            <editforminit></editforminit>
-            <annotationform>.</annotationform>
-            <editorlayout>generatedlayout</editorlayout>
-            <excludeAttributesWMS/>
-            <excludeAttributesWFS/>
-            <attributeactions/>
-        </maplayer>
-        <maplayer minimumScale="0" maximumScale="1e+08" minLabelScale="1" maxLabelScale="1e+08" geometry="Polygon" type="vector" hasScaleBasedVisibilityFlag="0" scaleBasedLabelVisibilityFlag="0">
-            <id>min_building20130830162008873</id>
-            <datasource>./mnl_building.shp</datasource>
-            <title></title>
-            <abstract></abstract>
-            <keywordList>
-                <value></value>
-            </keywordList>
-            <layername>mnl_building</layername>
-            <srs>
-                <spatialrefsys>
-                    <proj4>+proj=utm +zone=32 +datum=WGS84 +units=m +no_defs</proj4>
-                    <srsid>3116</srsid>
-                    <srid>32632</srid>
-                    <authid>EPSG:32632</authid>
-                    <description>WGS 84 / UTM zone 32N</description>
-                    <projectionacronym>utm</projectionacronym>
-                    <ellipsoidacronym>WGS84</ellipsoidacronym>
-                    <geographicflag>false</geographicflag>
-                </spatialrefsys>
-            </srs>
-            <provider encoding="System">ogr</provider>
-            <previewExpression>name</previewExpression>
-            <vectorjoins>
-                <join joinFieldName="osmid" targetFieldName="osmid" memoryCache="0" joinLayerId="grass_min_building_centroid20130902152416005"/>
-            </vectorjoins>
             <renderer-v2 attr="total_area" symbollevels="0" type="graduatedSymbol">
                 <ranges>
-                    <range symbol="0" lower="125.710000" upper="401.930000" label="125.7100 - 401.9300"/>
-                    <range symbol="1" lower="401.930000" upper="831.520000" label="401.9300 - 831.5200"/>
-                    <range symbol="2" lower="831.520000" upper="1024.520000" label="831.5200 - 1024.5200"/>
-                    <range symbol="3" lower="1024.520000" upper="1567.080000" label="1024.5200 - 1567.0800"/>
-                    <range symbol="4" lower="1567.080000" upper="4365.890000" label="1567.0800 - 4365.8900"/>
-                    <range symbol="5" lower="4365.890000" upper="7539.090000" label="4365.8900 - 7539.0900"/>
+                    <range symbol="0" lower="125.710000" upper="1000.000000" label="125.7100 - 1000.0000"/>
+                    <range symbol="1" lower="1000.000000" upper="2000.000000" label="1000.0000 - 2000.0000"/>
+                    <range symbol="2" lower="2000.000000" upper="3000.000000" label="2000.0000 - 3000.0000"/>
+                    <range symbol="3" lower="3000.000000" upper="4000.000000" label="3000.0000 - 4000.0000"/>
+                    <range symbol="4" lower="4000.000000" upper="5000.000000" label="4000.0000 - 5000.0000"/>
+                    <range symbol="5" lower="5000.000000" upper="6000.000000" label="5000.0000 - 6000.0000"/>
+                    <range symbol="6" lower="6000.000000" upper="7000.000000" label="6000.0000 - 7000.0000"/>
+                    <range symbol="7" lower="7000.000000" upper="7539.090000" label="7000.0000 - 7539.0900"/>
                 </ranges>
                 <symbols>
                     <symbol alpha="1" type="fill" name="0">
@@ -1048,7 +453,7 @@
                     <symbol alpha="1" type="fill" name="1">
                         <layer pass="0" class="SimpleFill" locked="0">
                             <prop k="border_width_unit" v="MM"/>
-                            <prop k="color" v="253,212,158,255"/>
+                            <prop k="color" v="254,240,217,255"/>
                             <prop k="color_border" v="175,179,138,255"/>
                             <prop k="offset" v="0,0"/>
                             <prop k="offset_unit" v="MM"/>
@@ -1060,7 +465,7 @@
                     <symbol alpha="1" type="fill" name="2">
                         <layer pass="0" class="SimpleFill" locked="0">
                             <prop k="border_width_unit" v="MM"/>
-                            <prop k="color" v="253,187,132,255"/>
+                            <prop k="color" v="253,212,158,255"/>
                             <prop k="color_border" v="175,179,138,255"/>
                             <prop k="offset" v="0,0"/>
                             <prop k="offset_unit" v="MM"/>
@@ -1072,7 +477,7 @@
                     <symbol alpha="1" type="fill" name="3">
                         <layer pass="0" class="SimpleFill" locked="0">
                             <prop k="border_width_unit" v="MM"/>
-                            <prop k="color" v="252,141,89,255"/>
+                            <prop k="color" v="253,187,132,255"/>
                             <prop k="color_border" v="175,179,138,255"/>
                             <prop k="offset" v="0,0"/>
                             <prop k="offset_unit" v="MM"/>
@@ -1084,7 +489,7 @@
                     <symbol alpha="1" type="fill" name="4">
                         <layer pass="0" class="SimpleFill" locked="0">
                             <prop k="border_width_unit" v="MM"/>
-                            <prop k="color" v="227,74,51,255"/>
+                            <prop k="color" v="252,141,89,255"/>
                             <prop k="color_border" v="175,179,138,255"/>
                             <prop k="offset" v="0,0"/>
                             <prop k="offset_unit" v="MM"/>
@@ -1094,6 +499,30 @@
                         </layer>
                     </symbol>
                     <symbol alpha="1" type="fill" name="5">
+                        <layer pass="0" class="SimpleFill" locked="0">
+                            <prop k="border_width_unit" v="MM"/>
+                            <prop k="color" v="227,74,51,255"/>
+                            <prop k="color_border" v="175,179,138,255"/>
+                            <prop k="offset" v="0,0"/>
+                            <prop k="offset_unit" v="MM"/>
+                            <prop k="style" v="solid"/>
+                            <prop k="style_border" v="solid"/>
+                            <prop k="width_border" v="0.26"/>
+                        </layer>
+                    </symbol>
+                    <symbol alpha="1" type="fill" name="6">
+                        <layer pass="0" class="SimpleFill" locked="0">
+                            <prop k="border_width_unit" v="MM"/>
+                            <prop k="color" v="179,0,0,255"/>
+                            <prop k="color_border" v="175,179,138,255"/>
+                            <prop k="offset" v="0,0"/>
+                            <prop k="offset_unit" v="MM"/>
+                            <prop k="style" v="solid"/>
+                            <prop k="style_border" v="solid"/>
+                            <prop k="width_border" v="0.26"/>
+                        </layer>
+                    </symbol>
+                    <symbol alpha="1" type="fill" name="7">
                         <layer pass="0" class="SimpleFill" locked="0">
                             <prop k="border_width_unit" v="MM"/>
                             <prop k="color" v="179,0,0,255"/>
@@ -1124,9 +553,10 @@
                     <prop k="schemeName" v="cb\seq\OrRd"/>
                     <prop k="variantName" v="_06"/>
                 </colorramp>
-                <mode name="jenks"/>
-                <rotation field=""/>
-                <sizescale field="" scalemethod="area"/>
+                <invertedcolorramp value="0"/>
+                <mode name="pretty"/>
+                <rotation/>
+                <sizescale scalemethod="area"/>
             </renderer-v2>
             <customproperties>
                 <property key="labeling" value="pal"/>
@@ -1310,6 +740,7 @@
             </edittypes>
             <editform>.</editform>
             <editforminit></editforminit>
+            <featformsuppress>0</featformsuppress>
             <annotationform>.</annotationform>
             <editorlayout>generatedlayout</editorlayout>
             <aliases>
@@ -1319,29 +750,29 @@
             <excludeAttributesWFS/>
             <attributeactions/>
         </maplayer>
-        <maplayer minimumScale="-4.65661e-10" maximumScale="1e+08" minLabelScale="0" maxLabelScale="1e+08" geometry="Line" type="vector" hasScaleBasedVisibilityFlag="0" scaleBasedLabelVisibilityFlag="0">
-            <id>mnl_edge20140528133744749</id>
-            <datasource>./mnl_edge.shp</datasource>
+        <maplayer minimumScale="0" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" geometry="Line" simplifyMaxScale="1" type="vector" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
+            <id>edge20140909155822206</id>
+            <datasource>./edge.shp</datasource>
             <title></title>
             <abstract></abstract>
             <keywordList>
                 <value></value>
             </keywordList>
-            <layername>mnl_edge</layername>
+            <layername>edge</layername>
             <srs>
                 <spatialrefsys>
-                    <proj4>+proj=utm +zone=32 +datum=WGS84 +units=m +no_defs</proj4>
-                    <srsid>3116</srsid>
-                    <srid>32632</srid>
-                    <authid>EPSG:32632</authid>
-                    <description>WGS 84 / UTM zone 32N</description>
-                    <projectionacronym>utm</projectionacronym>
+                    <proj4>+proj=longlat +datum=WGS84 +no_defs</proj4>
+                    <srsid>3452</srsid>
+                    <srid>4326</srid>
+                    <authid>EPSG:4326</authid>
+                    <description>WGS 84</description>
+                    <projectionacronym>longlat</projectionacronym>
                     <ellipsoidacronym>WGS84</ellipsoidacronym>
-                    <geographicflag>false</geographicflag>
+                    <geographicflag>true</geographicflag>
                 </spatialrefsys>
             </srs>
-            <provider encoding="System">ogr</provider>
-            <previewExpression>COALESCE("cat", '&lt;NULL>')</previewExpression>
+            <provider encoding="UTF-8">ogr</provider>
+            <previewExpression></previewExpression>
             <vectorjoins/>
             <renderer-v2 symbollevels="0" type="singleSymbol">
                 <symbols>
@@ -1351,6 +782,7 @@
                             <prop k="color" v="80,80,80,255"/>
                             <prop k="customdash" v="5;2"/>
                             <prop k="customdash_unit" v="MM"/>
+                            <prop k="draw_inside_polygon" v="0"/>
                             <prop k="joinstyle" v="round"/>
                             <prop k="offset" v="0"/>
                             <prop k="offset_unit" v="MM"/>
@@ -1364,6 +796,7 @@
                             <prop k="color" v="248,248,248,255"/>
                             <prop k="customdash" v="5;2"/>
                             <prop k="customdash_unit" v="MM"/>
+                            <prop k="draw_inside_polygon" v="0"/>
                             <prop k="joinstyle" v="round"/>
                             <prop k="offset" v="0"/>
                             <prop k="offset_unit" v="MM"/>
@@ -1374,8 +807,8 @@
                         </layer>
                     </symbol>
                 </symbols>
-                <rotation field=""/>
-                <sizescale field="" scalemethod="area"/>
+                <rotation/>
+                <sizescale scalemethod="area"/>
             </renderer-v2>
             <customproperties>
                 <property key="labeling" value="pal"/>
@@ -1532,34 +965,35 @@
             </edittypes>
             <editform>.</editform>
             <editforminit></editforminit>
+            <featformsuppress>0</featformsuppress>
             <annotationform>.</annotationform>
             <editorlayout>generatedlayout</editorlayout>
             <excludeAttributesWMS/>
             <excludeAttributesWFS/>
             <attributeactions/>
         </maplayer>
-        <maplayer minimumScale="-4.65661e-10" maximumScale="1e+08" minLabelScale="0" maxLabelScale="1e+08" geometry="Line" type="vector" hasScaleBasedVisibilityFlag="0" scaleBasedLabelVisibilityFlag="0">
-            <id>mnl_to_edge20140528114717317</id>
-            <datasource>./mnl_to_edge.shp</datasource>
+        <maplayer minimumScale="0" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" geometry="Line" simplifyMaxScale="1" type="vector" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
+            <id>to_edge20140909160023671</id>
+            <datasource>./to_edge.shp</datasource>
             <title></title>
             <abstract></abstract>
             <keywordList>
                 <value></value>
             </keywordList>
-            <layername>mnl_to_edge</layername>
+            <layername>to_edge</layername>
             <srs>
                 <spatialrefsys>
-                    <proj4>+proj=utm +zone=32 +datum=WGS84 +units=m +no_defs</proj4>
-                    <srsid>3116</srsid>
-                    <srid>32632</srid>
-                    <authid>EPSG:32632</authid>
-                    <description>WGS 84 / UTM zone 32N</description>
-                    <projectionacronym>utm</projectionacronym>
+                    <proj4>+proj=longlat +datum=WGS84 +no_defs</proj4>
+                    <srsid>3452</srsid>
+                    <srid>4326</srid>
+                    <authid>EPSG:4326</authid>
+                    <description>WGS 84</description>
+                    <projectionacronym>longlat</projectionacronym>
                     <ellipsoidacronym>WGS84</ellipsoidacronym>
-                    <geographicflag>false</geographicflag>
+                    <geographicflag>true</geographicflag>
                 </spatialrefsys>
             </srs>
-            <provider encoding="System">ogr</provider>
+            <provider encoding="UTF-8">ogr</provider>
             <previewExpression></previewExpression>
             <vectorjoins/>
             <renderer-v2 symbollevels="0" type="singleSymbol">
@@ -1570,6 +1004,7 @@
                             <prop k="color" v="113,113,113,255"/>
                             <prop k="customdash" v="5;2"/>
                             <prop k="customdash_unit" v="MM"/>
+                            <prop k="draw_inside_polygon" v="0"/>
                             <prop k="joinstyle" v="bevel"/>
                             <prop k="offset" v="0"/>
                             <prop k="offset_unit" v="MM"/>
@@ -1580,8 +1015,8 @@
                         </layer>
                     </symbol>
                 </symbols>
-                <rotation field=""/>
-                <sizescale field="" scalemethod="area"/>
+                <rotation/>
+                <sizescale scalemethod="area"/>
             </renderer-v2>
             <customproperties>
                 <property key="labeling" value="pal"/>
@@ -1729,37 +1164,38 @@
             <edittypes>
                 <edittype labelontop="0" editable="1" type="0" name="length"/>
             </edittypes>
-            <editform></editform>
+            <editform>.</editform>
             <editforminit></editforminit>
-            <annotationform></annotationform>
+            <featformsuppress>0</featformsuppress>
+            <annotationform>.</annotationform>
             <editorlayout>generatedlayout</editorlayout>
             <excludeAttributesWMS/>
             <excludeAttributesWFS/>
             <attributeactions/>
         </maplayer>
-        <maplayer minimumScale="-4.65661e-10" maximumScale="1e+08" minLabelScale="0" maxLabelScale="1e+08" geometry="Point" type="vector" hasScaleBasedVisibilityFlag="0" scaleBasedLabelVisibilityFlag="0">
-            <id>mnl_vertex20130919170058153</id>
-            <datasource>./mnl_vertex.shp</datasource>
+        <maplayer minimumScale="0" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" geometry="Point" simplifyMaxScale="1" type="vector" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
+            <id>vertex20140909155751293</id>
+            <datasource>./vertex.shp</datasource>
             <title></title>
             <abstract></abstract>
             <keywordList>
                 <value></value>
             </keywordList>
-            <layername>mnl_vertex</layername>
+            <layername>vertex</layername>
             <srs>
                 <spatialrefsys>
-                    <proj4>+proj=utm +zone=32 +datum=WGS84 +units=m +no_defs</proj4>
-                    <srsid>3116</srsid>
-                    <srid>32632</srid>
-                    <authid>EPSG:32632</authid>
-                    <description>WGS 84 / UTM zone 32N</description>
-                    <projectionacronym>utm</projectionacronym>
+                    <proj4>+proj=longlat +datum=WGS84 +no_defs</proj4>
+                    <srsid>3452</srsid>
+                    <srid>4326</srid>
+                    <authid>EPSG:4326</authid>
+                    <description>WGS 84</description>
+                    <projectionacronym>longlat</projectionacronym>
                     <ellipsoidacronym>WGS84</ellipsoidacronym>
-                    <geographicflag>false</geographicflag>
+                    <geographicflag>true</geographicflag>
                 </spatialrefsys>
             </srs>
-            <provider encoding="System">ogr</provider>
-            <previewExpression>x</previewExpression>
+            <provider encoding="UTF-8">ogr</provider>
+            <previewExpression></previewExpression>
             <vectorjoins/>
             <renderer-v2 symbollevels="0" type="RuleRenderer">
                 <rules>
@@ -1774,14 +1210,17 @@
                             <prop k="angle" v="0"/>
                             <prop k="color" v="255,234,223,255"/>
                             <prop k="color_border" v="255,85,0,255"/>
+                            <prop k="horizontal_anchor_point" v="1"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
                             <prop k="offset_unit" v="MM"/>
+                            <prop k="outline_style" v="solid"/>
                             <prop k="outline_width" v="0"/>
                             <prop k="outline_width_unit" v="MM"/>
                             <prop k="scale_method" v="area"/>
                             <prop k="size" v="7"/>
                             <prop k="size_unit" v="MM"/>
+                            <prop k="vertical_anchor_point" v="1"/>
                         </layer>
                     </symbol>
                     <symbol alpha="1" type="marker" name="1">
@@ -1789,14 +1228,17 @@
                             <prop k="angle" v="0"/>
                             <prop k="color" v="252,255,44,255"/>
                             <prop k="color_border" v="255,234,0,255"/>
+                            <prop k="horizontal_anchor_point" v="1"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
                             <prop k="offset_unit" v="MM"/>
+                            <prop k="outline_style" v="solid"/>
                             <prop k="outline_width" v="0"/>
                             <prop k="outline_width_unit" v="MM"/>
                             <prop k="scale_method" v="area"/>
                             <prop k="size" v="7"/>
                             <prop k="size_unit" v="MM"/>
+                            <prop k="vertical_anchor_point" v="1"/>
                         </layer>
                     </symbol>
                     <symbol alpha="1" type="marker" name="2">
@@ -1804,14 +1246,17 @@
                             <prop k="angle" v="0"/>
                             <prop k="color" v="171,184,50,255"/>
                             <prop k="color_border" v="127,127,95,255"/>
+                            <prop k="horizontal_anchor_point" v="1"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
                             <prop k="offset_unit" v="MM"/>
+                            <prop k="outline_style" v="solid"/>
                             <prop k="outline_width" v="0"/>
                             <prop k="outline_width_unit" v="MM"/>
                             <prop k="scale_method" v="area"/>
                             <prop k="size" v="7"/>
                             <prop k="size_unit" v="MM"/>
+                            <prop k="vertical_anchor_point" v="1"/>
                         </layer>
                     </symbol>
                     <symbol alpha="1" type="marker" name="3">
@@ -1819,14 +1264,17 @@
                             <prop k="angle" v="0"/>
                             <prop k="color" v="255,255,255,255"/>
                             <prop k="color_border" v="100,100,100,255"/>
+                            <prop k="horizontal_anchor_point" v="1"/>
                             <prop k="name" v="circle"/>
                             <prop k="offset" v="0,0"/>
                             <prop k="offset_unit" v="MM"/>
+                            <prop k="outline_style" v="solid"/>
                             <prop k="outline_width" v="0.2"/>
                             <prop k="outline_width_unit" v="MM"/>
                             <prop k="scale_method" v="area"/>
                             <prop k="size" v="5"/>
                             <prop k="size_unit" v="MM"/>
+                            <prop k="vertical_anchor_point" v="1"/>
                         </layer>
                     </symbol>
                 </symbols>
@@ -1987,6 +1435,7 @@
             </edittypes>
             <editform>.</editform>
             <editforminit></editforminit>
+            <featformsuppress>0</featformsuppress>
             <annotationform>.</annotationform>
             <editorlayout>generatedlayout</editorlayout>
             <excludeAttributesWMS/>
@@ -1995,19 +1444,37 @@
         </maplayer>
     </projectlayers>
     <properties>
-        <GRASS>
-            <WorkingLocation type="QString">min</WorkingLocation>
-            <WorkingGisdbase type="QString">C:/Users/jdorfner/AppData/Local/Temp</WorkingGisdbase>
-            <WorkingMapset type="QString">distance_fun01</WorkingMapset>
-        </GRASS>
-        <SpatialRefSys>
-            <ProjectCrs type="QString">EPSG:4326</ProjectCrs>
-            <ProjectCRSID type="int">3857</ProjectCRSID>
-            <ProjectionsEnabled type="int">1</ProjectionsEnabled>
-        </SpatialRefSys>
+        <WMSContactPerson type="QString"></WMSContactPerson>
+        <WMSOnlineResource type="QString"></WMSOnlineResource>
+        <WMSContactOrganization type="QString"></WMSContactOrganization>
+        <WMSKeywordList type="QStringList">
+            <value></value>
+        </WMSKeywordList>
+        <WFSUrl type="QString"></WFSUrl>
         <Paths>
             <Absolute type="bool">false</Absolute>
         </Paths>
+        <WMSServiceTitle type="QString"></WMSServiceTitle>
+        <WFSLayers type="QStringList"/>
+        <WMSContactMail type="QString"></WMSContactMail>
+        <PositionPrecision>
+            <DecimalPlaces type="int">2</DecimalPlaces>
+            <Automatic type="bool">true</Automatic>
+            <DegreeFormat type="QString">D</DegreeFormat>
+        </PositionPrecision>
+        <WCSUrl type="QString"></WCSUrl>
+        <WMSServiceCapabilities type="bool">false</WMSServiceCapabilities>
+        <WMSContactPhone type="QString"></WMSContactPhone>
+        <WMSServiceAbstract type="QString"></WMSServiceAbstract>
+        <WMSAddWktGeometry type="bool">false</WMSAddWktGeometry>
+        <Measure>
+            <Ellipsoid type="QString">WGS84</Ellipsoid>
+        </Measure>
+        <WFSTLayers>
+            <Insert type="QStringList"/>
+            <Update type="QStringList"/>
+            <Delete type="QStringList"/>
+        </WFSTLayers>
         <Gui>
             <SelectionColorBluePart type="int">0</SelectionColorBluePart>
             <CanvasColorGreenPart type="int">255</CanvasColorGreenPart>
@@ -2017,9 +1484,34 @@
             <SelectionColorGreenPart type="int">255</SelectionColorGreenPart>
             <CanvasColorBluePart type="int">255</CanvasColorBluePart>
         </Gui>
-        <PositionPrecision>
-            <DecimalPlaces type="int">2</DecimalPlaces>
-            <Automatic type="bool">true</Automatic>
-        </PositionPrecision>
+        <Identify>
+            <disabledLayers type="QStringList"/>
+        </Identify>
+        <Macros>
+            <pythonCode type="QString"></pythonCode>
+        </Macros>
+        <GRASS>
+            <WorkingLocation type="QString">min</WorkingLocation>
+            <WorkingGisdbase type="QString">C:/Users/jdorfner/AppData/Local/Temp</WorkingGisdbase>
+            <WorkingMapset type="QString">distance_fun01</WorkingMapset>
+        </GRASS>
+        <WMSAccessConstraints type="QString"></WMSAccessConstraints>
+        <WCSLayers type="QStringList"/>
+        <SpatialRefSys>
+            <ProjectCRSProj4String type="QString">+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs</ProjectCRSProj4String>
+            <ProjectCrs type="QString">EPSG:3857</ProjectCrs>
+            <ProjectCRSID type="int">3857</ProjectCRSID>
+            <ProjectionsEnabled type="int">1</ProjectionsEnabled>
+        </SpatialRefSys>
+        <DefaultStyles>
+            <Fill type="QString"></Fill>
+            <Line type="QString"></Line>
+            <Marker type="QString"></Marker>
+            <RandomColors type="bool">true</RandomColors>
+            <AlphaInt type="int">255</AlphaInt>
+            <ColorRamp type="QString"></ColorRamp>
+        </DefaultStyles>
+        <WMSFees type="QString"></WMSFees>
+        <WMSUrl type="QString"></WMSUrl>
     </properties>
 </qgis>

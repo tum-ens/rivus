@@ -7,10 +7,10 @@ import rivus
 from coopr.opt.base import SolverFactory
 
 base_directory = os.path.join('data', 'mnl')
-building_shapefile = os.path.join(base_directory, 'mnl_building')
-edge_shapefile = os.path.join(base_directory, 'mnl_edge')
-vertex_shapefile = os.path.join(base_directory, 'mnl_vertex')
-data_spreadsheet = os.path.join(base_directory, 'mnl.xlsx')
+building_shapefile = os.path.join(base_directory, 'building')
+edge_shapefile = os.path.join(base_directory, 'edge')
+vertex_shapefile = os.path.join(base_directory, 'vertex')
+data_spreadsheet = os.path.join(base_directory, 'data.xlsx')
 
 
 # load buildings and sum by type and nearest edge ID
