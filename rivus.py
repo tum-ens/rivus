@@ -737,23 +737,32 @@ def get_constants(prob):
         (costs, Pmax, Kappa_hub) tuple
     """
     costs = get_entity(prob, 'costs')
-    Pmax = get_entity(prob, 'Pmax').unstack()
-    Kappa_hub = get_entity(prob, 'Kappa_hub').unstack()
-    Kappa_process = get_entity(prob, 'Kappa_process').unstack()
+    Pmax = get_entity(prob, 'Pmax')
+    Kappa_hub = get_entity(prob, 'Kappa_hub')
+    Kappa_process = get_entity(prob, 'Kappa_process')
     
     # nicer index names
-    Pmax.index.names = ['Vertex1', 'Vertex2']
-    Kappa_hub.index.names = ['Vertex1', 'Vertex2']
+    Pmax.index.names = ['Vertex1', 'Vertex2', 'commodity']
+    Kappa_hub.index.names = ['Vertex1', 'Vertex2', 'process']
     
     # drop all-zero rows 
-    Pmax = Pmax[Pmax.sum(axis=1) > 0]
-    Kappa_hub = Kappa_hub[Kappa_hub.sum(axis=1) > 0]
-    Kappa_process = Kappa_process[Kappa_process.sum(axis=1) > 0]
+    Pmax = Pmax[Pmax > 0].unstack().fillna(0)
+    Kappa_hub = Kappa_hub[Kappa_hub > 0].unstack().fillna(0)
+    Kappa_process = Kappa_process[Kappa_process > 0].unstack().fillna(0)
     
     # round to integers
-    Pmax = Pmax.applymap(round)
-    Kappa_hub = Kappa_hub.applymap(round)
-    Kappa_process = Kappa_process.applymap(round)
+    if Pmax.empty:
+        Pmax = pd.DataFrame([])
+    else:
+        Pmax = Pmax.applymap(round)
+    if Kappa_hub.empty:
+        Kappa_hub = pd.DataFrame([])
+    else:
+        Kappa_hub = Kappa_hub.applymap(round)
+    if Kappa_process.empty:
+        Kappa_process = pd.DataFrame([])
+    else:
+        Kappa_process = Kappa_process.applymap(round)
     costs = costs.apply(round)
     
     return costs, Pmax, Kappa_hub, Kappa_process
@@ -775,7 +784,7 @@ def get_timeseries(prob):
     flows = get_entities(prob, ['Pin', 'Pot', 'Psi', 'Sigma'])
     hubs = get_entity(prob, 'Epsilon_hub')
     proc_io = get_entities(prob, ['Epsilon_in', 'Epsilon_out'])
-    proc_tau = get_entity(prob, 'Tau').unstack()
+    proc_tau = get_entity(prob, 'Tau')
 
     # fill NaN's
     flows.fillna(0, inplace=True)
@@ -784,9 +793,20 @@ def get_timeseries(prob):
     # drop all-zero rows
     source = source[source > 0].unstack()
     flows = flows[flows.sum(axis=1) > 0].applymap(round)
-    hubs = hubs[hubs > 0].unstack().fillna(0).applymap(round)
-    proc_io = proc_io[proc_io.sum(axis=1) > 0].applymap(round)
-    proc_tau = proc_tau[proc_tau.sum(axis=1).apply(round) > 0].applymap(round)
+    
+    hubs = hubs[hubs > 0].unstack().fillna(0)
+    if hubs.empty:
+        hubs = pd.DataFrame([])
+    else:
+        hubs = hubs.applymap(round)
+    
+    proc_io = proc_io[proc_io.sum(axis=1) > 0]
+    if not proc_io.empty:
+        proc_io = proc_io.applymap(round)
+    
+    proc_tau = proc_tau[proc_tau.apply(round) > 0]
+    if not proc_tau.empty:
+        proc_tau = proc_tau.unstack().applymap(round)
 
     return source, flows, hubs, proc_io, proc_tau
 
@@ -886,8 +906,13 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True):
         
         for kappas, marker_style in point_sources:
             # sum capacities
-            # and add geometry (point coordinates)
             kappa_sum = kappas.to_frame(name=commodity)
+            
+            # skip if empty
+            if kappa_sum.empty:
+                continue
+                
+            # add geometry (point coordinates)                
             kappa_sum = kappa_sum.join(prob._vertex.geometry)
             
             for k, row in kappa_sum.iterrows():
@@ -926,15 +951,20 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True):
         lines_sources = [(consumers, 'v'), 
                          (producers, '^')]
         for kappas, marker_style in lines_sources:
-            # sum consuming capacities
-            # and join with vertex coordinates
+            # sum consuming capacities            
             kappa_sum = kappas.to_frame(name=commodity)
+            
+            # skip if empty
+            if kappa_sum.empty:
+                continue
+            
+            # join with vertex coordinates            
             kappa_sum = kappa_sum.join(prob._edge.geometry)
             
             for k, row in kappa_sum.iterrows():
                 # coordinates
-                lon, lat = zip(*row['geometry'].coords)
-                lon, lat = lon[len(lon)/2], lat[len(lat)/2]  # line midpoint
+                line = row['geometry']
+                lon, lat = zip(*line.coords)
                 # size
                 marker_size = 50 + math.sqrt(row[commodity]) * 4
                 font_size = 6 + 6 * math.sqrt(row[commodity]) / 200
@@ -943,9 +973,10 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True):
                             c=COLORS[commodity], s=marker_size, 
                             marker=marker_style, lw=0.5,
                             edgecolor=(1, 1, 1), zorder=11)
-                # annotate
+                # annotate at line midpoint
                 if row[commodity] > 0:
-                    x, y = map(lon, lat)
+                    midpoint = line.interpolate(0.5, normalized=True)
+                    x, y = map(midpoint.x, midpoint.y)
                     plt.annotate(
                         '%u'%row[commodity], xy=(x, y), 
                         fontsize=font_size, zorder=12, color=COLORS['decoration'],
@@ -962,6 +993,7 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True):
             # coordinates
             line = row['geometry']
             lon, lat = zip(*line.coords)
+
             # linewidth
             try:
                 line_width = math.sqrt(row[commodity]) * 0.05
@@ -976,7 +1008,8 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True):
                      solid_capstyle='round', solid_joinstyle='round')
             # annotate at line midpoint
             if row[commodity] > 0:
-                (x, y) = map(lon[len(lon)/2], lat[len(lat)/2])
+                midpoint = line.interpolate(0.5, normalized=True)
+                (x, y) = map(midpoint.x, midpoint.y)
                 plt.annotate(
                     '%u'%row[commodity], xy=(x, y), 
                     fontsize=font_size, zorder=12, color=COLORS[commodity],
