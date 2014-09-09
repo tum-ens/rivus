@@ -21,8 +21,8 @@ def setup_solver(optim):
         # http://www.gurobi.com/documentation/5.6/reference-manual/parameters
         optim.set_options("TimeLimit=600")  # seconds
         optim.set_options("MIPFocus=1")  # 1=feasible, 2=optimal, 3=bound
-        optim.set_options("MIPGap=1e-4")  # default = 1e-4
-        optim.set_options("Threads=4")  # number of simultaneous CPU threads
+        optim.set_options("MIPGap=5e-2")  # default = 1e-4
+        optim.set_options("Threads=6")  # number of simultaneous CPU threads
     elif optim.name == 'glpk':
         # reference with list of options
         # execute 'glpsol --help'
@@ -76,30 +76,33 @@ optim = setup_solver(optim)
 result = optim.solve(prob, tee=True)
 prob.load(result)
 
-# prepare input data similar to model for easier analysis
-entity_getter = itemgetter(
-    'commodity', 'process', 'process_commodity', 'time', 'area_demand')
-commodity, process, process_commodity, time, area_demand = entity_getter(data)
-
-
+# load results
 costs, Pmax, Kappa_hub, Kappa_process = capmin.get_constants(prob)
 source, flows, hub_io, proc_io, proc_tau = capmin.get_timeseries(prob)
+
+result_dir = os.path.join('result', os.path.basename(base_directory))
+
+# create result directory if not existing already
+if not os.path.exists(result_dir):
+    os.makedirs(result_dir)
+
+
+edge_w_peak = edge.join(prob.peak).fillna(0)
+pdshp.write_shp(os.path.join(result_dir, 'edge_w_peak'), edge_w_peak)
+
+
+capmin.report(prob, os.path.join(result_dir, 'report.xlsx'))
 
 # plot all caps (and demands if existing)
 for com, plot_type in [('Elec', 'caps'), ('Heat', 'caps'), ('Gas', 'caps'),
                        ('Elec', 'peak'), ('Heat', 'peak')]:
     
     # create plot
-    fig = capmin.plot(prob, com, mapscale=True, 
+    fig = capmin.plot(prob, com, mapscale=False, tick_labels=False, 
                       plot_demand=(plot_type == 'peak'))
-
+    plt.title('')
     # save to file
     for ext in ['png', 'pdf']:
-        result_dir = os.path.join('result', os.path.basename(base_directory))
-        
-        # create result directory if not existing already
-        if not os.path.exists(result_dir):
-            os.makedirs(result_dir)
             
         # determine figure filename from plot type, commodity and extension
         fig_filename = os.path.join(
