@@ -1,6 +1,6 @@
-""" CAPMIN: optimization model for distributed urban energy systems
+"""rivus: optimization model for distributed urban energy systems
 
-CAPMIN optimizes topology and size of urban energy networks, energy conversion.
+rivus optimizes topology and size of urban energy networks, energy conversion.
 
 """
 import coopr.pyomo as pyomo
@@ -20,7 +20,7 @@ COLORS = {
 }
 
 def read_excel(filename):
-    """Read Excel input file and prepare CAPMIN input data dict.
+    """Read Excel input file and prepare rivus input data dict.
     
     Reads an Excel spreadsheet that adheres to the structure shown in the
     example dataset data/mnl/mnl.xlsx. Must contain
@@ -56,7 +56,7 @@ def read_excel(filename):
     
 
 def create_model(data, vertex, edge):
-    """Return a CAPMIN model instance from input file and spatial input. 
+    """Return a rivus model instance from input file and spatial input. 
     
     Args:
         spreadsheet: Excel spreadsheet with entity sheets Commodity, Process,
@@ -73,7 +73,7 @@ def create_model(data, vertex, edge):
 
     """ 
     m = pyomo.ConcreteModel()
-    m.name = 'CAPMIN'
+    m.name = 'rivus'
     
     # DataFrames
     commodity = data['commodity']    
@@ -731,7 +731,7 @@ def get_constants(prob):
         costs, Pmax, Kappa_hub, Kappa_process = get_constants(prob)
 
     Args:
-        prob: a CAPMIN model instance
+        prob: a rivus model instance
 
     Returns:
         (costs, Pmax, Kappa_hub) tuple
@@ -765,7 +765,7 @@ def get_timeseries(prob):
         source, flows, hubs, proc_io, proc_tau = get_timeseries(prob)
 
     Args:
-        prob: a CAPMIN model instance
+        prob: a rivus model instance
 
     Returns:
         (source, flows, hubs, proc_io, proc_tau) tuple
@@ -1012,7 +1012,7 @@ def report(prob, filename):
     """Write result summary to a spreadsheet file
 
     Args:
-        prob: a capmin model instance
+        prob: a rivus model instance
         filename: Excel spreadsheet filename, will be overwritten if exists
 
     Returns:

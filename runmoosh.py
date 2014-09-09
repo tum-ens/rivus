@@ -1,9 +1,9 @@
-import capmin
 import coopr.environ
 import matplotlib.pyplot as plt
 import os
 import pandas as pd
 import pandashp as pdshp
+import rivus
 from coopr.opt.base import SolverFactory
 from operator import itemgetter
 
@@ -66,10 +66,10 @@ edge = edge.fillna(0)
 vertex = pdshp.read_shp(vertex_shapefile)
 
 # load spreadsheet data
-data = capmin.read_excel(data_spreadsheet)
+data = rivus.read_excel(data_spreadsheet)
 
 # create & solve model
-model = capmin.create_model(data, vertex, edge)
+model = rivus.create_model(data, vertex, edge)
 prob = model.create()
 optim = SolverFactory('gurobi')
 optim = setup_solver(optim)
@@ -77,8 +77,8 @@ result = optim.solve(prob, tee=True)
 prob.load(result)
 
 # load results
-costs, Pmax, Kappa_hub, Kappa_process = capmin.get_constants(prob)
-source, flows, hub_io, proc_io, proc_tau = capmin.get_timeseries(prob)
+costs, Pmax, Kappa_hub, Kappa_process = rivus.get_constants(prob)
+source, flows, hub_io, proc_io, proc_tau = rivus.get_timeseries(prob)
 
 result_dir = os.path.join('result', os.path.basename(base_directory))
 
@@ -91,14 +91,14 @@ edge_w_peak = edge.join(prob.peak).fillna(0)
 pdshp.write_shp(os.path.join(result_dir, 'edge_w_peak'), edge_w_peak)
 
 
-capmin.report(prob, os.path.join(result_dir, 'report.xlsx'))
+rivus.report(prob, os.path.join(result_dir, 'report.xlsx'))
 
 # plot all caps (and demands if existing)
 for com, plot_type in [('Elec', 'caps'), ('Heat', 'caps'), ('Gas', 'caps'),
                        ('Elec', 'peak'), ('Heat', 'peak')]:
     
     # create plot
-    fig = capmin.plot(prob, com, mapscale=False, tick_labels=False, 
+    fig = rivus.plot(prob, com, mapscale=False, tick_labels=False, 
                       plot_demand=(plot_type == 'peak'))
     plt.title('')
     # save to file

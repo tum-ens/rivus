@@ -1,18 +1,17 @@
-import capmin
+import coopr.environ
+import matplotlib.pyplot as plt
+import os
 import pandas as pd
 import pandashp as pdshp
-import pandaspyomo as pdpo
-import pyomotools
-import pdb
+import rivus
 from coopr.opt.base import SolverFactory
-from operator import itemgetter
 
-building_shapefile = 'data/mnl/mnl_building'
-edge_shapefile = 'data/mnl/mnl_edge'
-vertex_shapefile = 'data/mnl/mnl_vertex'
-data_spreadsheet = 'data/mnl/mnl.xlsx'
+base_directory = os.path.join('data', 'mnl')
+building_shapefile = os.path.join(base_directory, 'mnl_building')
+edge_shapefile = os.path.join(base_directory, 'mnl_edge')
+vertex_shapefile = os.path.join(base_directory, 'mnl_vertex')
+data_spreadsheet = os.path.join(base_directory, 'mnl.xlsx')
 
-solver_name = 'gurobi' # possible (if licensed and binary in path): cplex, gurobi 
 
 # load buildings and sum by type and nearest edge ID
 # 1. read shapefile to DataFrame (with special geometry column)
@@ -35,36 +34,43 @@ edge = edge.fillna(0)
 # load nodes
 vertex = pdshp.read_shp(vertex_shapefile)
 
-# load spreadsheet
-data = capmin.read_excel(data_spreadsheet)
+# load spreadsheet data
+data = rivus.read_excel(data_spreadsheet)
 
 # create and solve model
-model = capmin.create_model(data, vertex, edge)
-instance = model.create()
-solver = SolverFactory(solver_name)
-result = solver.solve(instance, tee=True)
-instance.load(result)
+model = rivus.create_model(data, vertex, edge)
+prob = model.create()
+solver = SolverFactory('gurobi')
+result = solver.solve(prob, tee=True)
+prob.load(result)
 
-# prepare input data similar to model for easier analysis
-ig=itemgetter('Commodity', 'Process', 'Process-Commodity', 'Time', 'Area-Demand')
-dfs = pyomotools.read_xls(data_spreadsheet)
-commodity, process, process_commodity, time, area_demand = ig(dfs)
+# load results
+costs, Pmax, Kappa_hub, Kappa_process = rivus.get_constants(prob)
+source, flows, hub_io, proc_io, proc_tau = rivus.get_timeseries(prob)
 
-# read results to workspace
-Pin = pdpo.get_entity(instance, 'Pin').unstack().unstack()
-Pot = pdpo.get_entity(instance, 'Pot').unstack().unstack()
-Psi = pdpo.get_entity(instance, 'Psi').unstack().unstack()
-Pmax = pdpo.get_entity(instance, 'Pmax').unstack()
-Xi = pdpo.get_entity(instance, 'Xi').unstack()
-Sigma = pdpo.get_entity(instance, 'Sigma').unstack().unstack()
-Rho = pdpo.get_entity(instance, 'Rho').unstack().unstack()
-Kappa_hub = pdpo.get_entity(instance, 'Kappa_hub').unstack().unstack()
-Epsilon_hub = pdpo.get_entity(instance, 'Epsilon_hub').unstack().unstack()
-Epsilon_in = pdpo.get_entity(instance, 'Epsilon_in').unstack().unstack()
-Epsilon_out = pdpo.get_entity(instance, 'Epsilon_out').unstack().unstack()
-Tau = pdpo.get_entity(instance, 'Tau').unstack().unstack()
-costs = pdpo.get_entity(instance, 'costs')
 
-# alias for easier model inspection
-m = instance
+result_dir = os.path.join('result', os.path.basename(base_directory))
 
+# create result directory if not existing already
+if not os.path.exists(result_dir):
+    os.makedirs(result_dir)
+    
+
+rivus.report(prob, os.path.join(result_dir, 'report.xlsx'))
+
+# plot all caps (and demands if existing)
+for com, plot_type in [('Elec', 'caps'), ('Heat', 'caps'), ('Gas', 'caps'),
+                       ('Elec', 'peak'), ('Heat', 'peak')]:
+    
+    # create plot
+    fig = rivus.plot(prob, com, mapscale=False, tick_labels=False, 
+                      plot_demand=(plot_type == 'peak'))
+    plt.title('')
+    # save to file
+    for ext in ['png', 'pdf']:
+            
+        # determine figure filename from plot type, commodity and extension
+        fig_filename = os.path.join(
+            result_dir, '{}-{}.{}').format(plot_type, com, ext)
+        fig.savefig(fig_filename, dpi=300, bbox_inches='tight', 
+                    transparent=(ext=='pdf'))
