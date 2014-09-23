@@ -964,19 +964,18 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True):
             for k, row in kappa_sum.iterrows():
                 # coordinates
                 line = row['geometry']
-                lon, lat = zip(*line.coords)
+                midpoint = line.interpolate(0.5, normalized=True)
+                x, y = map(midpoint.x, midpoint.y)
                 # size
                 marker_size = 50 + math.sqrt(row[commodity]) * 4
                 font_size = 6 + 6 * math.sqrt(row[commodity]) / 200
                 # plot
-                map.scatter(lon, lat, latlon=True,
+                map.scatter(x, y, latlon=False,
                             c=COLORS[commodity], s=marker_size, 
                             marker=marker_style, lw=0.5,
                             edgecolor=(1, 1, 1), zorder=11)
                 # annotate at line midpoint
                 if row[commodity] > 0:
-                    midpoint = line.interpolate(0.5, normalized=True)
-                    x, y = map(midpoint.x, midpoint.y)
                     plt.annotate(
                         '%u'%row[commodity], xy=(x, y), 
                         fontsize=font_size, zorder=12, color=COLORS['decoration'],
