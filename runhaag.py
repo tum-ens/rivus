@@ -6,7 +6,7 @@ import pandashp as pdshp
 import rivus
 from coopr.opt.base import SolverFactory
 
-base_directory = os.path.join('data', 'haag_wgs84')
+base_directory = os.path.join('data', 'haag')
 building_shapefile = os.path.join(base_directory, 'building')
 edge_shapefile = os.path.join(base_directory, 'edge')
 vertex_shapefile = os.path.join(base_directory, 'vertex')
