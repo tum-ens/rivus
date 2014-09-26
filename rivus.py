@@ -304,12 +304,12 @@ def create_model(data, vertex, edge):
     
     # edges/arcs
     def peak_satisfaction_rule(m, i, j, co, t):
-        provided_power = hub_balance(m, i, j, co, t) + m.Sigma[i,j,co,t]
-        return provided_power >= m.peak.loc[i,j][co] * time.loc[t]['scale']
+        provided_power = hub_balance(m, i, j, co, t) + m.Sigma[i, j, co, t]
+        return provided_power >= m.peak.loc[i,j][co] * time.loc[t][co]
     
     def edge_equation_rule(m, i, j, co, t):
         if co in m.co_transportable:
-            length = edge.loc[i, j]['geometry'].length
+            length = line_length(edge.loc[i, j]['geometry'])
             
             flow_in = ( 1 - length * commodity.loc[co]['loss-var']) * \
                       ( m.Pin[i,j,co,t] + m.Pin[j,i,co,t] )
@@ -529,6 +529,45 @@ def find_matching_edge(m, i, j):
     else:
         return (j,i)
 
+
+# Helper functions for data preparation
+
+def line_length(line):
+    """Length of a line in meters, given in geographic coordinates
+    
+    Args:
+        line: a shapely LineString object with WGS-84 coordinates
+        
+    Returns:
+        Length of line in meters
+    """
+    from geopy.distance import distance
+
+    return sum(distance(a, b).meters for (a, b) in pairs(line.coords))
+
+
+def pairs(lst):
+    """Iterate over a list in overlapping pairs without wrap-around.
+    
+    Args:
+        lst: an iterable/list
+        
+    Returns:
+        Yields a pair of consecutive elements (lst[k], lst[k+1]) of lst. Last 
+        call yields the last two elements.
+        
+    Example:
+        lst = [4, 7, 11, 2]
+        pairs(lst) yields (4, 7), (7, 11), (11, 2)
+       
+    Source:
+        http://stackoverflow.com/questions/1257413/1257446#1257446
+    """
+    i = iter(lst)
+    prev = i.next()
+    for item in i:
+        yield prev, item
+        prev = item
 
 # Technical helper functions for data retrieval
 
@@ -1053,13 +1092,19 @@ def report(prob, filename):
     costs, Pmax, Kappa_hub, Kappa_process = get_constants(prob)
     source, flows, hubs, proc_io, proc_tau = get_timeseries(prob)
     
-    with pd.ExcelWriter(filename) as writer:
-        costs.to_frame().to_excel(writer, 'Costs')
-        Pmax.to_excel(writer, 'Pmax')
-        Kappa_hub.to_excel(writer, 'Kappa_hub')
-        Kappa_process.to_excel(writer, 'Kappa_process')
-        
-        source.to_excel(writer, 'Source')
-        flows.to_excel(writer, 'Flows')
-        hubs.to_excel(writer, 'Hubs')
-        proc_tau.to_excel(writer, 'Process')
+    report_content = [
+        (costs.to_frame(), 'Costs'),
+        (Pmax, 'Pmax'), 
+        (Kappa_hub, 'Kappa_hub'), 
+        (Kappa_process, 'Kappa_process'), 
+        (source, 'Source'), 
+        (flows, 'Flows'), 
+        (hubs, 'Hubs'), 
+        (proc_io, 'Proc_io'),  
+        (proc_tau, 'Proc_tau')]
+    
+    with pd.ExcelWriter(filename) as writer:        
+        for df, sheet_name in report_content:
+            if not df.empty:
+                df.to_excel(writer, sheet_name)
+
