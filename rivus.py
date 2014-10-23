@@ -1061,11 +1061,11 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True):
     map.drawparallels(
         np.arange(bbox[0] + height * .15, bbox[2], height * .25), 
         color=COLORS['decoration'], 
-        linewidth=0.1, labels=parallel_labels, dashes=[1, 0])
+        linewidth=0.1, labels=parallel_labels, dashes=(None, None))
     map.drawmeridians(
         np.arange(bbox[1] + width * .15, bbox[3], width * .25), 
         color=COLORS['decoration'], 
-        linewidth=0.1, labels=meridian_labels, dashes=[1, 0])
+        linewidth=0.1, labels=meridian_labels, dashes=(None, None))
     
     # bar length = (horizontal map extent) / 3, rounded to 100 (1e-2) metres
     bar_length = round((map(bbox[3], bbox[2])[0] - 
