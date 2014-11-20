@@ -5,8 +5,16 @@ rivus optimizes topology and size of urban energy networks, energy conversion.
 """
 import coopr.pyomo as pyomo
 import itertools
+import math
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import matplotlib.patheffects as pe
+import numpy as np
 import pandas as pd
+import pandashp as pdshp
 import warnings
+from geopy.distance import distance
+from mpl_toolkits.basemap import Basemap
 
 COLORS = {
     'base': (.667, .667, .667),
@@ -79,7 +87,6 @@ def create_model(data, vertex, edge):
     commodity = data['commodity']    
     process = data['process']
     process_commodity = data['process_commodity']
-    #storage = dfs['Storage']
     time = data['time']
     area_demand = data['area_demand']   
     
@@ -361,9 +368,6 @@ def create_model(data, vertex, edge):
         return m.Rho[v,co,t]<= vertex.loc[v][co]
     
     # process
-    def process_throughput_rule(m, v, p, t):
-        return m.Tau[v,p,t] == throughput_sum(m, v, p, t)
-        
     def process_throughput_by_capacity_rule(m, v, p, t):
         return m.Tau[v,p,t] <= m.Kappa_process[v, p]
     
@@ -454,9 +458,6 @@ def create_model(data, vertex, edge):
         doc='Rho <= Cmax')
     
     # process
-    m.process_throughput = pyomo.Constraint(
-        m.vertex, m.process, m.time,
-        doc='process throughput (Tau) is equal to sum of process inputs flows')
     m.process_throughput_by_capacity = pyomo.Constraint(
         m.vertex, m.process, m.time,
         doc='Tau <= Kappa_process')
@@ -514,14 +515,6 @@ def process_balance(m, v, co, t):
             balance += m.Epsilon_out[v,p,co,t]
     return balance
 
-def throughput_sum(m, v, p, t):
-    """ Calculate process throughput as the sum of inputs. """
-    throughput = 0
-    for (pro, co) in m.process_input_tuples:
-        if pro == p:
-            throughput += m.Epsilon_in[v,p,co,t] * m.r_in.loc[p,co]
-    return throughput
-
 def find_matching_edge(m, i, j):
     """ Return corresponding edge for a given arc. """
     if (i,j) in m.edge:
@@ -541,8 +534,6 @@ def line_length(line):
     Returns:
         Length of line in meters
     """
-    from geopy.distance import distance
-
     return sum(distance(a, b).meters for (a, b) in pairs(line.coords))
 
 
@@ -850,20 +841,14 @@ def get_timeseries(prob):
     return source, flows, hubs, proc_io, proc_tau
 
 
-def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True):
+def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
+         annotations=True):
     """Plot a map of supply, conversion, transport and consumption.
     
     For given commodity, plot a map of all locations where the commodity is
     introduced (Rho), transported (Pin/Pot/Pmax), converted (Epsilon_*) and
     consumed (Sigma, peak).  
     """
-    import math
-    import matplotlib as mpl
-    import matplotlib.pyplot as plt
-    import matplotlib.patheffects as pe
-    from mpl_toolkits.basemap import Basemap
-    import numpy as np
-    import pandashp as pdshp
     
     # set up Basemap for extent
     bbox = pdshp.total_bounds(prob._vertex)
@@ -972,10 +957,11 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True):
                 # annotate at line midpoint
 
                 (x, y) = map(lon[len(lon)/2], lat[len(lat)/2])
-                plt.annotate(
-                    '%u'%row[commodity], xy=(x, y), 
-                    fontsize=font_size, zorder=12, color=COLORS[commodity],
-                    **annotate_defaults)
+                if annotations:
+                    plt.annotate(
+                        '%u'%row[commodity], xy=(x, y), 
+                        fontsize=font_size, zorder=12, color=COLORS[commodity],
+                        **annotate_defaults)
         
         # Kappa_hub
         # reuse r_in, r_out from before to select hub processes
@@ -1014,7 +1000,7 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True):
                             marker=marker_style, lw=0.5,
                             edgecolor=(1, 1, 1), zorder=11)
                 # annotate at line midpoint
-                if row[commodity] > 0:
+                if annotations and row[commodity] > 0:
                     plt.annotate(
                         '%u'%row[commodity], xy=(x, y), 
                         fontsize=font_size, zorder=12, color=COLORS['decoration'],
@@ -1048,10 +1034,11 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True):
             if row[commodity] > 0:
                 midpoint = line.interpolate(0.5, normalized=True)
                 (x, y) = map(midpoint.x, midpoint.y)
-                plt.annotate(
-                    '%u'%row[commodity], xy=(x, y), 
-                    fontsize=font_size, zorder=12, color=COLORS[commodity],
-                    **annotate_defaults)
+                if annotations:
+                    plt.annotate(
+                        '%u'%row[commodity], xy=(x, y), 
+                        fontsize=font_size, zorder=12, color=COLORS[commodity],
+                        **annotate_defaults)
         plt.title("{} demand".format(commodity))
     
     # map decoration
