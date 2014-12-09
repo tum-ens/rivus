@@ -25,8 +25,9 @@ def scenario_renovation(data, vertex, edge):
     area_demand.ix[('other', 'Heat'), 'peak'] *= 0.5
     return data, vertex, edge
 
+
 scenarios = [
-#    scenario_base,
+    scenario_base,
     scenario_renovation]
 
 # solver
@@ -36,7 +37,7 @@ def setup_solver(optim):
     if optim.name == 'gurobi':
         # reference with list of option names
         # http://www.gurobi.com/documentation/5.6/reference-manual/parameters
-        optim.set_options("TimeLimit=18000")  # seconds
+        optim.set_options("TimeLimit=500")  # seconds
         optim.set_options("MIPFocus=2")  # 1=feasible, 2=optimal, 3=bound
         optim.set_options("MIPGap=3e-4")  # default = 1e-4
         optim.set_options("Threads=7")  # number of simultaneous CPU threads
@@ -92,9 +93,9 @@ def run_scenario(scenario):
     sce_nice_name = sce.replace('_', ' ').title()
     
     # prepare input data 
-    edge = prepare_edge(edge_shapefile, building_shapefile)
-    vertex = pdshp.read_shp(vertex_shapefile)    
     data = rivus.read_excel(data_spreadsheet)
+    vertex = pdshp.read_shp(vertex_shapefile)    
+    edge = prepare_edge(edge_shapefile, building_shapefile)
     
     # apply scenario function to input data
     data, vertex, edge = scenario(data, vertex, edge)
@@ -124,13 +125,13 @@ def run_scenario(scenario):
             # create plot
             fig = rivus.plot(prob, com, mapscale=False, tick_labels=False, 
                              plot_demand=(plot_type == 'peak'),
-                             annotations=False)
+                             annotations=plot_annotations)
             plt.title('')
             
             # save to file
             for ext, transp in [('png', True), ('png', False), ('pdf', True)]:
                 transp_str = ('-transp' if transp and ext != 'pdf' else '')
-                annote_str = ('-annote' if annote else '')
+                annote_str = ('-annote' if plot_annotations else '')
                 
                 # determine figure filename from scenario name, plot type, 
                 # commodity, transparency, annotations and extension
@@ -139,8 +140,10 @@ def run_scenario(scenario):
                 fig_filename = os.path.join(result_dir, fig_filename)
                 fig.savefig(fig_filename, dpi=300, bbox_inches='tight', 
                             transparent=transp)
+                
+    return prob
             
 if __name__ == '__main__':
     for scenario in scenarios:
-        run_scenario(scenario)
+        prob = run_scenario(scenario)
 
