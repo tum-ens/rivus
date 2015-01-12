@@ -393,8 +393,9 @@ def create_model(data, vertex, edge):
                 sum(m.Kappa_process[v,p] * process.loc[p]['cost-inv-var'] + 
                     m.Phi[v,p] * process.loc[p]['cost-inv-fix']
                     for v in m.vertex for p in m.process) + \
-                sum(m.Pmax[i,j,co] * commodity.loc[co]['cost-inv-var'] + 
-                    m.Xi[i,j,co] * commodity.loc[co]['cost-inv-fix']
+                sum((m.Pmax[i,j,co] * commodity.loc[co]['cost-inv-var'] + 
+                     m.Xi[i,j,co] * commodity.loc[co]['cost-inv-fix']) *
+                    line_length(edge.loc[i, j]['geometry'])
                     for (i,j) in m.edge for co in m.co_transportable)
                     
         elif cost_type == 'Fix':
