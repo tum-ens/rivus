@@ -40,8 +40,11 @@ vertex['Vertex'] = vertex.index
 
 pandashp.match_vertices_and_edges(vertex, edge)
 
-# drop loops (1 that is)
+# drop loops
 edge = edge[~(edge['Vertex1'] == edge['Vertex2'])]
+
+# if there are >1 edges that connect the same vertex pair, drop one of them
+edge = edge.drop_duplicates(subset=['Vertex1', 'Vertex2'])
 
 # write to file
 edge.to_file(edge_filename)
