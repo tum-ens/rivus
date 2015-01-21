@@ -86,26 +86,7 @@ result_dir = os.path.join('result', os.path.basename(base_directory))
 if not os.path.exists(result_dir):
     os.makedirs(result_dir)
 
-
-edge_w_peak = edge.join(prob.peak).fillna(0)
-pdshp.write_shp(os.path.join(result_dir, 'edge_w_peak'), edge_w_peak)
-
-
+rivus.to_pickle(prob, os.path.join(result_dir, 'prob.pickle'))
 rivus.report(prob, os.path.join(result_dir, 'report.xlsx'))
+rivus.result_figures(prob, os.path.join(result_dir, 'plot'))
 
-# plot all caps (and demands if existing)
-for com, plot_type in [('Elec', 'caps'), ('Heat', 'caps'), ('Gas', 'caps'),
-                       ('Elec', 'peak'), ('Heat', 'peak')]:
-    
-    # create plot
-    fig = rivus.plot(prob, com, mapscale=False, tick_labels=False, 
-                      plot_demand=(plot_type == 'peak'))
-    plt.title('')
-    # save to file
-    for ext in ['png', 'pdf']:
-            
-        # determine figure filename from plot type, commodity and extension
-        fig_filename = os.path.join(
-            result_dir, '{}-{}.{}').format(plot_type, com, ext)
-        fig.savefig(fig_filename, dpi=300, bbox_inches='tight', 
-                    transparent=(ext=='pdf'))

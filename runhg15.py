@@ -113,33 +113,10 @@ def run_scenario(scenario):
     if not os.path.exists(result_dir):
         os.makedirs(result_dir)
     
-    # report    
-    rivus.report(prob, os.path.join(result_dir, 'report.xlsx'))
-    
-    # plots
-    for com, plot_type in [('Elec', 'caps'), ('Heat', 'caps'), ('Gas', 'caps'),
-                           ('Elec', 'peak'), ('Heat', 'peak')]:
-        
-        # two plot variants
-        for plot_annotations in [False, True]:
-            # create plot
-            fig = rivus.plot(prob, com, mapscale=False, tick_labels=False, 
-                             plot_demand=(plot_type == 'peak'),
-                             annotations=plot_annotations)
-            plt.title('')
-            
-            # save to file
-            for ext, transp in [('png', True), ('png', False), ('pdf', True)]:
-                transp_str = ('-transp' if transp and ext != 'pdf' else '')
-                annote_str = ('-annote' if plot_annotations else '')
-                
-                # determine figure filename from scenario name, plot type, 
-                # commodity, transparency, annotations and extension
-                fig_filename = '{}-{}-{}{}{}.{}'.format(
-                    sce, plot_type, com, transp_str, annote_str, ext) 
-                fig_filename = os.path.join(result_dir, fig_filename)
-                fig.savefig(fig_filename, dpi=300, bbox_inches='tight', 
-                            transparent=transp)
+    # report
+    rivus.to_pickle(prob, os.path.join(result_dir, sce+'.pickle'))    
+    rivus.report(prob, os.path.join(result_dir, sce+'.xlsx'))
+    rivus.result_figures(prob, os.path.join(result_dir, sce))
                 
     return prob
             
