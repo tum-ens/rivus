@@ -19,9 +19,9 @@ def setup_solver(optim):
     if optim.name == 'gurobi':
         # reference with list of option names
         # http://www.gurobi.com/documentation/5.6/reference-manual/parameters
-        optim.set_options("TimeLimit=600")  # seconds
+        optim.set_options("TimeLimit=60")  # seconds
         optim.set_options("MIPFocus=1")  # 1=feasible, 2=optimal, 3=bound
-        optim.set_options("MIPGap=5e-2")  # default = 1e-4
+        optim.set_options("MIPGap=1e-4")  # default = 1e-4
         optim.set_options("Threads=6")  # number of simultaneous CPU threads
     elif optim.name == 'glpk':
         # reference with list of options
