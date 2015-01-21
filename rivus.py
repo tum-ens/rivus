@@ -4,6 +4,7 @@ rivus optimizes topology and size of urban energy networks, energy conversion.
 
 """
 import coopr.pyomo as pyomo
+import geopandas
 import itertools
 import math
 import matplotlib as mpl
@@ -924,23 +925,29 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
         _, Pmax, Kappa_hub, Kappa_process = get_constants(prob)
         source = get_timeseries(prob)[0]
 
-        # Pmax: pipe capacities
-        Pmax = Pmax.join(prob._edge.geometry)
-        for k, row in Pmax.iterrows():
-            # coordinates
-            line = row['geometry']
-            lon, lat = zip(*line.coords)
-            # linewidth
-            line_width = math.sqrt(row[commodity]) * 0.05
-            # plot
-            map.plot(lon, lat, latlon=True,
-                     color=COLORS[commodity], linewidth=line_width,
-                     solid_capstyle='round', solid_joinstyle='round')
+        # Pmax: pipe capacities (if existing)
+        if commodity in Pmax.columns:
+            Pmax = Pmax.join(prob._edge.geometry)
+            for k, row in Pmax.iterrows():
+                # coordinates
+                line = row['geometry']
+                lon, lat = zip(*line.coords)
+                # linewidth
+                line_width = math.sqrt(row[commodity]) * 0.05
+                # plot
+                map.plot(lon, lat, latlon=True,
+                         color=COLORS[commodity], linewidth=line_width,
+                         solid_capstyle='round', solid_joinstyle='round')
 
         # Kappa_process: Process capacities consuming/producing a commodity
         r_in = prob.r_in.xs(commodity, level='Commodity')
         r_out = prob.r_out.xs(commodity, level='Commodity')
-        sources = source.max(axis=1).xs(commodity, level='commodity')
+        
+        # sources: Commodity source terms 
+        try:
+            sources = source.max(axis=1).xs(commodity, level='commodity')
+        except KeyError:
+            sources = pd.Series()
 
         # multiply input/output ratios with capacities and drop non-matching
         # process types completely
