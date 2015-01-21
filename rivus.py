@@ -1130,6 +1130,42 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
 
     return fig
 
+def result_figures(prob, file_basename):
+    """Create multiple maps
+    
+    Args:
+        prob: a rivus model instance
+        file_basename: filename prefix for figures
+        
+    Returns:
+        Nothing
+    """
+    for com, plot_type in [('Elec', 'caps'), ('Heat', 'caps'), ('Gas', 'caps'),
+                           ('Elec', 'peak'), ('Heat', 'peak')]:
+        
+        # two plot variants
+        for plot_annotations in [False, True]:
+            # create plot
+            fig = plot(prob, com, mapscale=False, tick_labels=False, 
+                       plot_demand=(plot_type == 'peak'),
+                       annotations=plot_annotations)
+            plt.title('')
+            
+            # save to file
+            for ext, transp in [('png', True), ('png', False), ('pdf', True)]:
+                transp_str = ('-transp' if transp and ext != 'pdf' else '')
+                annote_str = ('-annote' if plot_annotations else '')
+                
+                # determine figure filename from basename, plot type, 
+                # commodity, transparency, annotations and file extension
+                file_suffix = '-{}-{}{}{}.{}'.format(
+                    plot_type, com, transp_str, annote_str, ext) 
+                fig_filename = file_basename + file_suffix
+                fig.savefig(fig_filename, dpi=300, bbox_inches='tight', 
+                            transparent=transp)
+
+
+
 def report(prob, filename):
     """Write result summary to a spreadsheet file
 
@@ -1158,4 +1194,39 @@ def report(prob, filename):
         for df, sheet_name in report_content:
             if not df.empty:
                 df.to_excel(writer, sheet_name)
+
+
+def to_pickle(prob, filename):
+    """Save rivus model instance (possibly including result) to file
+    
+    Args:
+        prob: a rivus model instance
+        filename: pickle file to be written
+        
+    Returns:
+        Nothing
+    """
+    try:
+        import cPickle as pickle
+    except ImportError:
+        import pickle
+    with open(filename, 'wb') as file_handle:
+        pickle.dump(prob, file_handle)
+        
+def from_pickle(filename):
+    """Load a rivus model instance from a pickle file
+    
+    Args:
+        filename: pickle file
+    
+    Returns:
+        prob: the unpickled rivus model instance
+    """
+    try:
+        import cPickle as pickle
+    except ImportError:
+        import pickle
+    with open(filename, 'r') as file_handle:
+        prob = pickle.load(file_handle)
+    return prob
 
