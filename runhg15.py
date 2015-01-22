@@ -26,10 +26,15 @@ def scenario_renovation(data, vertex, edge):
     area_demand.ix[('other', 'Heat'), 'peak'] *= 0.5
     return data, vertex, edge
 
+def scenario_dh_cheap(data, vertex, edge):
+    """DH cheap: reduce cost of DH pipe by 50%"""
+    commodity = data['commodity']
+    commodity.loc['Heat', 'cost-inv-fix'] *= 0.5
+    commodity.loc['Heat', 'cost-inv-var'] *= 0.5
+    return data, vertex, edge
 
 scenarios = [
-    scenario_base,
-    scenario_renovation]
+    scenario_dh_cheap]
 
 # solver
 
