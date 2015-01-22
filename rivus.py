@@ -927,7 +927,7 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
     # default settings for annotation labels
     annotate_defaults = dict(
         textcoords='offset points', ha='center', va='center', xytext=(0, 0),
-        path_effects=[pe.withStroke(linewidth=2, foreground="w")])
+        path_effects=[pe.withStroke(linewidth=1, foreground="w")])
 
     # create new figure with basemap in Transverse Mercator projection
     # centered on map location
@@ -964,7 +964,7 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
                 line = row['geometry']
                 lon, lat = zip(*line.coords)
                 # linewidth
-                line_width = math.sqrt(row[commodity]) * 0.05
+                line_width = math.sqrt(row[commodity]) * 0.025
                 # plot
                 map.plot(lon, lat, latlon=True,
                          color=COLORS[commodity], linewidth=line_width,
@@ -1011,20 +1011,20 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
                 # coordinates
                 lon, lat = row['geometry'].xy
                 # size
-                marker_size = 50 + math.sqrt(row[commodity]) * 4
-                font_size = 6 + 6 * math.sqrt(row[commodity]) / 200
+                marker_size = 0 + math.sqrt(row[commodity]) * 1.5
+                font_size = 3 + 5 * math.sqrt(row[commodity]) / 200
                 # plot
                 map.scatter(lon, lat, latlon=True,
                             c=COLORS[commodity], s=marker_size,
                             marker=marker_style, lw=0.5,
-                            edgecolor=(1, 1, 1), zorder=10)
+                            edgecolor=(1, 1, 1), zorder=13)
                 # annotate at line midpoint
 
                 (x, y) = map(lon[len(lon)/2], lat[len(lat)/2])
                 if annotations:
                     plt.annotate(
                         '%u'%row[commodity], xy=(x, y),
-                        fontsize=font_size, zorder=12, color=COLORS[commodity],
+                        fontsize=font_size, zorder=14, color=COLORS[commodity],
                         **annotate_defaults)
 
         # Kappa_hub
@@ -1056,8 +1056,8 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
                 midpoint = line.interpolate(0.5, normalized=True)
                 x, y = map(midpoint.x, midpoint.y)
                 # size
-                marker_size = 50 + math.sqrt(row[commodity]) * 4
-                font_size = 6 + 6 * math.sqrt(row[commodity]) / 200
+                marker_size = 0 + math.sqrt(row[commodity]) * 1.5
+                font_size = 3 + 5 * math.sqrt(row[commodity]) / 200
                 # plot
                 map.scatter(x, y, latlon=False,
                             c=COLORS[commodity], s=marker_size,
@@ -1089,7 +1089,7 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
                 warnings.warn("Skipping commodity {} without "
                               "demand.".format(commodity))
                 return
-            font_size = 6 + 6 * math.sqrt(row[commodity]) / 200
+            font_size = 3 + 5 * math.sqrt(row[commodity]) / 200
             # plot
             map.plot(lon, lat, latlon=True,
                      color=COLORS[commodity], linewidth=line_width,
@@ -1101,7 +1101,7 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
                 if annotations:
                     plt.annotate(
                         '%u'%row[commodity], xy=(x, y),
-                        fontsize=font_size, zorder=12, color=COLORS[commodity],
+                        fontsize=font_size, zorder=10, color=COLORS['decoration'],
                         **annotate_defaults)
         plt.title("{} demand".format(commodity))
 
@@ -1126,7 +1126,8 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
         map.drawmapscale(
             bbox[1]+ 0.22 * width, bbox[0] + 0.1 * height,
             central_meridian, central_parallel, bar_length,
-            barstyle='fancy', units='m', zorder=13)
+            barstyle='simple', units='m', zorder=15,
+            fontcolor=(.2, .2, .2), fillcolor2=(.2, .2, .2))
 
     return fig
 
@@ -1163,6 +1164,8 @@ def result_figures(prob, file_basename):
                 fig_filename = file_basename + file_suffix
                 fig.savefig(fig_filename, dpi=300, bbox_inches='tight', 
                             transparent=transp)
+            # free memory
+            plt.close(fig)
 
 
 
