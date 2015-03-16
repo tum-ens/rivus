@@ -19,7 +19,7 @@ from mpl_toolkits.basemap import Basemap
 
 COLORS = {
     'base': (.667, .667, .667),
-    'building': (0.95686274509803926, 0.95686274509803926, 0.7803921568627451),
+    'building': (0.95, 0.95, 0.78),
     'decoration': (.5, .5, .5),
     'Heat': (1, 0, 0),
     'Cool': (0, 0, 1),
@@ -166,7 +166,7 @@ def create_model(data, vertex, edge):
 
     # find commodities for which there exists no identically named attribute in
     # table 'vertex' and set it to zero to disable them as source-commodities.
-    no_source_commodities = commodity.index.diff(vertex.columns)
+    no_source_commodities = commodity.index.difference(vertex.columns)
     for co in no_source_commodities:
         vertex[co] = 0
 
@@ -900,7 +900,7 @@ def get_timeseries(prob):
 
 
 def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
-         annotations=True):
+         annotations=True, buildings=None):
     """Plot a map of supply, conversion, transport and consumption.
 
     For given commodity, plot a map of all locations where the commodity is
@@ -932,22 +932,39 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
     # create new figure with basemap in Transverse Mercator projection
     # centered on map location
     fig = plt.figure()
-    map = Basemap(
+    bm = Basemap(
         projection='tmerc', resolution=None,
         llcrnrlat=bbox[0], llcrnrlon=bbox[1],
         urcrnrlat=bbox[2], urcrnrlon=bbox[3],
         lat_0=central_parallel, lon_0=central_meridian)
 
-    # basemap: plot street network
+
+    # basemap: plot buildings if provided
+    if buildings:
+        # Function readshapefiles sadly only supports drawing the outlines,
+        # filling is a bit more involved. Here I'm using the technique from
+        # http://basemaptutorial.readthedocs.org/en/latest/shapefile.html
+        # in section "Filling polygons".
+        from matplotlib.patches import Polygon
+        from matplotlib.collections import PatchCollection
+        
+        bm.readshapefile(buildings, 'buildings', drawbounds=False)
+        patches = []
+        for info, shape in zip(bm.buildings_info, bm.buildings):
+            patches.append(Polygon(np.array(shape), True))
+        
+        pc = PatchCollection(patches, facecolor=COLORS['building'], 
+                             linewidths=0)
+        plt.gca().add_collection(pc)
+
+    # basemap: street network
     for k, row in prob.params['edge'].iterrows():
         line = row['geometry']
-        lon, lat = zip(*line.coords)
-        # linewidth
-        line_width = 0.1
+        lon, lat = zip(*line.coords) 
         # plot
-        map.plot(lon, lat, latlon=True,
-                 color=COLORS['base'], linewidth=line_width,
-                 solid_capstyle='round', solid_joinstyle='round')
+        bm.plot(lon, lat, latlon=True,
+                color=COLORS['base'], linewidth=0.1,
+                solid_capstyle='round', solid_joinstyle='round')
 
     if not plot_demand:
         # default commodity plot with Pmax, Kappa_hub, Kappa_process, sources
@@ -966,7 +983,7 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
                 # linewidth
                 line_width = math.sqrt(row[commodity]) * 0.025
                 # plot
-                map.plot(lon, lat, latlon=True,
+                bm.plot(lon, lat, latlon=True,
                          color=COLORS[commodity], linewidth=line_width,
                          solid_capstyle='round', solid_joinstyle='round')
 
@@ -1014,13 +1031,13 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
                 marker_size = 0 + math.sqrt(row[commodity]) * 1.5
                 font_size = 3 + 5 * math.sqrt(row[commodity]) / 200
                 # plot
-                map.scatter(lon, lat, latlon=True,
+                bm.scatter(lon, lat, latlon=True,
                             c=COLORS[commodity], s=marker_size,
                             marker=marker_style, lw=0.5,
                             edgecolor=(1, 1, 1), zorder=13)
                 # annotate at line midpoint
 
-                (x, y) = map(lon[len(lon)/2], lat[len(lat)/2])
+                (x, y) = bm(lon[len(lon)/2], lat[len(lat)/2])
                 if annotations:
                     plt.annotate(
                         '%u'%row[commodity], xy=(x, y),
@@ -1054,12 +1071,12 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
                 # coordinates
                 line = row['geometry']
                 midpoint = line.interpolate(0.5, normalized=True)
-                x, y = map(midpoint.x, midpoint.y)
+                x, y = bm(midpoint.x, midpoint.y)
                 # size
                 marker_size = 0 + math.sqrt(row[commodity]) * 1.5
                 font_size = 3 + 5 * math.sqrt(row[commodity]) / 200
                 # plot
-                map.scatter(x, y, latlon=False,
+                bm.scatter(x, y, latlon=False,
                             c=COLORS[commodity], s=marker_size,
                             marker=marker_style, lw=0.5,
                             edgecolor=(1, 1, 1), zorder=11)
@@ -1091,13 +1108,13 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
                 return
             font_size = 3 + 5 * math.sqrt(row[commodity]) / 200
             # plot
-            map.plot(lon, lat, latlon=True,
+            bm.plot(lon, lat, latlon=True,
                      color=COLORS[commodity], linewidth=line_width,
                      solid_capstyle='round', solid_joinstyle='round')
             # annotate at line midpoint
             if row[commodity] > 0:
                 midpoint = line.interpolate(0.5, normalized=True)
-                (x, y) = map(midpoint.x, midpoint.y)
+                (x, y) = bm(midpoint.x, midpoint.y)
                 if annotations:
                     plt.annotate(
                         '%u'%row[commodity], xy=(x, y),
@@ -1106,24 +1123,24 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
         plt.title("{} demand".format(commodity))
 
     # map decoration
-    map.drawmapboundary(linewidth=0)
+    bm.drawmapboundary(linewidth=0)
     parallel_labels = [1,0,0,0] if tick_labels else [0,0,0,0]
     meridian_labels = [0,0,0,1] if tick_labels else [0,0,0,0]
-    map.drawparallels(
+    bm.drawparallels(
         np.arange(bbox[0] + height * .15, bbox[2], height * .25),
         color=COLORS['decoration'],
         linewidth=0.1, labels=parallel_labels, dashes=(None, None))
-    map.drawmeridians(
+    bm.drawmeridians(
         np.arange(bbox[1] + width * .15, bbox[3], width * .25),
         color=COLORS['decoration'],
         linewidth=0.1, labels=meridian_labels, dashes=(None, None))
 
     # bar length = (horizontal map extent) / 3, rounded to 100 (1e-2) metres
-    bar_length = round((map(bbox[3], bbox[2])[0] -
-                        map(bbox[1], bbox[0])[0]) / 3, -2)
+    bar_length = round((bm(bbox[3], bbox[2])[0] -
+                        bm(bbox[1], bbox[0])[0]) / 3, -2)
 
     if mapscale:
-        map.drawmapscale(
+        bm.drawmapscale(
             bbox[1]+ 0.22 * width, bbox[0] + 0.1 * height,
             central_meridian, central_parallel, bar_length,
             barstyle='simple', units='m', zorder=15,
@@ -1131,12 +1148,13 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
 
     return fig
 
-def result_figures(prob, file_basename):
+def result_figures(prob, file_basename, buildings=None):
     """Create multiple maps
     
     Args:
         prob: a rivus model instance
         file_basename: filename prefix for figures
+        buildings: optional filename to buildings shapefile
         
     Returns:
         Nothing
@@ -1149,6 +1167,7 @@ def result_figures(prob, file_basename):
             # create plot
             fig = plot(prob, com, mapscale=False, tick_labels=False, 
                        plot_demand=(plot_type == 'peak'),
+                       buildings=buildings,
                        annotations=plot_annotations)
             plt.title('')
             
