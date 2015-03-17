@@ -19,10 +19,10 @@ def setup_solver(optim):
     if optim.name == 'gurobi':
         # reference with list of option names
         # http://www.gurobi.com/documentation/5.6/reference-manual/parameters
-        optim.set_options("TimeLimit=60")  # seconds
+        optim.set_options("TimeLimit=500")  # seconds
         optim.set_options("MIPFocus=1")  # 1=feasible, 2=optimal, 3=bound
         optim.set_options("MIPGap=1e-4")  # default = 1e-4
-        optim.set_options("Threads=6")  # number of simultaneous CPU threads
+        optim.set_options("Threads=24")  # number of simultaneous CPU threads
     elif optim.name == 'glpk':
         # reference with list of options
         # execute 'glpsol --help'
@@ -87,6 +87,6 @@ if not os.path.exists(result_dir):
     os.makedirs(result_dir)
 
 rivus.to_pickle(prob, os.path.join(result_dir, 'prob.pickle'))
-rivus.report(prob, os.path.join(result_dir, 'report.xlsx'))
+rivus.report(prob, os.path.join(result_dir, 'prob.xlsx'))
 rivus.result_figures(prob, os.path.join(result_dir, 'plot'))
 
