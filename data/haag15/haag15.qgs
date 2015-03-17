@@ -905,7 +905,7 @@
                 <property key="labeling/fieldName" value="nearest"/>
                 <property key="labeling/fontBold" value="false"/>
                 <property key="labeling/fontCapitals" value="0"/>
-                <property key="labeling/fontFamily" value="TUM Neue Helvetica 55 Regular"/>
+                <property key="labeling/fontFamily" value="MS Shell Dlg 2"/>
                 <property key="labeling/fontItalic" value="false"/>
                 <property key="labeling/fontLetterSpacing" value="0"/>
                 <property key="labeling/fontLimitPixelSize" value="false"/>
@@ -1834,7 +1834,7 @@
             <vectorjoins/>
             <expressionfields/>
             <edittypes>
-                <edittype widgetv2type="TextEdit" name="index">
+                <edittype widgetv2type="TextEdit" name="FID">
                     <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
                 </edittype>
             </edittypes>
@@ -2040,7 +2040,7 @@
             <excludeAttributesWFS/>
             <attributeactions/>
             <edittypes>
-                <edittype widgetv2type="TextEdit" name="index">
+                <edittype widgetv2type="TextEdit" name="FID">
                     <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
                 </edittype>
             </edittypes>
