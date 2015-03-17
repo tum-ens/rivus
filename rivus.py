@@ -11,22 +11,49 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as pe
 import numpy as np
+import os
 import pandas as pd
 import pandashp as pdshp
 import warnings
 from geopy.distance import distance
 from mpl_toolkits.basemap import Basemap
 
-COLORS = {
-    'base': (.667, .667, .667),
-    'building': (0.95, 0.95, 0.78),
-    'decoration': (.5, .5, .5),
-    'Heat': (1, 0, 0),
-    'Cool': (0, 0, 1),
-    'Elec': (1, .667, 0),
-    'Demand': (0, 1, 0),
-    'Gas': (.5, .25, 0),
+
+COLORS = { # (R,G,B) tuples with range (0-255)
+    # defaults
+    'base': (192, 192, 192),
+    'building': (192, 192, 192),
+    'decoration': (128, 128, 128),
+    # commodities
+    'Heat': (255, 0, 0),
+    'Cool': (0, 0, 255),
+    'Elec': (255, 192, 0),
+    'Demand': (0, 255, 0),
+    'Gas': (128, 64, 0),
+    # buildings
+    'industrial': (240, 198, 116),
+    'residential': (181, 189, 104),
+    'commercial': (129, 162, 190),
+    'basin': (110, 75, 56),
+    'chapel': (177, 121, 91),
+    'church': (177, 121, 91),
+    'farm': (202, 178, 214),
+    'farm_auxiliary': (106, 61, 154),
+    'garage': (253, 191, 111),
+    'greenhouse': (255, 127, 0),
+    'hospital': (129, 221, 190),
+    'hotel': (227, 26, 28),
+    'house': (181, 189, 104),
+    'office': (129, 162, 190),
+    'public': (129, 162, 190),
+    'restaurant': (227, 26, 28),
+    'retail': (129, 162, 190),
+    'school': (29, 103, 214),
+    'warehouse': (98, 134, 6),
 }
+to_rgb = lambda r,g,b: tuple(x/255. for x in (r,g,b))
+for key, val in COLORS.iteritems():
+    COLORS[key] = to_rgb(*val)
 
 def read_excel(filename):
     """Read Excel input file and prepare rivus input data dict.
@@ -108,9 +135,9 @@ def create_model(data, vertex, edge):
     has_cap_min_0 = process['cap-min'] == 0
     has_one_input = m.r_in.groupby(level='Process').count() == 1
     has_r_in_1 = m.r_in.groupby(level='Process').sum() == 1
-    hub = process[has_cost_inv_fix_0 & 
-                  has_cap_min_0 & 
-                  has_one_input & 
+    hub = process[has_cost_inv_fix_0 &
+                  has_cap_min_0 &
+                  has_one_input &
                   has_r_in_1]
     m.params['hub'] = hub
 
@@ -523,16 +550,16 @@ def def_costs_rule(m, cost_type):
 
     elif cost_type == 'Var':
         return m.costs['Var'] == \
-            sum(m.Epsilon_hub[i,j,h,t] * 
-                m.params['hub'].loc[h]['cost-var'] * 
+            sum(m.Epsilon_hub[i,j,h,t] *
+                m.params['hub'].loc[h]['cost-var'] *
                 m.params['time'].loc[t]['weight']
                 for (i,j) in m.edge for h in m.hub for t in m.time) + \
-            sum(m.Tau[v,p,t] * 
-                m.params['process'].loc[p]['cost-var'] * 
+            sum(m.Tau[v,p,t] *
+                m.params['process'].loc[p]['cost-var'] *
                 m.params['time'].loc[t]['weight']
                 for v in m.vertex for p in m.process for t in m.time) + \
-            sum(m.Rho[v,co,t] * 
-                m.params['commodity'].loc[co]['cost-var'] * 
+            sum(m.Rho[v,co,t] *
+                m.params['commodity'].loc[co]['cost-var'] *
                 m.params['time'].loc[t]['weight']
                 for v in m.vertex for co in m.co_source for t in m.time)
 
@@ -546,7 +573,7 @@ def obj_rule(m):
 # Helper functions for model
 
 def hub_balance(m, i, j, co, t):
-    """ Calculate commodity balance in an edge {i,j} from/to hubs. """
+    """Calculate commodity balance in an edge {i,j} from/to hubs. """
     balance = 0
     for h in m.hub:
         if co in m.r_in.loc[h].index:
@@ -556,7 +583,7 @@ def hub_balance(m, i, j, co, t):
     return balance
 
 def flow_balance(m, v, co, t):
-    """ Calculate commodity flow balance in a vertex from/to arcs. """
+    """Calculate commodity flow balance in a vertex from/to arcs. """
     balance = 0
     for w in m.neighbours[v]:
         balance += m.Pot[w,v,co,t]
@@ -564,7 +591,7 @@ def flow_balance(m, v, co, t):
     return balance
 
 def process_balance(m, v, co, t):
-    """ Calculate commodity balance in a vertex from/to processes. """
+    """Calculate commodity balance in a vertex from/to processes. """
     balance = 0
     for p in m.process:
         if co in m.r_in.loc[p].index:
@@ -574,7 +601,7 @@ def process_balance(m, v, co, t):
     return balance
 
 def find_matching_edge(m, i, j):
-    """ Return corresponding edge for a given arc. """
+    """Return corresponding edge for a given arc. """
     if (i,j) in m.edge:
         return (i,j)
     else:
@@ -584,10 +611,10 @@ def find_matching_edge(m, i, j):
 # Helper functions for data preparation
 
 def line_length(line):
-    """Length of a line in meters, given in geographic coordinates
+    """Calculate length of a line in meters, given in geographic coordinates.
 
     Args:
-        line: a shapely LineString object with WGS-84 coordinates
+        line: a shapely LineString object with WGS 84 coordinates
 
     Returns:
         Length of line in meters
@@ -621,7 +648,7 @@ def pairs(lst):
 # Technical helper functions for data retrieval
 
 def get_entity(instance, name):
-    """ Return a DataFrame for an entity in model instance.
+    """Return a DataFrame for an entity in model instance.
 
     Args:
         instance: a Pyomo ConcreteModel instance
@@ -679,7 +706,7 @@ def get_entity(instance, name):
 
 
 def get_entities(instance, names):
-    """ Return one DataFrame with entities in columns and a common index.
+    """Return one DataFrame with entities in columns and a common index.
 
     Works only on entities that share a common domain (set or set_tuple), which
     is used as index of the returned DataFrame.
@@ -713,7 +740,7 @@ def get_entities(instance, names):
 
 
 def list_entities(instance, entity_type):
-    """ Return list of sets, params, variables, constraints or objectives
+    """Return list of sets, params, variables, constraints or objectives.
 
     Args:
         instance: a Pyomo ConcreteModel object
@@ -900,12 +927,28 @@ def get_timeseries(prob):
 
 
 def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
-         annotations=True, buildings=None):
+         annotations=True, buildings=None, shapefiles=None):
     """Plot a map of supply, conversion, transport and consumption.
 
     For given commodity, plot a map of all locations where the commodity is
     introduced (Rho), transported (Pin/Pot/Pmax), converted (Epsilon_*) and
     consumed (Sigma, peak).
+
+    Args:
+        prob:
+        commodity:
+        plot_demand: If True, plot demand, else plot capacities
+        mapscale: If True, add mapscale to plot (default: False)
+        tick_labels: If True, add lon/lat tick labels (default: False)
+        annotations: If True, add numeric labels to graph (default: True)
+        buildings: tuple of (filename to shapefile, boolean)
+                   if true, color buildings according to attribute column
+                   "type" and colors in constan rivus.COLORS; else use default
+                   COLOR['building'] for all
+        shapefiles: list of dicts of shapefiles that shall be drawn by
+                    basemap function readshapefile. is passed as **kwargs
+    Returns:
+        fig: the map figure object
     """
 
     # set up Basemap for extent
@@ -938,32 +981,49 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
         urcrnrlat=bbox[2], urcrnrlon=bbox[3],
         lat_0=central_parallel, lon_0=central_meridian)
 
+    if shapefiles:
+        for shp in shapefiles:
+            bm.readshapefile(**shp)
 
     # basemap: plot buildings if provided
     if buildings:
+        # unpack option tuple
+        building_shapefile, color_buildings = buildings
+
         # Function readshapefiles sadly only supports drawing the outlines,
         # filling is a bit more involved. Here I'm using the technique from
         # http://basemaptutorial.readthedocs.org/en/latest/shapefile.html
         # in section "Filling polygons".
+        from collections import defaultdict
         from matplotlib.patches import Polygon
         from matplotlib.collections import PatchCollection
-        
-        bm.readshapefile(buildings, 'buildings', drawbounds=False)
-        patches = []
+
+        bm.readshapefile(building_shapefile, 'buildings', drawbounds=False)
+        patches = {}
         for info, shape in zip(bm.buildings_info, bm.buildings):
-            patches.append(Polygon(np.array(shape), True))
-        
-        pc = PatchCollection(patches, facecolor=COLORS['building'], 
-                             linewidths=0)
-        plt.gca().add_collection(pc)
+            group = patches.setdefault(info['type'], [])
+            group.append(Polygon(np.array(shape), True))
+
+        # prepare colors defaultdict
+        building_colors = defaultdict(lambda: COLORS['building'])
+        # only use type-color if option is set
+        if color_buildings:
+            building_colors.update(COLORS)
+
+        # now color all patches accoridng to type; defaultdict automatically
+        # returns COLORS['building'] for unknown building types
+        for key in patches:
+            pc = PatchCollection(patches[key], facecolor=building_colors[key],
+                                 edgecolor='none', zorder=10)
+            plt.gca().add_collection(pc)
 
     # basemap: street network
     for k, row in prob.params['edge'].iterrows():
         line = row['geometry']
-        lon, lat = zip(*line.coords) 
+        lon, lat = zip(*line.coords)
         # plot
         bm.plot(lon, lat, latlon=True,
-                color=COLORS['base'], linewidth=0.1,
+                color=COLORS['base'], linewidth=0.1, zorder=19,
                 solid_capstyle='round', solid_joinstyle='round')
 
     if not plot_demand:
@@ -983,15 +1043,15 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
                 # linewidth
                 line_width = math.sqrt(row[commodity]) * 0.025
                 # plot
-                bm.plot(lon, lat, latlon=True,
-                         color=COLORS[commodity], linewidth=line_width,
-                         solid_capstyle='round', solid_joinstyle='round')
+                bm.plot(lon, lat, latlon=True, zorder=20,
+                        color=COLORS[commodity], linewidth=line_width,
+                        solid_capstyle='round', solid_joinstyle='round')
 
         # Kappa_process: Process capacities consuming/producing a commodity
         r_in = prob.r_in.xs(commodity, level='Commodity')
         r_out = prob.r_out.xs(commodity, level='Commodity')
-        
-        # sources: Commodity source terms 
+
+        # sources: Commodity source terms
         try:
             sources = source.max(axis=1).xs(commodity, level='commodity')
         except KeyError:
@@ -1034,14 +1094,14 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
                 bm.scatter(lon, lat, latlon=True,
                             c=COLORS[commodity], s=marker_size,
                             marker=marker_style, lw=0.5,
-                            edgecolor=(1, 1, 1), zorder=13)
+                            edgecolor=(1, 1, 1), zorder=30)
                 # annotate at line midpoint
 
                 (x, y) = bm(lon[len(lon)/2], lat[len(lat)/2])
                 if annotations:
                     plt.annotate(
                         '%u'%row[commodity], xy=(x, y),
-                        fontsize=font_size, zorder=14, color=COLORS[commodity],
+                        fontsize=font_size, zorder=31, color=COLORS[commodity],
                         **annotate_defaults)
 
         # Kappa_hub
@@ -1079,13 +1139,13 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
                 bm.scatter(x, y, latlon=False,
                             c=COLORS[commodity], s=marker_size,
                             marker=marker_style, lw=0.5,
-                            edgecolor=(1, 1, 1), zorder=11)
+                            edgecolor=(1, 1, 1), zorder=40)
                 # annotate at line midpoint
                 if annotations and row[commodity] > 0:
                     plt.annotate(
                         '%u'%row[commodity], xy=(x, y),
-                        fontsize=font_size, zorder=12, color=COLORS['decoration'],
-                        **annotate_defaults)
+                        fontsize=font_size, zorder=41,
+                        color=COLORS['decoration'], **annotate_defaults)
 
         plt.title("{} capacities".format(commodity))
 
@@ -1109,8 +1169,9 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
             font_size = 3 + 5 * math.sqrt(row[commodity]) / 200
             # plot
             bm.plot(lon, lat, latlon=True,
-                     color=COLORS[commodity], linewidth=line_width,
-                     solid_capstyle='round', solid_joinstyle='round')
+                    color=COLORS[commodity], linewidth=line_width,
+                    solid_capstyle='round', solid_joinstyle='round',
+                    zorder=20)
             # annotate at line midpoint
             if row[commodity] > 0:
                 midpoint = line.interpolate(0.5, normalized=True)
@@ -1118,8 +1179,8 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
                 if annotations:
                     plt.annotate(
                         '%u'%row[commodity], xy=(x, y),
-                        fontsize=font_size, zorder=10, color=COLORS['decoration'],
-                        **annotate_defaults)
+                        fontsize=font_size, zorder=21,
+                        color=COLORS['decoration'], **annotate_defaults)
         plt.title("{} demand".format(commodity))
 
     # map decoration
@@ -1128,11 +1189,11 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
     meridian_labels = [0,0,0,1] if tick_labels else [0,0,0,0]
     bm.drawparallels(
         np.arange(bbox[0] + height * .15, bbox[2], height * .25),
-        color=COLORS['decoration'],
+        color=COLORS['decoration'], zorder=9,
         linewidth=0.1, labels=parallel_labels, dashes=(None, None))
     bm.drawmeridians(
         np.arange(bbox[1] + width * .15, bbox[3], width * .25),
-        color=COLORS['decoration'],
+        color=COLORS['decoration'], zorder=9,
         linewidth=0.1, labels=meridian_labels, dashes=(None, None))
 
     # bar length = (horizontal map extent) / 3, rounded to 100 (1e-2) metres
@@ -1143,45 +1204,58 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
         bm.drawmapscale(
             bbox[1]+ 0.22 * width, bbox[0] + 0.1 * height,
             central_meridian, central_parallel, bar_length,
-            barstyle='simple', units='m', zorder=15,
+            barstyle='simple', units='m', zorder=25,
             fontcolor=(.2, .2, .2), fillcolor2=(.2, .2, .2))
 
     return fig
 
-def result_figures(prob, file_basename, buildings=None):
-    """Create multiple maps
-    
+def result_figures(prob, file_basename, buildings=None, shapefiles=None):
+    """Call rivus.plot with hard-coded combinations of plot_type and commodity.
+
+    This is a convenience wrapper to shorten scripts.
+    TODO: Generalise so that no hard-coding of commodity names is needed.
+
     Args:
         prob: a rivus model instance
         file_basename: filename prefix for figures
         buildings: optional filename to buildings shapefile
-        
+
     Returns:
         Nothing
     """
     for com, plot_type in [('Elec', 'caps'), ('Heat', 'caps'), ('Gas', 'caps'),
                            ('Elec', 'peak'), ('Heat', 'peak')]:
-        
+
         # two plot variants
         for plot_annotations in [False, True]:
             # create plot
-            fig = plot(prob, com, mapscale=False, tick_labels=False, 
+            fig = plot(prob, com, mapscale=False, tick_labels=False,
                        plot_demand=(plot_type == 'peak'),
-                       buildings=buildings,
+                       buildings=buildings, 
+                       shapefiles=shapefiles,
                        annotations=plot_annotations)
             plt.title('')
-            
+
             # save to file
             for ext, transp in [('png', True), ('png', False), ('pdf', True)]:
-                transp_str = ('-transp' if transp and ext != 'pdf' else '')
-                annote_str = ('-annote' if plot_annotations else '')
+                # split scenario name from subdirectory
+                base_dir, sce = os.path.split(file_basename)
                 
-                # determine figure filename from basename, plot type, 
-                # commodity, transparency, annotations and file extension
-                file_suffix = '-{}-{}{}{}.{}'.format(
-                    plot_type, com, transp_str, annote_str, ext) 
-                fig_filename = file_basename + file_suffix
-                fig.savefig(fig_filename, dpi=300, bbox_inches='tight', 
+                # create subdirectory according to plot variant
+                sub_dir = 'annotated' if plot_annotations else 'plain'
+                sub_dir += '-transparent' if transp and ext!= 'pdf' else ''
+                
+                # create subdirectory if does not exist yet
+                fig_dir = os.path.join(base_dir, sub_dir)
+                if not os.path.exists(fig_dir):
+                    os.makedirs(fig_dir)
+                
+                # create complete relative figure filename
+                fig_basename = '{}-{}-{}.{}'.format(sce, plot_type, com, ext)
+                fig_filename = os.path.join(fig_dir, fig_basename)
+                
+                # save the figure
+                fig.savefig(fig_filename, dpi=300, bbox_inches='tight',
                             transparent=transp)
             # free memory
             plt.close(fig)
@@ -1189,7 +1263,11 @@ def result_figures(prob, file_basename, buildings=None):
 
 
 def report(prob, filename):
-    """Write result summary to a spreadsheet file
+    """Write result summary to a spreadsheet file.
+
+    Create a concise result spreadsheet with values of all key variables,
+    inclduing costs, pipe capacities, process and hub capacities, source flows,
+    and process input/output/throughput per time step.
 
     Args:
         prob: a rivus model instance
@@ -1219,12 +1297,12 @@ def report(prob, filename):
 
 
 def to_pickle(prob, filename):
-    """Save rivus model instance (possibly including result) to file
-    
+    """Save rivus model instance (possibly including result) to file.
+
     Args:
         prob: a rivus model instance
         filename: pickle file to be written
-        
+
     Returns:
         Nothing
     """
@@ -1234,13 +1312,13 @@ def to_pickle(prob, filename):
         import pickle
     with open(filename, 'wb') as file_handle:
         pickle.dump(prob, file_handle)
-        
+
 def from_pickle(filename):
-    """Load a rivus model instance from a pickle file
-    
+    """Load a rivus model instance from a pickle file.
+
     Args:
         filename: pickle file
-    
+
     Returns:
         prob: the unpickled rivus model instance
     """

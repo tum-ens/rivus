@@ -15,21 +15,29 @@ def replot(directory):
     glob_pattern = os.path.join(directory, '*.pickle')
     pickle_filenames = glob.glob(glob_pattern)
     
-    print(pickle_filenames)
-    
+    data_dir = os.path.join('data', os.path.basename(directory))
     # if directory = 'result/moosh' try to find a suitable building shapefile
     # in 'data/moosh'
     buildings = None
-    building_filename = os.path.join('data', 
-                                     os.path.basename(directory), 
-                                     'building')
+    building_filename = os.path.join(data_dir, 'building')
     if os.path.exists(building_filename+'.shp'):
-        buildings = building_filename
-    
+        buildings = (building_filename, False)  # if True, color buildings
+        
+    # if data/.../to_edge exists, paint it
+    shapefiles = None
+    to_edge_filename = os.path.join(data_dir, 'to_edge')
+    if os.path.exists(to_edge_filename+'.shp'):
+        shapefiles = [{'name': 'to_edge',
+                       'color': rivus.to_rgb(192, 192, 192),
+                       'shapefile': to_edge_filename,
+                       'zorder': 1,
+                       'linewidth': 0.1}]
+
     for pf in pickle_filenames:
         prob = rivus.from_pickle(pf)
         rivus.result_figures(prob, os.path.splitext(pf)[0], 
-                             buildings=buildings)
+                             buildings=buildings,
+                             shapefiles=shapefiles)
 
             
 if __name__ == '__main__':
