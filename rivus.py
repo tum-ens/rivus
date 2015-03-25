@@ -1296,37 +1296,49 @@ def report(prob, filename):
                 df.to_excel(writer, sheet_name)
 
 
-def to_pickle(prob, filename):
-    """Save rivus model instance (possibly including result) to file.
-
+def save(prob, filename):
+    """Save rivus model instance to a gzip'ed pickle file
+    
+    Pickle is the standard Python way of serializing and de-serializing Python
+    objects. By using it, saving any object, in case of this function a 
+    Pyomo ConcreteModel, becomes a twoliner. 
+    <https://docs.python.org/2/library/pickle.html>
+    GZip is a standard Python compression library that is used to transparently
+    compress the pickle file further.
+    <https://docs.python.org/2/library/gzip.html>
+    It is used over the possibly more compact bzip2 compression due to the
+    lower runtime. Source: <http://stackoverflow.com/a/18475192/2375855>
+    
     Args:
         prob: a rivus model instance
         filename: pickle file to be written
-
+        
     Returns:
         Nothing
     """
+    import gzip
     try:
         import cPickle as pickle
     except ImportError:
         import pickle
-    with open(filename, 'wb') as file_handle:
+    with gzip.GzipFile(filename, 'wb') as file_handle:
         pickle.dump(prob, file_handle)
 
-def from_pickle(filename):
-    """Load a rivus model instance from a pickle file.
-
+def load(filename):
+    """Load a rivus model instance from a gzip'ed pickle file
+    
     Args:
         filename: pickle file
-
+    
     Returns:
         prob: the unpickled rivus model instance
     """
+    import gzip
     try:
         import cPickle as pickle
     except ImportError:
         import pickle
-    with open(filename, 'r') as file_handle:
+    with gzip.GzipFile(filename, 'r') as file_handle:
         prob = pickle.load(file_handle)
     return prob
 

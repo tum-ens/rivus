@@ -12,7 +12,7 @@ def replot(directory):
     Returns:
         Nothing
     """
-    glob_pattern = os.path.join(directory, '*.pickle')
+    glob_pattern = os.path.join(directory, '*.pgz')
     pickle_filenames = glob.glob(glob_pattern)
     
     data_dir = os.path.join('data', os.path.basename(directory))
@@ -34,7 +34,7 @@ def replot(directory):
                        'linewidth': 0.1}]
 
     for pf in pickle_filenames:
-        prob = rivus.from_pickle(pf)
+        prob = rivus.load(pf)
         rivus.result_figures(prob, os.path.splitext(pf)[0], 
                              buildings=buildings,
                              shapefiles=shapefiles)

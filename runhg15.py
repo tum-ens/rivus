@@ -18,7 +18,7 @@ data_spreadsheet = os.path.join(base_directory, 'data.xlsx')
 def scenario_base(data, vertex, edge):
     """Base scenario: change nothing-"""
     return data, vertex, edge
-    
+
 def scenario_renovation(data, vertex, edge):
     """Renovation: reduce heat demand of residential/other by 50%"""
     area_demand = data['area_demand']
@@ -33,10 +33,16 @@ def scenario_dh_cheap(data, vertex, edge):
     commodity.loc['Heat', 'cost-inv-var'] *= 0.5
     return data, vertex, edge
 
+def scenario_gas_expensive(data, vertex, edge):
+    commodity = data['commodity']
+    commodity.loc['Gas', 'cost-var'] *= 1.5
+    return data, vertex, edge
+
 scenarios = [
     scenario_base,
     scenario_renovation,
-    scenario_dh_cheap]
+    scenario_dh_cheap,
+    scenario_gas_expensive]
 
 # solver
 
@@ -47,8 +53,8 @@ def setup_solver(optim):
         # http://www.gurobi.com/documentation/5.6/reference-manual/parameters
         optim.set_options("TimeLimit=5000")  # seconds
         optim.set_options("MIPFocus=2")  # 1=feasible, 2=optimal, 3=bound
-        optim.set_options("MIPGap=3e-4")  # default = 1e-4
-        optim.set_options("Threads=24")  # number of simultaneous CPU threads
+        optim.set_options("MIPGap=5e-4")  # default = 1e-4
+        optim.set_options("Threads=48")  # number of simultaneous CPU threads
     elif optim.name == 'glpk':
         # reference with list of options
         # execute 'glpsol --help'
@@ -71,7 +77,7 @@ def prepare_edge(edge_shapefile, building_shapefile):
     buildings = geopandas.read_file(building_shapefile+'.shp')
     buildings = buildings.convert_objects(convert_numeric=True)
     building_type_mapping = {
-        'basin': 'other', 'chapel': 'other', 'church': 'other', 
+        'basin': 'other', 'chapel': 'other', 'church': 'other',
         'farm_auxiliary': 'other', 'greenhouse': 'other',
         'school': 'public',
         'office': 'commercial', 'restaurant': 'commercial',
@@ -81,8 +87,8 @@ def prepare_edge(edge_shapefile, building_shapefile):
     buildings['AREA'] = buildings.area
     buildings_grouped = buildings.groupby(['nearest', 'type'])
     total_area = buildings_grouped.sum()['AREA'].unstack()
-    
-    # load edges (streets) and join with summed areas 
+
+    # load edges (streets) and join with summed areas
     # 1. read shapefile to DataFrame (with geometry column)
     # 2. join DataFrame total_area on index (=ID)
     # 3. fill missing values with 0
@@ -93,20 +99,20 @@ def prepare_edge(edge_shapefile, building_shapefile):
     return edge
 
 
-        
+
 def run_scenario(scenario):
     # scenario name
     sce = scenario.__name__
     sce_nice_name = sce.replace('_', ' ').title()
-    
-    # prepare input data 
+
+    # prepare input data
     data = rivus.read_excel(data_spreadsheet)
-    vertex = pdshp.read_shp(vertex_shapefile)    
+    vertex = pdshp.read_shp(vertex_shapefile)
     edge = prepare_edge(edge_shapefile, building_shapefile)
-    
+
     # apply scenario function to input data
     data, vertex, edge = scenario(data, vertex, edge)
-    
+
     # create & solve model
     model = rivus.create_model(data, vertex, edge)
     prob = model.create()
@@ -114,19 +120,19 @@ def run_scenario(scenario):
     optim = setup_solver(optim)
     result = optim.solve(prob, tee=True)
     prob.load(result)
-        
+
     # create result directory if not existent
     result_dir = os.path.join('result', os.path.basename(base_directory))
     if not os.path.exists(result_dir):
         os.makedirs(result_dir)
-    
+
     # report
-    rivus.to_pickle(prob, os.path.join(result_dir, sce+'.pickle'))    
+    rivus.save(prob, os.path.join(result_dir, sce+'.pgz'))
     rivus.report(prob, os.path.join(result_dir, sce+'.xlsx'))
     rivus.result_figures(prob, os.path.join(result_dir, sce))
-                
+
     return prob
-            
+
 if __name__ == '__main__':
     for scenario in scenarios:
         prob = run_scenario(scenario)

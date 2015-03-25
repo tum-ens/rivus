@@ -14,7 +14,7 @@ def reanalyse(directory):
         tuple (demand, cost, Pmax, Kappa_hub, Kappa_process) of concatenated
         DataFrames
     """
-    glob_pattern = os.path.join(directory, '*.pickle')
+    glob_pattern = os.path.join(directory, '*.pgz')
     pickle_filenames = glob.glob(glob_pattern)
     
     demand = {}
@@ -25,7 +25,7 @@ def reanalyse(directory):
     
     for pf in pickle_filenames:
         # load original problem object including solution
-        prob = rivus.from_pickle(pf)
+        prob = rivus.load(pf)
         
         # truncate directory name and extension from pickle filename
         # remove 'scenario_' prefix, if present
