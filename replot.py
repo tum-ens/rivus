@@ -35,7 +35,10 @@ def replot(directory):
 
     for pf in pickle_filenames:
         prob = rivus.load(pf)
-        rivus.result_figures(prob, os.path.splitext(pf)[0], 
+        figure_basename = os.path.splitext(pf)[0]
+        if buildings:
+            figure_basename += '_bld'
+        rivus.result_figures(prob, figure_basename, 
                              buildings=buildings,
                              shapefiles=shapefiles)
 
