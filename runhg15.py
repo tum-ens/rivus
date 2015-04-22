@@ -10,6 +10,7 @@ from coopr.opt.base import SolverFactory
 base_directory = os.path.join('data', 'haag15')
 building_shapefile = os.path.join(base_directory, 'building_w_nearest')
 edge_shapefile = os.path.join(base_directory, 'edge')
+to_edge_shapefile = os.path.join(base_directory, 'to_edge')
 vertex_shapefile = os.path.join(base_directory, 'vertex')
 data_spreadsheet = os.path.join(base_directory, 'data.xlsx')
 
@@ -38,11 +39,13 @@ def scenario_gas_expensive(data, vertex, edge):
     commodity.loc['Gas', 'cost-var'] *= 1.5
     return data, vertex, edge
 
-scenarios = [
-    scenario_base,
-    scenario_renovation,
-    scenario_dh_cheap,
-    scenario_gas_expensive]
+def scenario_elec_expensive(data, vertex, edge):
+    commodity = data['commodity']
+    commodity.loc['Elec', 'cost-var'] *=2
+    return data, vertex, edge
+    
+scenarios = [scenario_base, scenario_renovation, scenario_dh_cheap, 
+             scenario_gas_expensive, scenario_elec_expensive]
 
 # solver
 
@@ -51,7 +54,7 @@ def setup_solver(optim):
     if optim.name == 'gurobi':
         # reference with list of option names
         # http://www.gurobi.com/documentation/5.6/reference-manual/parameters
-        optim.set_options("TimeLimit=5000")  # seconds
+        optim.set_options("TimeLimit=14400")  # seconds
         optim.set_options("MIPFocus=2")  # 1=feasible, 2=optimal, 3=bound
         optim.set_options("MIPGap=5e-4")  # default = 1e-4
         optim.set_options("Threads=48")  # number of simultaneous CPU threads
@@ -127,9 +130,23 @@ def run_scenario(scenario):
         os.makedirs(result_dir)
 
     # report
+    rivus.save_log(result, os.path.join(result_dir, sce+'.log'))
     rivus.save(prob, os.path.join(result_dir, sce+'.pgz'))
     rivus.report(prob, os.path.join(result_dir, sce+'.xlsx'))
+    
+    # plot without buildings
     rivus.result_figures(prob, os.path.join(result_dir, sce))
+    
+    # plot with buildings and to_edge
+    more_shapefiles = [{'name': 'to_edge',
+                        'color': rivus.to_rgb(192, 192, 192),
+                        'shapefile': to_edge_shapefile,
+                        'zorder': 1,
+                        'linewidth': 0.1}]
+    rivus.result_figures(prob, os.path.join(result_dir, sce+'_bld'), 
+                         buildings=(building_shapefile, False),
+                         shapefiles=more_shapefiles)
+
 
     return prob
 
