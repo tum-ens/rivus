@@ -8,7 +8,7 @@ import rivus
 from coopr.opt.base import SolverFactory
 
 base_directory = os.path.join('data', 'haag15')
-building_shapefile = os.path.join(base_directory, 'building_w_nearest')
+building_shapefile = os.path.join(base_directory, 'building')
 edge_shapefile = os.path.join(base_directory, 'edge')
 to_edge_shapefile = os.path.join(base_directory, 'to_edge')
 vertex_shapefile = os.path.join(base_directory, 'vertex')

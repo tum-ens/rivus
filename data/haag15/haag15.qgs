@@ -3,7 +3,7 @@
     <title></title>
     <layer-tree-group expanded="1" checked="Qt::PartiallyChecked" name="">
         <customproperties/>
-        <layer-tree-layer expanded="0" checked="Qt::Checked" id="edge_clusters20150512165505123" name="edge_clusters">
+        <layer-tree-layer expanded="0" checked="Qt::Checked" id="edge_clusters20150513141900776" name="edge_clusters">
             <customproperties/>
         </layer-tree-layer>
         <layer-tree-layer expanded="1" checked="Qt::Checked" id="vertex20150107185956453" name="vertex">
@@ -62,31 +62,36 @@
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="vertex20150107175345760"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="streets20150107161720166"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:3857" srcDatumTransform="-1" destDatumTransform="-1" layerid="OpenLayers_plugin_layer20150107190533479"/>
+            <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="building_20150513145924256"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="edge20150107180716561"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="vertex20150107185208169"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="vertex20150107173604494"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="edge20150107180127523"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="buildings20150105175714427"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="cluster_shrunk20150512163658595"/>
+            <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="building_w_nearest20150513145654687"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="landuse20150105152410112"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="streets20150107162929012"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="vertex20150107180707064"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="points20150105152159889"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="cluster_buffered20150512162806876"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="streets20150107170523219"/>
-            <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="streets20150107185956399"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="edge_clusters20150512165505123"/>
+            <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="streets20150107185956399"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="streets20150107171000275"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="streets20150107170742535"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="cluster_buffered20150512162846201"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="streets20150107171443106"/>
+            <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="edge_clusters20150513141900776"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:3857" srcDatumTransform="-1" destDatumTransform="-1" layerid="OpenLayers_plugin_layer20150107190644342"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="bg20150107190731136"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="streets20150107170019263"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="streets20150107173100979"/>
+            <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="edge_geocolumns20150513140835824"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="to_edge20150107190153153"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="edge_buffered20150512164223960"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="edge20150107190016011"/>
+            <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:32632" srcDatumTransform="-1" destDatumTransform="-1" layerid="edge_distance20150513141130349"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="edge20150105162959797"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="streets20150107172717324"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="vertex20150121133847847"/>
@@ -94,6 +99,7 @@
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:3875" srcDatumTransform="-1" destDatumTransform="-1" layerid="edge_prof_buff_diss20150512165352184"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="boundary20150105154103313"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:3875" srcDatumTransform="-1" destDatumTransform="-1" layerid="edge_prof_buff20150512165326559"/>
+            <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="edge_clusters20150513141839226"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="building20150105171139781"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="cluster_buffered20150512162727140"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="vertex20150107180318001"/>
@@ -122,7 +128,9 @@
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="streets20150107162553862"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="landuse20150105152338972"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="streets20150107160801346"/>
+            <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:32632" srcDatumTransform="-1" destDatumTransform="-1" layerid="edge_distance20150513141429440"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="vertex20150107174338360"/>
+            <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="building_20150513150036588"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="lines20150105153229521"/>
         </layer_coordinate_transform_info>
     </mapcanvas>
@@ -134,13 +142,13 @@
             <item>vertex20150107185956453</item>
             <item>edge20150107190136359</item>
             <item>to_edge20150107190153153</item>
-            <item>edge_clusters20150512165505123</item>
+            <item>edge_clusters20150513141900776</item>
         </custom-order>
     </layer-tree-canvas>
     <legend updateDrawingOrder="true">
         <legendlayer drawingOrder="-1" open="false" checked="Qt::Checked" name="edge_clusters" showFeatureCount="0">
             <filegroup open="false" hidden="false">
-                <legendlayerfile isInOverview="0" layerid="edge_clusters20150512165505123" visible="1"/>
+                <legendlayerfile isInOverview="0" layerid="edge_clusters20150513141900776" visible="1"/>
             </filegroup>
         </legendlayer>
         <legendlayer drawingOrder="-1" open="true" checked="Qt::Checked" name="vertex" showFeatureCount="1">
@@ -169,7 +177,7 @@
             </filegroup>
         </legendlayer>
     </legend>
-    <Composer title="Quer DIN A3" visible="1">
+    <Composer title="Quer DIN A3" visible="0">
         <Composition gridVisible="0" printResolution="600" paperWidth="420" snapGridOffsetX="0" guidesVisible="1" snapGridResolution="10" snapGridOffsetY="0" alignmentSnap="1" snapping="0" snapTolerancePixels="5" numPages="1" paperHeight="297" smartGuides="1" printAsRaster="1" generateWorldFile="0">
             <symbol alpha="1" type="fill" name="">
                 <layer pass="0" class="SimpleFill" locked="0">
@@ -186,6 +194,28 @@
                     <prop k="style" v="solid"/>
                 </layer>
             </symbol>
+            <ComposerLegend symbolWidth="7" title="Clusters (manual)" boxSpace="2" splitLayer="0" equalColumnWidth="0" map="2" titleAlignment="1" symbolHeight="4" wmsLegendHeight="25" wrapChar="" fontColor="#404040" columnSpace="2" wmsLegendWidth="50" columnCount="1">
+                <styles>
+                    <style marginBottom="2" name="title" font="Arial,10,-1,5,50,0,0,0,0,0"/>
+                    <style marginTop="2" name="group" font="Arial,10,-1,5,50,0,0,0,0,0"/>
+                    <style marginTop="2" name="subgroup" font="Arial,10,-1,5,50,0,0,0,0,0"/>
+                    <style marginTop="2" name="symbol" font="MS Shell Dlg 2,8.25,-1,5,50,0,0,0,0,0"/>
+                    <style marginTop="2" marginLeft="2" name="symbolLabel" font="Arial,9,-1,5,50,0,0,0,0,0"/>
+                </styles>
+                <layer-tree-group expanded="1" checked="Qt::Checked" name="">
+                    <customproperties/>
+                    <layer-tree-layer expanded="1" checked="Qt::Checked" id="edge_clusters20150513141900776" name="edge_clusters">
+                        <customproperties>
+                            <property key="legend/node-order" value="0,1,2,3,4,5,6,7,8,9,10,11"/>
+                            <property key="legend/title-style" value="hidden"/>
+                        </customproperties>
+                    </layer-tree-layer>
+                </layer-tree-group>
+                <ComposerItem pagey="208.766" page="1" id="" lastValidViewScaleFactor="-1" positionMode="0" positionLock="false" x="376.931" y="208.766" visibility="1" zValue="11" background="true" transparency="0" frameJoinStyle="miter" blendMode="0" width="36.6" outlineWidth="0.3" excludeFromExports="0" uuid="{402e478b-8609-455d-acec-e45d03f7a5c0}" height="81.4" itemRotation="0" frame="true" pagex="376.931">
+                    <FrameColor alpha="255" red="87" blue="87" green="87"/>
+                    <BackgroundColor alpha="255" red="255" blue="255" green="255"/>
+                </ComposerItem>
+            </ComposerLegend>
             <ComposerShape shapeType="2" cornerRadius="0">
                 <symbol alpha="1" type="fill" name="">
                     <layer pass="0" class="SimpleFill" locked="0">
@@ -231,8 +261,8 @@
             <ComposerLegend symbolWidth="4" title="" boxSpace="2" splitLayer="0" equalColumnWidth="0" map="2" titleAlignment="1" symbolHeight="4" wmsLegendHeight="25" wrapChar="" fontColor="#404040" columnSpace="2" wmsLegendWidth="50" columnCount="1">
                 <styles>
                     <style name="title" font="MS Shell Dlg 2,16,-1,5,50,0,0,0,0,0"/>
-                    <style marginTop="2" name="group" font="MS Shell Dlg 2,14,-1,5,50,0,0,0,0,0"/>
-                    <style marginTop="2" name="subgroup" font="MS Shell Dlg 2,12,-1,5,50,0,0,0,0,0"/>
+                    <style marginTop="2" name="group" font="Arial,10,-1,5,50,0,0,0,0,0"/>
+                    <style marginTop="2" name="subgroup" font="Arial,10,-1,5,50,0,0,0,0,0"/>
                     <style marginTop="2" name="symbol" font="MS Shell Dlg 2,8.25,-1,5,50,0,0,0,0,0"/>
                     <style marginTop="2" marginLeft="2" name="symbolLabel" font="Arial,9,-1,5,50,0,0,0,0,0"/>
                 </styles>
@@ -246,7 +276,7 @@
                         </customproperties>
                     </layer-tree-layer>
                 </layer-tree-group>
-                <ComposerItem pagey="8.34822" page="1" id="" lastValidViewScaleFactor="-1" positionMode="0" positionLock="false" x="379.431" y="8.34822" visibility="1" zValue="8" background="false" transparency="0" frameJoinStyle="miter" blendMode="0" width="34.3" outlineWidth="0.3" excludeFromExports="0" uuid="{59dc785f-4051-4601-9c21-5700c0db2e5e}" height="129.7" itemRotation="0" frame="true" pagex="379.431">
+                <ComposerItem pagey="8.34822" page="1" id="" lastValidViewScaleFactor="-1" positionMode="0" positionLock="false" x="379.431" y="8.34822" visibility="1" zValue="8" background="true" transparency="0" frameJoinStyle="miter" blendMode="0" width="34.1" outlineWidth="0.3" excludeFromExports="0" uuid="{59dc785f-4051-4601-9c21-5700c0db2e5e}" height="128.7" itemRotation="0" frame="true" pagex="379.431">
                     <FrameColor alpha="255" red="128" blue="128" green="128"/>
                     <BackgroundColor alpha="255" red="255" blue="255" green="255"/>
                 </ComposerItem>
@@ -341,7 +371,7 @@
                     </markerStyle>
                 </ComposerMapGrid>
                 <AtlasMap scalingMode="2" atlasDriven="0" margin="0.10000000000000001"/>
-                <ComposerItem pagey="172.002" page="1" id="" lastValidViewScaleFactor="3.06438" positionMode="0" positionLock="false" x="7.62869" y="172.002" visibility="1" zValue="4" background="false" transparency="0" frameJoinStyle="miter" blendMode="0" width="120.878" outlineWidth="0.3" excludeFromExports="0" uuid="{8a56fdf4-cde8-4d3a-8454-9dbbeec56083}" height="118.164" itemRotation="0" frame="true" pagex="7.62869">
+                <ComposerItem pagey="172.002" page="1" id="" lastValidViewScaleFactor="2.98251" positionMode="0" positionLock="false" x="7.62869" y="172.002" visibility="1" zValue="4" background="false" transparency="0" frameJoinStyle="miter" blendMode="0" width="120.878" outlineWidth="0.3" excludeFromExports="0" uuid="{8a56fdf4-cde8-4d3a-8454-9dbbeec56083}" height="118.164" itemRotation="0" frame="true" pagex="7.62869">
                     <FrameColor alpha="255" red="128" blue="128" green="128"/>
                     <BackgroundColor alpha="255" red="255" blue="255" green="255"/>
                 </ComposerItem>
@@ -418,7 +448,7 @@
                     </markerStyle>
                 </ComposerMapGrid>
                 <AtlasMap scalingMode="2" atlasDriven="0" margin="0.10000000000000001"/>
-                <ComposerItem pagey="106.246" page="1" id="" lastValidViewScaleFactor="3.06438" positionMode="0" positionLock="false" x="7.62869" y="106.246" visibility="1" zValue="2" background="false" transparency="0" frameJoinStyle="miter" blendMode="0" width="120.878" outlineWidth="0.3" excludeFromExports="0" uuid="{80003f13-cfdf-4a54-8b6a-c000dbcfb59e}" height="59.1707" itemRotation="0" frame="true" pagex="7.62869">
+                <ComposerItem pagey="106.246" page="1" id="" lastValidViewScaleFactor="2.98251" positionMode="0" positionLock="false" x="7.62869" y="106.246" visibility="1" zValue="2" background="false" transparency="0" frameJoinStyle="miter" blendMode="0" width="120.878" outlineWidth="0.3" excludeFromExports="0" uuid="{80003f13-cfdf-4a54-8b6a-c000dbcfb59e}" height="59.1707" itemRotation="0" frame="true" pagex="7.62869">
                     <FrameColor alpha="255" red="128" blue="128" green="128"/>
                     <BackgroundColor alpha="255" red="255" blue="255" green="255"/>
                 </ComposerItem>
@@ -474,7 +504,7 @@
                     </markerStyle>
                 </ComposerMapGrid>
                 <AtlasMap scalingMode="2" atlasDriven="0" margin="0.10000000000000001"/>
-                <ComposerItem pagey="8.34822" page="1" id="" lastValidViewScaleFactor="3.06438" positionMode="0" positionLock="false" x="7.62869" y="8.34822" visibility="1" zValue="1" background="false" transparency="0" frameJoinStyle="miter" blendMode="0" width="406.102" outlineWidth="0.3" excludeFromExports="0" uuid="{aa6761d8-6c68-44b1-8f42-6e71b2631f5a}" height="281.818" itemRotation="0" frame="true" pagex="7.62869">
+                <ComposerItem pagey="8.34822" page="1" id="" lastValidViewScaleFactor="2.98251" positionMode="0" positionLock="false" x="7.62869" y="8.34822" visibility="1" zValue="1" background="false" transparency="0" frameJoinStyle="miter" blendMode="0" width="406.102" outlineWidth="0.3" excludeFromExports="0" uuid="{aa6761d8-6c68-44b1-8f42-6e71b2631f5a}" height="281.818" itemRotation="0" frame="true" pagex="7.62869">
                     <FrameColor alpha="255" red="128" blue="128" green="128"/>
                     <BackgroundColor alpha="255" red="255" blue="255" green="255"/>
                 </ComposerItem>
@@ -508,22 +538,10 @@
             <vectorjoins/>
             <expressionfields/>
             <edittypes>
-                <edittype widgetv2type="TextEdit" name="osm_id">
-                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
-                </edittype>
-                <edittype widgetv2type="TextEdit" name="osm_way_id">
-                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
-                </edittype>
-                <edittype widgetv2type="TextEdit" name="name">
-                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
-                </edittype>
-                <edittype widgetv2type="TextEdit" name="type">
+                <edittype widgetv2type="TextEdit" name="admin_leve">
                     <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
                 </edittype>
                 <edittype widgetv2type="TextEdit" name="amenity">
-                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
-                </edittype>
-                <edittype widgetv2type="TextEdit" name="admin_leve">
                     <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
                 </edittype>
                 <edittype widgetv2type="TextEdit" name="building">
@@ -532,7 +550,19 @@
                 <edittype widgetv2type="TextEdit" name="man_made">
                     <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
                 </edittype>
+                <edittype widgetv2type="TextEdit" name="name">
+                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+                </edittype>
                 <edittype widgetv2type="TextEdit" name="office">
+                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+                </edittype>
+                <edittype widgetv2type="TextEdit" name="osm_id">
+                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+                </edittype>
+                <edittype widgetv2type="TextEdit" name="osm_way_id">
+                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+                </edittype>
+                <edittype widgetv2type="TextEdit" name="other_tags">
                     <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
                 </edittype>
                 <edittype widgetv2type="TextEdit" name="place">
@@ -541,7 +571,16 @@
                 <edittype widgetv2type="TextEdit" name="shop">
                     <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
                 </edittype>
-                <edittype widgetv2type="TextEdit" name="other_tags">
+                <edittype widgetv2type="TextEdit" name="type">
+                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+                </edittype>
+                <edittype widgetv2type="TextEdit" name="nearest">
+                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+                </edittype>
+                <edittype widgetv2type="TextEdit" name="area">
+                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+                </edittype>
+                <edittype widgetv2type="TextEdit" name="perimeter">
                     <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
                 </edittype>
             </edittypes>
@@ -924,7 +963,7 @@
                 <property key="labeling/distInMapUnits" value="false"/>
                 <property key="labeling/distMapUnitMaxScale" value="0"/>
                 <property key="labeling/distMapUnitMinScale" value="0"/>
-                <property key="labeling/enabled" value="true"/>
+                <property key="labeling/enabled" value="false"/>
                 <property key="labeling/fieldName" value="nearest"/>
                 <property key="labeling/fontBold" value="false"/>
                 <property key="labeling/fontCapitals" value="0"/>
@@ -943,7 +982,7 @@
                 <property key="labeling/fontWeight" value="50"/>
                 <property key="labeling/fontWordSpacing" value="0"/>
                 <property key="labeling/formatNumbers" value="true"/>
-                <property key="labeling/isExpression" value="true"/>
+                <property key="labeling/isExpression" value="false"/>
                 <property key="labeling/labelOffsetInMapUnits" value="true"/>
                 <property key="labeling/labelOffsetMapUnitMaxScale" value="0"/>
                 <property key="labeling/labelOffsetMapUnitMinScale" value="0"/>
@@ -1077,22 +1116,10 @@
             <excludeAttributesWFS/>
             <attributeactions/>
             <edittypes>
-                <edittype widgetv2type="TextEdit" name="osm_id">
-                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
-                </edittype>
-                <edittype widgetv2type="TextEdit" name="osm_way_id">
-                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
-                </edittype>
-                <edittype widgetv2type="TextEdit" name="name">
-                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
-                </edittype>
-                <edittype widgetv2type="TextEdit" name="type">
+                <edittype widgetv2type="TextEdit" name="admin_leve">
                     <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
                 </edittype>
                 <edittype widgetv2type="TextEdit" name="amenity">
-                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
-                </edittype>
-                <edittype widgetv2type="TextEdit" name="admin_leve">
                     <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
                 </edittype>
                 <edittype widgetv2type="TextEdit" name="building">
@@ -1101,7 +1128,19 @@
                 <edittype widgetv2type="TextEdit" name="man_made">
                     <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
                 </edittype>
+                <edittype widgetv2type="TextEdit" name="name">
+                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+                </edittype>
                 <edittype widgetv2type="TextEdit" name="office">
+                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+                </edittype>
+                <edittype widgetv2type="TextEdit" name="osm_id">
+                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+                </edittype>
+                <edittype widgetv2type="TextEdit" name="osm_way_id">
+                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+                </edittype>
+                <edittype widgetv2type="TextEdit" name="other_tags">
                     <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
                 </edittype>
                 <edittype widgetv2type="TextEdit" name="place">
@@ -1110,7 +1149,16 @@
                 <edittype widgetv2type="TextEdit" name="shop">
                     <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
                 </edittype>
-                <edittype widgetv2type="TextEdit" name="other_tags">
+                <edittype widgetv2type="TextEdit" name="type">
+                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+                </edittype>
+                <edittype widgetv2type="TextEdit" name="nearest">
+                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+                </edittype>
+                <edittype widgetv2type="TextEdit" name="area">
+                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+                </edittype>
+                <edittype widgetv2type="TextEdit" name="perimeter">
                     <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
                 </edittype>
             </edittypes>
@@ -1151,6 +1199,21 @@
                     <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
                 </edittype>
                 <edittype widgetv2type="TextEdit" name="Cluster">
+                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+                </edittype>
+                <edittype widgetv2type="TextEdit" name="length">
+                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+                </edittype>
+                <edittype widgetv2type="TextEdit" name="x0">
+                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+                </edittype>
+                <edittype widgetv2type="TextEdit" name="y0">
+                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+                </edittype>
+                <edittype widgetv2type="TextEdit" name="x1">
+                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+                </edittype>
+                <edittype widgetv2type="TextEdit" name="y1">
                     <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
                 </edittype>
             </edittypes>
@@ -1368,10 +1431,25 @@
                 <edittype widgetv2type="TextEdit" name="Cluster">
                     <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
                 </edittype>
+                <edittype widgetv2type="TextEdit" name="length">
+                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+                </edittype>
+                <edittype widgetv2type="TextEdit" name="x0">
+                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+                </edittype>
+                <edittype widgetv2type="TextEdit" name="y0">
+                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+                </edittype>
+                <edittype widgetv2type="TextEdit" name="x1">
+                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+                </edittype>
+                <edittype widgetv2type="TextEdit" name="y1">
+                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
+                </edittype>
             </edittypes>
         </maplayer>
         <maplayer minimumScale="0" maximumScale="1e+08" simplifyDrawingHints="1" minLabelScale="0" maxLabelScale="1e+08" simplifyDrawingTol="1" geometry="Polygon" simplifyMaxScale="1" type="vector" hasScaleBasedVisibilityFlag="0" simplifyLocal="1" scaleBasedLabelVisibilityFlag="0">
-            <id>edge_clusters20150512165505123</id>
+            <id>edge_clusters20150513141900776</id>
             <datasource>./edge_clusters.shp</datasource>
             <title></title>
             <abstract></abstract>
@@ -1396,15 +1474,6 @@
             <vectorjoins/>
             <expressionfields/>
             <edittypes>
-                <edittype widgetv2type="TextEdit" name="Edge">
-                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
-                </edittype>
-                <edittype widgetv2type="TextEdit" name="Vertex1">
-                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
-                </edittype>
-                <edittype widgetv2type="TextEdit" name="Vertex2">
-                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
-                </edittype>
                 <edittype widgetv2type="TextEdit" name="Cluster">
                     <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
                 </edittype>
@@ -1676,7 +1745,7 @@
                 <property key="labeling/distMapUnitMaxScale" value="0"/>
                 <property key="labeling/distMapUnitMinScale" value="0"/>
                 <property key="labeling/enabled" value="false"/>
-                <property key="labeling/fieldName" value=""/>
+                <property key="labeling/fieldName" value="c"/>
                 <property key="labeling/fontBold" value="false"/>
                 <property key="labeling/fontCapitals" value="0"/>
                 <property key="labeling/fontFamily" value="MS Shell Dlg 2"/>
@@ -1826,15 +1895,6 @@
             <excludeAttributesWFS/>
             <attributeactions/>
             <edittypes>
-                <edittype widgetv2type="TextEdit" name="Edge">
-                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
-                </edittype>
-                <edittype widgetv2type="TextEdit" name="Vertex1">
-                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
-                </edittype>
-                <edittype widgetv2type="TextEdit" name="Vertex2">
-                    <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
-                </edittype>
                 <edittype widgetv2type="TextEdit" name="Cluster">
                     <widgetv2config IsMultiline="0" fieldEditable="1" UseHtml="0" labelOnTop="0"/>
                 </edittype>
@@ -2886,18 +2946,18 @@
             <LayerSnappingList type="QStringList">
                 <value>Building20150107092313377</value>
                 <value>edge20150107190136359</value>
+                <value>edge_clusters20150513141900776</value>
                 <value>streets20150107175529931</value>
                 <value>to_edge20150107190153153</value>
                 <value>vertex20150107185956453</value>
-                <value>edge_clusters20150512165505123</value>
             </LayerSnappingList>
             <LayerSnappingEnabledList type="QStringList">
                 <value>disabled</value>
                 <value>disabled</value>
-                <value>disabled</value>
-                <value>disabled</value>
-                <value>disabled</value>
                 <value>enabled</value>
+                <value>disabled</value>
+                <value>disabled</value>
+                <value>disabled</value>
             </LayerSnappingEnabledList>
             <AvoidIntersectionsList type="QStringList"/>
             <LayerSnappingToleranceUnitList type="QStringList">
@@ -2911,10 +2971,10 @@
             <LayerSnapToList type="QStringList">
                 <value>to_vertex_and_segment</value>
                 <value>to_vertex_and_segment</value>
-                <value>to_vertex_and_segment</value>
-                <value>to_vertex_and_segment</value>
-                <value>to_vertex_and_segment</value>
                 <value>to_vertex</value>
+                <value>to_vertex_and_segment</value>
+                <value>to_vertex_and_segment</value>
+                <value>to_vertex_and_segment</value>
             </LayerSnapToList>
             <LayerSnappingToleranceList type="QStringList">
                 <value>0.000000</value>
