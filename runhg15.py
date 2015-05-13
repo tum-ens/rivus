@@ -116,21 +116,24 @@ def run_scenario(scenario):
     # apply scenario function to input data
     data, vertex, edge = scenario(data, vertex, edge)
 
+    # create result directory if not existent
+    result_dir = os.path.join('result', os.path.basename(base_directory))
+    if not os.path.exists(result_dir):
+        os.makedirs(result_dir)
+    # derive log filename
+    log_filename =os.path.join(result_dir, sce+'.log')
+
     # create & solve model
     model = rivus.create_model(data, vertex, edge)
     prob = model.create()
     optim = SolverFactory('gurobi')
     optim = setup_solver(optim)
-    result = optim.solve(prob, tee=True)
+    result = optim.solve(prob, 
+                         logfile=log_filename,
+                         tee=True)
     prob.load(result)
 
-    # create result directory if not existent
-    result_dir = os.path.join('result', os.path.basename(base_directory))
-    if not os.path.exists(result_dir):
-        os.makedirs(result_dir)
-
     # report
-    rivus.save_log(result, os.path.join(result_dir, sce+'.log'))
     rivus.save(prob, os.path.join(result_dir, sce+'.pgz'))
     rivus.report(prob, os.path.join(result_dir, sce+'.xlsx'))
     
@@ -146,8 +149,6 @@ def run_scenario(scenario):
     rivus.result_figures(prob, os.path.join(result_dir, sce+'_bld'), 
                          buildings=(building_shapefile, False),
                          shapefiles=more_shapefiles)
-
-
     return prob
 
 if __name__ == '__main__':
