@@ -546,8 +546,15 @@ def def_costs_rule(m, cost_type):
                 for (i,j) in m.edge for co in m.co_transportable)
 
     elif cost_type == 'Fix':
-        return m.costs['Fix'] == m.costs['Inv'] * 0.05
-
+        return m.costs['Fix'] == \
+            sum(m.Kappa_hub[i,j,h] * m.params['hub'].loc[h]['cost-fix']
+                for (i,j) in m.edge for h in m.hub) + \
+            sum(m.Kappa_process[v,p] * m.params['process'].loc[p]['cost-fix']
+                for v in m.vertex for p in m.process) + \
+            sum(m.Pmax[i,j,co] * m.params['commodity'].loc[co]['cost-fix'] *
+                line_length(m.params['edge'].loc[i, j]['geometry'])
+                for (i,j) in m.edge for co in m.co_transportable)
+            
     elif cost_type == 'Var':
         return m.costs['Var'] == \
             sum(m.Epsilon_hub[i,j,h,t] *
