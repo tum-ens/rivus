@@ -55,7 +55,7 @@ result_dir = os.path.join('result', os.path.basename(base_directory))
 if not os.path.exists(result_dir):
     os.makedirs(result_dir)
     
-
+rivus.save(prob, os.path.join(result_dir, 'prob.pgz'))
 rivus.report(prob, os.path.join(result_dir, 'report.xlsx'))
 
 # plot all caps (and demands if existing)

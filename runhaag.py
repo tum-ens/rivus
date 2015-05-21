@@ -40,7 +40,7 @@ def setup_solver(optim):
         optim.set_options("TimeLimit=500")  # seconds
         optim.set_options("MIPFocus=2")  # 1=feasible, 2=optimal, 3=bound
         optim.set_options("MIPGap=3e-4")  # default = 1e-4
-        optim.set_options("Threads=7")  # number of simultaneous CPU threads
+        optim.set_options("Threads=3")  # number of simultaneous CPU threads
     elif optim.name == 'glpk':
         # reference with list of options
         # execute 'glpsol --help'
