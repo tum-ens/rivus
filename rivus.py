@@ -25,9 +25,9 @@ COLORS = { # (R,G,B) tuples with range (0-255)
     'building': (192, 192, 192),
     'decoration': (128, 128, 128),
     # commodities
-    'Heat': (255, 0, 0),
+    'Heat': (230, 112, 36),
     'Cool': (0, 0, 255),
-    'Elec': (255, 192, 0),
+    'Elec': (255, 170, 0),
     'Demand': (0, 255, 0),
     'Gas': (128, 64, 0),
     # buildings
