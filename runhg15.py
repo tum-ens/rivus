@@ -35,17 +35,27 @@ def scenario_dh_cheap(data, vertex, edge):
     return data, vertex, edge
 
 def scenario_gas_expensive(data, vertex, edge):
+    """Gas expensive: increase gas price by 50%"""
     commodity = data['commodity']
     commodity.loc['Gas', 'cost-var'] *= 1.5
     return data, vertex, edge
 
 def scenario_elec_expensive(data, vertex, edge):
+    """Elec expensive: increase electricity price by 100%"""
     commodity = data['commodity']
     commodity.loc['Elec', 'cost-var'] *=2
     return data, vertex, edge
     
+def scenario_dh_plant_cheap(data, vertex, edge):
+    """DH plant cheap: decrease cost of DH plant by 50%"""
+    process = data['process']
+    process.loc['District heating plant', 'cost-inv-fix'] *= 0.5
+    process.loc['District heating plant', 'cost-inv-var'] *= 0.5
+    return data, vertex, edge
+    
 scenarios = [scenario_base, scenario_renovation, scenario_dh_cheap, 
-             scenario_gas_expensive, scenario_elec_expensive]
+             scenario_gas_expensive, scenario_elec_expensive,
+             scenario_dh_plant_cheap]
 
 # solver
 
@@ -54,7 +64,7 @@ def setup_solver(optim):
     if optim.name == 'gurobi':
         # reference with list of option names
         # http://www.gurobi.com/documentation/5.6/reference-manual/parameters
-        optim.set_options("TimeLimit=14400")  # seconds
+        optim.set_options("TimeLimit=10800")  # seconds
         optim.set_options("MIPFocus=2")  # 1=feasible, 2=optimal, 3=bound
         optim.set_options("MIPGap=5e-4")  # default = 1e-4
         optim.set_options("Threads=48")  # number of simultaneous CPU threads
