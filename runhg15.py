@@ -1,11 +1,10 @@
 import coopr.environ
 import geopandas
-import matplotlib.pyplot as plt
 import os
-import pandas as pd
 import pandashp as pdshp
 import rivus
 from coopr.opt.base import SolverFactory
+from datetime import datetime
 
 base_directory = os.path.join('data', 'haag15')
 building_shapefile = os.path.join(base_directory, 'building')
@@ -78,6 +77,17 @@ def setup_solver(optim):
     return optim
 
 # helper functions
+def prepare_result_directory(result_name):
+    """ create a time stamped directory within the result folder """
+    # timestamp for result directory
+    now = datetime.now().strftime('%Y%m%dT%H%M%S')
+
+    # create result directory if not existent
+    result_dir = os.path.join('result', '{}-{}'.format(result_name, now))
+    if not os.path.exists(result_dir):
+        os.makedirs(result_dir)
+
+    return result_dir
 
 def prepare_edge(edge_shapefile, building_shapefile):
     """Create edge graph with grouped building demands.
@@ -126,12 +136,9 @@ def run_scenario(scenario):
     # apply scenario function to input data
     data, vertex, edge = scenario(data, vertex, edge)
 
-    # create result directory if not existent
-    result_dir = os.path.join('result', os.path.basename(base_directory))
-    if not os.path.exists(result_dir):
-        os.makedirs(result_dir)
-    # derive log filename
-    log_filename =os.path.join(result_dir, sce+'.log')
+    # prepare result directory 
+    result_name = os.path.basename(base_directory)
+    result_dir = prepare_result_directory(result_name)  # name + time stamp
 
     # create & solve model
     model = rivus.create_model(data, vertex, edge)
