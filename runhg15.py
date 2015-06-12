@@ -42,7 +42,7 @@ def scenario_gas_expensive(data, vertex, edge):
 def scenario_elec_expensive(data, vertex, edge):
     """Elec expensive: increase electricity price by 100%"""
     commodity = data['commodity']
-    commodity.loc['Elec', 'cost-var'] *=2
+    commodity.loc['Elec', 'cost-var'] *= 2
     return data, vertex, edge
     
 def scenario_dh_plant_cheap(data, vertex, edge):
@@ -52,9 +52,16 @@ def scenario_dh_plant_cheap(data, vertex, edge):
     process.loc['District heating plant', 'cost-inv-var'] *= 0.5
     return data, vertex, edge
     
+def scenario_heat_pump_better(data, vertex, edge):
+    """Heat pump better: increase output ratio by 50%"""
+    pro_co = data['process_commodity']
+    pro_co.loc[('Heat pump domestic', 'Heat', 'Out'), 'ratio'] *= 1.5
+    pro_co.loc[('Heat pump plant', 'Heat', 'Out'), 'ratio'] *= 1.5
+    return data, verte, edge
+    
 scenarios = [scenario_base, scenario_renovation, scenario_dh_cheap, 
              scenario_gas_expensive, scenario_elec_expensive,
-             scenario_dh_plant_cheap]
+             scenario_dh_plant_cheap, scenario_heat_pump_better]
 
 # solver
 
@@ -123,7 +130,7 @@ def prepare_edge(edge_shapefile, building_shapefile):
 
 
 
-def run_scenario(scenario):
+def run_scenario(scenario, result_dir):
     # scenario name
     sce = scenario.__name__
     sce_nice_name = sce.replace('_', ' ').title()
@@ -136,9 +143,7 @@ def run_scenario(scenario):
     # apply scenario function to input data
     data, vertex, edge = scenario(data, vertex, edge)
 
-    # prepare result directory 
-    result_name = os.path.basename(base_directory)
-    result_dir = prepare_result_directory(result_name)  # name + time stamp
+    log_filename = os.path.join(result_dir, sce+'.log')
 
     # create & solve model
     model = rivus.create_model(data, vertex, edge)
@@ -157,7 +162,7 @@ def run_scenario(scenario):
     # plot without buildings
     rivus.result_figures(prob, os.path.join(result_dir, sce))
     
-    # plot with buildings and to_edge
+    # plot with buildings and to_edge lines
     more_shapefiles = [{'name': 'to_edge',
                         'color': rivus.to_rgb(192, 192, 192),
                         'shapefile': to_edge_shapefile,
@@ -169,6 +174,10 @@ def run_scenario(scenario):
     return prob
 
 if __name__ == '__main__':
+    # prepare result directory 
+    result_name = os.path.basename(base_directory)
+    result_dir = prepare_result_directory(result_name)  # name + time stamp
+    
     for scenario in scenarios:
-        prob = run_scenario(scenario)
+        prob = run_scenario(scenario, result_dir)
 
