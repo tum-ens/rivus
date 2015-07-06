@@ -511,6 +511,7 @@ def commodity_maximum_rule(m, co):
             generation_per_timestep += process_balance(m, v, co, t)
         for e in m.edge:
             generation_per_timestep += hub_balance(m, e[0], e[1], co, t)
+        generation_per_timestep *= m.params['time'].loc[t]['weight']
         total_generation += generation_per_timestep
     return total_generation <= m.params['commodity'].loc[co]['allowed-max']
 
