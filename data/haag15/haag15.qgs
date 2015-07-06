@@ -105,8 +105,8 @@
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="edge20150105162959797"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="streets20150107172717324"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="vertex_clusters20150518151114646"/>
-            <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="vertex20150121133847847"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="voronoi_clusters20150518151406314"/>
+            <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="vertex20150121133847847"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="edge_buffered220150512164246295"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:3875" srcDatumTransform="-1" destDatumTransform="-1" layerid="edge_prof_buff_diss20150512165352184"/>
             <layer_coordinate_transform destAuthId="EPSG:3857" srcAuthId="EPSG:4326" srcDatumTransform="-1" destDatumTransform="-1" layerid="boundary20150105154103313"/>
@@ -203,7 +203,7 @@
             </filegroup>
         </legendlayer>
     </legend>
-    <Composer title="Quer DIN A3" visible="0">
+    <Composer title="Quer DIN A3" visible="1">
         <Composition gridVisible="0" printResolution="600" paperWidth="420" snapGridOffsetX="0" guidesVisible="1" snapGridResolution="10" snapGridOffsetY="0" alignmentSnap="1" snapping="0" snapTolerancePixels="5" numPages="1" paperHeight="297" smartGuides="1" printAsRaster="1" generateWorldFile="0">
             <symbol alpha="1" type="fill" name="">
                 <layer pass="0" class="SimpleFill" locked="0">
@@ -397,7 +397,7 @@
                     </markerStyle>
                 </ComposerMapGrid>
                 <AtlasMap scalingMode="2" atlasDriven="0" margin="0.10000000000000001"/>
-                <ComposerItem pagey="172.002" page="1" id="" lastValidViewScaleFactor="2.98251" positionMode="0" positionLock="false" x="7.62869" y="172.002" visibility="1" zValue="4" background="false" transparency="0" frameJoinStyle="miter" blendMode="0" width="120.878" outlineWidth="0.3" excludeFromExports="0" uuid="{8a56fdf4-cde8-4d3a-8454-9dbbeec56083}" height="118.164" itemRotation="0" frame="true" pagex="7.62869">
+                <ComposerItem pagey="172.002" page="1" id="" lastValidViewScaleFactor="3.06438" positionMode="0" positionLock="false" x="7.62869" y="172.002" visibility="1" zValue="4" background="false" transparency="0" frameJoinStyle="miter" blendMode="0" width="120.878" outlineWidth="0.3" excludeFromExports="0" uuid="{8a56fdf4-cde8-4d3a-8454-9dbbeec56083}" height="118.164" itemRotation="0" frame="true" pagex="7.62869">
                     <FrameColor alpha="255" red="128" blue="128" green="128"/>
                     <BackgroundColor alpha="255" red="255" blue="255" green="255"/>
                 </ComposerItem>
@@ -474,7 +474,7 @@
                     </markerStyle>
                 </ComposerMapGrid>
                 <AtlasMap scalingMode="2" atlasDriven="0" margin="0.10000000000000001"/>
-                <ComposerItem pagey="106.246" page="1" id="" lastValidViewScaleFactor="2.98251" positionMode="0" positionLock="false" x="7.62869" y="106.246" visibility="1" zValue="2" background="true" transparency="0" frameJoinStyle="miter" blendMode="0" width="120.878" outlineWidth="0.3" excludeFromExports="0" uuid="{80003f13-cfdf-4a54-8b6a-c000dbcfb59e}" height="59.1707" itemRotation="0" frame="true" pagex="7.62869">
+                <ComposerItem pagey="106.246" page="1" id="" lastValidViewScaleFactor="3.06438" positionMode="0" positionLock="false" x="7.62869" y="106.246" visibility="1" zValue="2" background="true" transparency="0" frameJoinStyle="miter" blendMode="0" width="120.878" outlineWidth="0.3" excludeFromExports="0" uuid="{80003f13-cfdf-4a54-8b6a-c000dbcfb59e}" height="59.1707" itemRotation="0" frame="true" pagex="7.62869">
                     <FrameColor alpha="255" red="128" blue="128" green="128"/>
                     <BackgroundColor alpha="255" red="255" blue="255" green="255"/>
                 </ComposerItem>
@@ -530,7 +530,7 @@
                     </markerStyle>
                 </ComposerMapGrid>
                 <AtlasMap scalingMode="2" atlasDriven="0" margin="0.10000000000000001"/>
-                <ComposerItem pagey="8.34822" page="1" id="" lastValidViewScaleFactor="2.98251" positionMode="0" positionLock="false" x="7.62869" y="8.34822" visibility="1" zValue="1" background="false" transparency="0" frameJoinStyle="miter" blendMode="0" width="406.102" outlineWidth="0.3" excludeFromExports="0" uuid="{aa6761d8-6c68-44b1-8f42-6e71b2631f5a}" height="281.818" itemRotation="0" frame="true" pagex="7.62869">
+                <ComposerItem pagey="8.34822" page="1" id="" lastValidViewScaleFactor="3.06438" positionMode="0" positionLock="false" x="7.62869" y="8.34822" visibility="1" zValue="1" background="false" transparency="0" frameJoinStyle="miter" blendMode="0" width="406.102" outlineWidth="0.3" excludeFromExports="0" uuid="{aa6761d8-6c68-44b1-8f42-6e71b2631f5a}" height="281.818" itemRotation="0" frame="true" pagex="7.62869">
                     <FrameColor alpha="255" red="128" blue="128" green="128"/>
                     <BackgroundColor alpha="255" red="255" blue="255" green="255"/>
                 </ComposerItem>
@@ -1426,10 +1426,10 @@
                 <multilineenabled fieldname="" on=""/>
                 <selectedonly on=""/>
             </labelattributes>
-            <editform></editform>
+            <editform>.</editform>
             <editforminit></editforminit>
             <featformsuppress>0</featformsuppress>
-            <annotationform></annotationform>
+            <annotationform>.</annotationform>
             <editorlayout>generatedlayout</editorlayout>
             <excludeAttributesWMS/>
             <excludeAttributesWFS/>
@@ -2282,18 +2282,18 @@
                 <property key="labeling/bufferColorB" value="255"/>
                 <property key="labeling/bufferColorG" value="255"/>
                 <property key="labeling/bufferColorR" value="255"/>
-                <property key="labeling/bufferDraw" value="false"/>
+                <property key="labeling/bufferDraw" value="true"/>
                 <property key="labeling/bufferJoinStyle" value="64"/>
                 <property key="labeling/bufferNoFill" value="false"/>
                 <property key="labeling/bufferSize" value="1"/>
                 <property key="labeling/bufferSizeInMapUnits" value="false"/>
                 <property key="labeling/bufferSizeMapUnitMaxScale" value="0"/>
                 <property key="labeling/bufferSizeMapUnitMinScale" value="0"/>
-                <property key="labeling/bufferTransp" value="0"/>
+                <property key="labeling/bufferTransp" value="50"/>
                 <property key="labeling/centroidInside" value="false"/>
                 <property key="labeling/centroidWhole" value="false"/>
                 <property key="labeling/decimals" value="3"/>
-                <property key="labeling/displayAll" value="false"/>
+                <property key="labeling/displayAll" value="true"/>
                 <property key="labeling/dist" value="0"/>
                 <property key="labeling/distInMapUnits" value="false"/>
                 <property key="labeling/distMapUnitMaxScale" value="0"/>
@@ -2302,13 +2302,13 @@
                 <property key="labeling/fieldName" value="Cluster"/>
                 <property key="labeling/fontBold" value="false"/>
                 <property key="labeling/fontCapitals" value="0"/>
-                <property key="labeling/fontFamily" value="MS Shell Dlg 2"/>
+                <property key="labeling/fontFamily" value="Arial"/>
                 <property key="labeling/fontItalic" value="false"/>
                 <property key="labeling/fontLetterSpacing" value="0"/>
                 <property key="labeling/fontLimitPixelSize" value="false"/>
                 <property key="labeling/fontMaxPixelSize" value="10000"/>
                 <property key="labeling/fontMinPixelSize" value="3"/>
-                <property key="labeling/fontSize" value="8.25"/>
+                <property key="labeling/fontSize" value="16"/>
                 <property key="labeling/fontSizeInMapUnits" value="false"/>
                 <property key="labeling/fontSizeMapUnitMaxScale" value="0"/>
                 <property key="labeling/fontSizeMapUnitMinScale" value="0"/>
@@ -3561,10 +3561,10 @@
                 <multilineenabled fieldname="" on=""/>
                 <selectedonly on=""/>
             </labelattributes>
-            <editform></editform>
+            <editform>.</editform>
             <editforminit></editforminit>
             <featformsuppress>0</featformsuppress>
-            <annotationform></annotationform>
+            <annotationform>.</annotationform>
             <editorlayout>generatedlayout</editorlayout>
             <excludeAttributesWMS/>
             <excludeAttributesWFS/>

@@ -18,6 +18,25 @@ data_spreadsheet = os.path.join(base_directory, 'data.xlsx')
 def scenario_base(data, vertex, edge):
     """Base scenario: change nothing-"""
     return data, vertex, edge
+    
+def scenario_no_heat_pump(data, vertex, edge):
+    """No heat pump: not allowed"""
+    process = data['process']
+    process.loc['Heat pump domestic', 'cap-min'] = 0
+    process.loc['Heat pump domestic', 'cap-max'] = 0
+    process.loc['Heat pump plant', 'cap-min'] = 0
+    process.loc['Heat pump plant', 'cap-max'] = 0
+    return data, vertex, edge
+    
+def scenario_no_electric_heating(data, vertex, edge):
+    """No electric heating at all"""
+    process = data['process']
+    process.loc['Heat pump domestic', 'cap-min'] = 0
+    process.loc['Heat pump domestic', 'cap-max'] = 0
+    process.loc['Heat pump plant', 'cap-min'] = 0
+    process.loc['Heat pump plant', 'cap-max'] = 0
+    process.loc['Elec heating domestic', 'cap-max'] = 0
+    return data, vertex, edge
 
 def scenario_renovation(data, vertex, edge):
     """Renovation: reduce heat demand of residential/other by 50%"""
@@ -38,6 +57,12 @@ def scenario_gas_expensive(data, vertex, edge):
     commodity = data['commodity']
     commodity.loc['Gas', 'cost-var'] *= 1.5
     return data, vertex, edge
+    
+def scenario_gas_cheap(data, vertex, edge):
+    """Gas cheap: decrease gas price by 50%"""
+    commodity = data['commodity']
+    commodity.loc['Gas', 'cost-var'] *= 0.5
+    return data, vertex, edge
 
 def scenario_elec_expensive(data, vertex, edge):
     """Elec expensive: increase electricity price by 100%"""
@@ -57,11 +82,7 @@ def scenario_heat_pump_better(data, vertex, edge):
     pro_co = data['process_commodity']
     pro_co.loc[('Heat pump domestic', 'Heat', 'Out'), 'ratio'] *= 1.5
     pro_co.loc[('Heat pump plant', 'Heat', 'Out'), 'ratio'] *= 1.5
-    return data, verte, edge
-    
-scenarios = [scenario_base, scenario_renovation, scenario_dh_cheap, 
-             scenario_gas_expensive, scenario_elec_expensive,
-             scenario_dh_plant_cheap, scenario_heat_pump_better]
+    return data, vertex, edge
 
 # solver
 
@@ -70,9 +91,9 @@ def setup_solver(optim):
     if optim.name == 'gurobi':
         # reference with list of option names
         # http://www.gurobi.com/documentation/5.6/reference-manual/parameters
-        optim.set_options("TimeLimit=10800")  # seconds
+        optim.set_options("TimeLimit=5000")  # seconds
         optim.set_options("MIPFocus=2")  # 1=feasible, 2=optimal, 3=bound
-        optim.set_options("MIPGap=5e-4")  # default = 1e-4
+        optim.set_options("MIPGap=1e-3")  # default = 1e-4
         optim.set_options("Threads=48")  # number of simultaneous CPU threads
     elif optim.name == 'glpk':
         # reference with list of options
@@ -87,7 +108,7 @@ def setup_solver(optim):
 def prepare_result_directory(result_name):
     """ create a time stamped directory within the result folder """
     # timestamp for result directory
-    now = datetime.now().strftime('%Y%m%dT%H%M%S')
+    now = datetime.now().strftime('%y%m%dT%H%M')
 
     # create result directory if not existent
     result_dir = os.path.join('result', '{}-{}'.format(result_name, now))
@@ -173,11 +194,20 @@ def run_scenario(scenario, result_dir):
                          shapefiles=more_shapefiles)
     return prob
 
+
 if __name__ == '__main__':
     # prepare result directory 
     result_name = os.path.basename(base_directory)
     result_dir = prepare_result_directory(result_name)  # name + time stamp
-    
-    for scenario in scenarios:
+
+    scenarios = [
+        scenario_base, scenario_no_heat_pump,
+        scenario_renovation, scenario_no_electric_heating,
+        scenario_dh_cheap, 
+        scenario_gas_expensive, scenario_gas_cheap,
+        scenario_elec_expensive,
+        scenario_dh_plant_cheap, scenario_heat_pump_better]
+
+    for scenario in [scenario_no_electric_heating]:
         prob = run_scenario(scenario, result_dir)
 

@@ -15,7 +15,7 @@ def replot(directory):
     glob_pattern = os.path.join(directory, '*.pgz')
     pickle_filenames = glob.glob(glob_pattern)
     
-    data_dir = os.path.join('data', os.path.basename(directory))
+    data_dir = os.path.join('data', os.path.basename(directory).split('-')[0])
     # if directory = 'result/moosh' try to find a suitable building shapefile
     # in 'data/moosh'
     buildings = None
