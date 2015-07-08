@@ -2,3 +2,4 @@
 *.log
 *.pyc
 result/*
+doc/_build/*
