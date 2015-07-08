@@ -25,6 +25,7 @@ rivus is a [mixed integer linear programming](https://en.wikipedia.org/wiki/Inte
   * [pandas](http://pandas.pydata.org/), including xlrd, xlwt, openpyxl for Excel I/O (included in Anaconda)
   * [mpl_toolkit.basemap](http://matplotlib.org/basemap/) (for result map generation)
   * Any solver supported by Pyomo (recommended: [Gurobi](http://gurobi.com/))
+  * [Python-tools](https://github.com/ojdo/python-tools) my personal toolbox for geographic data handling (module `pandashp`)
 
   
 ## Copyright
