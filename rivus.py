@@ -947,7 +947,7 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
         commodity:
         plot_demand: If True, plot demand, else plot capacities
         mapscale: If True, add mapscale to plot (default: False)
-        tick_labels: If True, add lon/lat tick labels (default: False)
+        tick_labels: If True, add lon/lat tick labels (default: True)
         annotations: If True, add numeric labels to graph (default: True)
         buildings: tuple of (filename to shapefile, boolean)
                    if true, color buildings according to attribute column
