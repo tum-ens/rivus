@@ -39,9 +39,12 @@ def scenario_no_electric_heating(data, vertex, edge):
     return data, vertex, edge
 
 def scenario_renovation(data, vertex, edge):
-    """Renovation: reduce heat demand of residential/other by 50%"""
+    """Renovation: reduce heat demand of residential/commercial by 50%"""
     area_demand = data['area_demand']
     area_demand.ix[('residential', 'Heat'), 'peak'] *= 0.5
+    area_demand.ix[('house', 'Heat'), 'peak'] *= 0.5
+    area_demand.ix[('commercial', 'Heat'), 'peak'] *= 0.5
+    area_demand.ix[('office', 'Heat'), 'peak'] *= 0.5
     area_demand.ix[('other', 'Heat'), 'peak'] *= 0.5
     return data, vertex, edge
 
@@ -201,13 +204,13 @@ if __name__ == '__main__':
     result_dir = prepare_result_directory(result_name)  # name + time stamp
 
     scenarios = [
-        scenario_base, scenario_no_heat_pump,
-        scenario_renovation, scenario_no_electric_heating,
+        scenario_base, scenario_no_electric_heating,
+        scenario_renovation, scenario_no_heat_pump,
         scenario_dh_cheap, 
         scenario_gas_expensive, scenario_gas_cheap,
         scenario_elec_expensive,
         scenario_dh_plant_cheap, scenario_heat_pump_better]
 
-    for scenario in [scenario_no_electric_heating]:
+    for scenario in scenarios:
         prob = run_scenario(scenario, result_dir)
 
