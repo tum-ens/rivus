@@ -38,6 +38,11 @@ def scenario_no_electric_heating(data, vertex, edge):
     process.loc['Elec heating domestic', 'cap-max'] = 0
     return data, vertex, edge
 
+def scenario_high_demand(data, vertex, edge):
+    """High demand: increase demand by 100%"""
+    data['area_demand'] *= 2
+    return data, vertex, edge
+
 def scenario_renovation(data, vertex, edge):
     """Renovation: reduce heat demand of residential/commercial by 50%"""
     area_demand = data['area_demand']
@@ -86,22 +91,38 @@ def scenario_heat_pump_better(data, vertex, edge):
     pro_co.loc[('Heat pump domestic', 'Heat', 'Out'), 'ratio'] *= 1.5
     pro_co.loc[('Heat pump plant', 'Heat', 'Out'), 'ratio'] *= 1.5
     return data, vertex, edge
+    
+def scenario_heat_pump_expensive(data, vertex, edge):
+    """Heat pump expensive: increase investment costs by 100%"""
+    pro = data['process']
+    pro.loc['Heat pump domestic', 'cost-inv-fix'] *= 2
+    pro.loc['Heat pump domestic', 'cost-inv-var'] *= 2
+    pro.loc['Heat pump plant', 'cost-inv-fix'] *= 2
+    pro.loc['Heat pump plant', 'cost-inv-var'] *= 2
+    return data, vertex, edge
+    
+def scenario_elec_very_expensive(data, vertex, edge):
+    """Elec very expensive: increase electricity price by 400%"""
+    commodity = data['commodity']
+    commodity.loc['Elec', 'cost-var'] *= 5
+    return data, vertex, edge
 
 # solver
 
-def setup_solver(optim):
+def setup_solver(optim, logfile='solver.log'):
     """Change solver options to custom values."""
     if optim.name == 'gurobi':
         # reference with list of option names
         # http://www.gurobi.com/documentation/5.6/reference-manual/parameters
-        optim.set_options("TimeLimit=5000")  # seconds
+        optim.set_options("logfile={}".format(logfile)) 
+        optim.set_options("TimeLimit=12000")  # seconds
         optim.set_options("MIPFocus=2")  # 1=feasible, 2=optimal, 3=bound
         optim.set_options("MIPGap=1e-3")  # default = 1e-4
         optim.set_options("Threads=48")  # number of simultaneous CPU threads
     elif optim.name == 'glpk':
         # reference with list of options
         # execute 'glpsol --help'
-        pass
+        optim.set_options("log={}".format(logfile))
     else:
         print("Warning from setup_solver: no options set for solver "
             "'{}'!".format(optim.name))
@@ -173,10 +194,8 @@ def run_scenario(scenario, result_dir):
     model = rivus.create_model(data, vertex, edge)
     prob = model.create()
     optim = SolverFactory('gurobi')
-    optim = setup_solver(optim)
-    result = optim.solve(prob, 
-                         logfile=log_filename,
-                         tee=True)
+    optim = setup_solver(optim, logfile=log_filename)
+    result = optim.solve(prob, tee=True)
     prob.load(result)
 
     # report
@@ -204,13 +223,20 @@ if __name__ == '__main__':
     result_dir = prepare_result_directory(result_name)  # name + time stamp
 
     scenarios = [
-        scenario_base, scenario_no_electric_heating,
-        scenario_renovation, scenario_no_heat_pump,
+        scenario_base, 
+        scenario_no_electric_heating,
+        scenario_renovation, 
+        scenario_no_heat_pump,
         scenario_dh_cheap, 
-        scenario_gas_expensive, scenario_gas_cheap,
+        scenario_high_demand,
+        scenario_gas_expensive, 
+        scenario_gas_cheap,
         scenario_elec_expensive,
-        scenario_dh_plant_cheap, scenario_heat_pump_better]
+        scenario_dh_plant_cheap, 
+        scenario_heat_pump_better,
+        scenario_heat_pump_expensive,
+        scenario_elec_very_expensive]
 
-    for scenario in scenarios:
+    for scenario in scenarios[-2:]:
         prob = run_scenario(scenario, result_dir)
 
