@@ -106,6 +106,12 @@ def scenario_elec_very_expensive(data, vertex, edge):
     commodity = data['commodity']
     commodity.loc['Elec', 'cost-var'] *= 5
     return data, vertex, edge
+    
+def scenario_elec_very_very_expensive(data, vertex, edge):
+    """Elec very expensive: increase electricity price tenfold """
+    commodity = data['commodity']
+    commodity.loc['Elec', 'cost-var'] *= 10
+    return data, vertex, edge
 
 # solver
 
@@ -235,8 +241,9 @@ if __name__ == '__main__':
         scenario_dh_plant_cheap, 
         scenario_heat_pump_better,
         scenario_heat_pump_expensive,
-        scenario_elec_very_expensive]
+        scenario_elec_very_expensive,
+        scenario_elec_very_very_expensive]
 
-    for scenario in scenarios[-2:]:
+    for scenario in scenarios[-1:]:
         prob = run_scenario(scenario, result_dir)
 
