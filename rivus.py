@@ -68,13 +68,13 @@ def read_excel(filename):
         a dict of 6 DataFrames, one for each sheet
     """
     with pd.ExcelFile(filename) as xls:
-        commodity = xls.parse('Commodity', index_col=['Commodity'])
-        process = xls.parse('Process', index_col=['Process'])
-        time = xls.parse('Time', index_col=['Time'])
-        area_demand = xls.parse('Area-Demand', index_col=['Area', 'Commodity'])
-        process_commodity = xls.parse(
-            'Process-Commodity',
-            index_col=['Process', 'Commodity', 'Direction'])
+        commodity = xls.parse('Commodity').set_index(['Commodity'])
+        process = xls.parse('Process').set_index(['Process'])
+        time = xls.parse('Time').set_index(['Time'])
+        area_demand = xls.parse('Area-Demand').set_index(['Area', 'Commodity'])
+        process_commodity = (
+            xls.parse('Process-Commodity')
+               .set_index(['Process', 'Commodity', 'Direction']))
 
     data = {
         'commodity': commodity,
@@ -149,15 +149,14 @@ def create_model(data, vertex, edge):
     # helper function: calculates outer product of column in table area_demand
     # with specified series, which is applied to the columns of edge_areas
     def multiply_by_area_demand(series, column):
-        return area_demand[column] \
-               .ix[series.name] \
-               .apply(lambda x: x*series) \
-               .stack()
+        return (area_demand[column].ix[series.name]
+                                   .apply(lambda x: x*series)
+                                   .stack())
 
     # peak(edge, commodity) in kW
-    m.peak = edge_areas.apply(lambda x: multiply_by_area_demand(x, 'peak')) \
-                       .sum(axis=1) \
-                       .unstack('Commodity')
+    m.peak = (edge_areas.apply(lambda x: multiply_by_area_demand(x, 'peak'))
+                        .sum(axis=1)
+                        .unstack('Commodity'))
 
     # reindex edges to vertex tuple index
     vertex.set_index('Vertex', inplace=True)
