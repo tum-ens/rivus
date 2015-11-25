@@ -91,7 +91,7 @@ def read_excel(filename):
     return data
 
 
-def create_model(data, vertex, edge):
+def create_model(data, vertex, edge, peak_multiplier=None):
     """Return a rivus model instance from input file and spatial input.
 
     Args:
@@ -167,6 +167,9 @@ def create_model(data, vertex, edge):
     # store geographic DataFrames vertex & edge for later use
     m.params['vertex'] = vertex.copy()
     m.params['edge'] = edge.copy()
+
+    if peak_multiplier:
+        m.peak = peak_multiplier(m)
 
     # construct arc set of directed (i,j), (j,i) edges
     arcs = [arc for (v1, v2) in edge.index for arc in ((v1, v2), (v2, v1))]
