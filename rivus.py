@@ -657,7 +657,7 @@ def pairs(lst):
         http://stackoverflow.com/questions/1257413/1257446#1257446
     """
     i = iter(lst)
-    prev = i.next()
+    prev = next(i)
     for item in i:
         yield prev, item
         prev = item
@@ -1114,7 +1114,7 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
                             edgecolor=(1, 1, 1), zorder=30)
                 # annotate at line midpoint
 
-                (x, y) = bm(lon[len(lon)/2], lat[len(lat)/2])
+                (x, y) = bm(lon[len(lon)//2], lat[len(lat)//2])
                 if annotations:
                     plt.annotate(
                         '%u'%row[commodity], xy=(x, y),
