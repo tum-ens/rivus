@@ -1,10 +1,16 @@
-import coopr.environ
+try:
+    import pyomo.environ
+    from pyomo.opt.base import SolverFactory
+    PYOMO3 = False
+except ImportError:
+    import coopr.environ
+    from coopr.opt.base import SolverFactory
+    PYOMO3 = True
 import matplotlib.pyplot as plt
 import os
 import pandas as pd
 import pandashp as pdshp
 import rivus
-from coopr.opt.base import SolverFactory
 from operator import itemgetter
 
 base_directory = os.path.join('data', 'moosh')
@@ -69,12 +75,14 @@ vertex = pdshp.read_shp(vertex_shapefile)
 data = rivus.read_excel(data_spreadsheet)
 
 # create & solve model
-model = rivus.create_model(data, vertex, edge)
-prob = model.create()
+prob = rivus.create_model(data, vertex, edge)
+if PYOMO3:
+    prob = prob.create()  # no longer needed in Pyomo 4
 optim = SolverFactory('gurobi')
 optim = setup_solver(optim)
 result = optim.solve(prob, tee=True)
-prob.load(result)
+if PYOMO3:
+    prob.load(result)  # no longer needed in Pyomo 4
 
 # load results
 costs, Pmax, Kappa_hub, Kappa_process = rivus.get_constants(prob)

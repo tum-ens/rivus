@@ -3,7 +3,14 @@
 rivus optimizes topology and size of urban energy networks, energy conversion.
 
 """
-import coopr.pyomo as pyomo
+import warnings
+try:
+    import pyomo.core as pyomo
+except ImportError:
+    import coopr.pyomo as pyomo
+    warnings.warn("Support for Pyomo 3.x is now deprecated and will be removed"
+                  "removed with the next release. Please upgrade to Pyomo 4.",
+                  FutureWarning, stacklevel=2)
 import geopandas
 import itertools
 import math
@@ -52,7 +59,7 @@ COLORS = { # (R,G,B) tuples with range (0-255)
     'warehouse': (98, 134, 6),
 }
 to_rgb = lambda r,g,b: tuple(x/255. for x in (r,g,b))
-for key, val in COLORS.iteritems():
+for key, val in COLORS.items():
     COLORS[key] = to_rgb(*val)
 
 def read_excel(filename):
