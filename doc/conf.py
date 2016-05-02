@@ -11,7 +11,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 project = u'rivus'
-copyright = u'2015, ojdo'
+copyright = u'2015-2016, ojdo'
 version = '0.1'
 release = '0.1'
 

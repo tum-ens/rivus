@@ -76,14 +76,15 @@ Dependencies
 * `matplotlib`_ for plotting
 * `pandas`_ for input and result data handling, report generation 
 * `pyomo`_ for the model equations
-* `python-tools`_ my personal toolbox for geographic data handling (module `pandashp`)
+* `python-tools`_ my personal toolbox for geographic data handling (modules 
+  `pandashp` and `shapelytools`)
    
 .. _coopr: https://software.sandia.gov/trac/coopr
 .. _Institute for Renewable and Sustainable Energy Systems: http://www.ens.ei.tum.de/
 .. _matplotlib: http://matplotlib.org
 .. _pandas: https://pandas.pydata.org
-.. _pyomo: https://software.sandia.gov/trac/coopr/wiki/Pyomo
+.. _pyomo: http://www.pyomo.org/
 .. _python-tools: https://github.com/ojdo/python-tools
-.. _rivus: https://github.com/ojdo/rivus
+.. _rivus: https://github.com/tum-ens/rivus
 .. _urbs: https://github.com/tum-ens/urbs
 

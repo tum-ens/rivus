@@ -19,18 +19,18 @@ rivus is a [mixed integer linear programming](https://en.wikipedia.org/wiki/Inte
   
 ## Dependencies
   
-  * [Python 2.7](https://python.org/download). On Windows, use [Anaconda](http://continuum.io/anaconda) and its `conda` packet manager (use `pip` only if a package cannot be found or is outdated in `conda` repository)
-  * Coopr/Pyomo version 3.5.x (version 4 support planned): `pip install coopr==3.5.8787`
+  * [Python 2.7](https://python.org/download) or Python 3.x. On Windows, use [Anaconda](http://continuum.io/anaconda) and its `conda` packet manager (use `pip` only if a package cannot be found or is outdated in `conda` repository)
+  * Pyomo 4: `pip install pyomo` (Coopr/Pyomo version 3.5 is still supported, but deprecated)
   * SciPy stack (NumPy, SciPy, matplotlib) (included in Anaconda)
-  * [pandas](http://pandas.pydata.org/), including xlrd, xlwt, openpyxl for Excel I/O (included in Anaconda)
-  * [mpl_toolkit.basemap](http://matplotlib.org/basemap/) (for result map generation)
+  * [pandas](http://pandas.pydata.org/), including xlrd, xlwt, openpyxl for Excel I/O (all included in Anaconda)
+  * [mpl_toolkit.basemap](http://matplotlib.org/basemap/) (for result map generation): Download from [~gohlke/pythonlibs](http://www.lfd.uci.edu/~gohlke/pythonlibs/#basemap) and install with `pip basemap-1.*.whl`
   * Any solver supported by Pyomo (recommended: [Gurobi](http://gurobi.com/))
-  * [Python-tools](https://github.com/ojdo/python-tools) my personal toolbox for geographic data handling (module `pandashp`)
+  * [Python-tools](https://github.com/ojdo/python-tools) my personal toolbox for geographic data handling (modules `pandashp` [could be replaced by GeoDataFrame] and `shapelytools` [not easily replacable]). Clone somewhere and [add to your Python path](http://stackoverflow.com/q/17806673/2375855).
 
   
 ## Copyright
 
-Copyright (C) 2015  Johannes Dorfner
+Copyright (C) 2015-2016  Johannes Dorfner
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
