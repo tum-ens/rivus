@@ -32,7 +32,8 @@ def setup_solver(optim):
     elif optim.name == 'glpk':
         # reference with list of options
         # execute 'glpsol --help'
-        pass
+        optim.set_options("tmlim=600")
+        optim.set_options("mipgap=2e-2")
     else:
         print("Warning from setup_solver: no options set for solver "
             "'{}'!".format(optim.name))
@@ -78,7 +79,7 @@ data = rivus.read_excel(data_spreadsheet)
 prob = rivus.create_model(data, vertex, edge)
 if PYOMO3:
     prob = prob.create()  # no longer needed in Pyomo 4
-optim = SolverFactory('gurobi')
+optim = SolverFactory('glpk')
 optim = setup_solver(optim)
 result = optim.solve(prob, tee=True)
 if PYOMO3:
