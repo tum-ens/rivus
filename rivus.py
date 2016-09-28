@@ -938,7 +938,7 @@ def get_timeseries(prob):
 
     proc_tau = proc_tau[proc_tau.apply(round) > 0]
     if not proc_tau.empty:
-        proc_tau = proc_tau.unstack().applymap(round)
+        proc_tau = proc_tau.unstack().fillna(0).applymap(round)
 
     return source, flows, hubs, proc_io, proc_tau
 
