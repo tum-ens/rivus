@@ -203,13 +203,13 @@ def run_scenario(scenario, result_dir):
     log_filename = os.path.join(result_dir, sce+'.log')
 
     # create & solve model
-    model = rivus.create_model(data, vertex, edge)
-    if PYOMO:
-        prob = model.create() # no longer needed in Pyomo 4+
-    optim = SolverFactory('gurobi')
+    prob = rivus.create_model(data, vertex, edge)
+    if PYOMO3:
+        prob = prob.create() # no longer needed in Pyomo 4+
+    optim = SolverFactory('glpk')
     optim = setup_solver(optim, logfile=log_filename)
     result = optim.solve(prob, tee=True)
-    if PYOMO:
+    if PYOMO3:
         prob.load(result) # no longer needed in Pyomo 4+
 
     # report

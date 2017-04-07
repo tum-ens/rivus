@@ -44,9 +44,9 @@ vertex = pdshp.read_shp(vertex_shapefile)
 data = rivus.read_excel(data_spreadsheet)
 
 # create and solve model
-model = rivus.create_model(data, vertex, edge)
+prob = rivus.create_model(data, vertex, edge)
 if PYOMO3:
-    prob = model.create() # no longer needed in Pyomo 4<
+    prob = prob.create() # no longer needed in Pyomo 4<
 solver = SolverFactory('glpk')
 result = solver.solve(prob, tee=True)
 if PYOMO3:

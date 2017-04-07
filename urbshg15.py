@@ -218,7 +218,7 @@ def run_scenario(scenario, result_dir):
     log_filename = os.path.join(result_dir, sce+'.log')
 
     # create & solve model
-    model = rivus.create_model(
+    prob = rivus.create_model(
         data, vertex, edge,
         peak_multiplier=lambda x:scale_peak_demand(x, peak_demand_prefactor))
     
@@ -227,8 +227,8 @@ def run_scenario(scenario, result_dir):
     #model.peak = reduced_peak
     
     if PYOMO3:
-        prob = model.create()
-    optim = SolverFactory('gurobi')
+        prob = prob.create()
+    optim = SolverFactory('glpk')
     optim = setup_solver(optim, logfile=log_filename)
     result = optim.solve(prob, tee=True)
     if PYOMO3:

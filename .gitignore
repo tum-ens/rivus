@@ -3,3 +3,6 @@
 *.pyc
 result/*
 doc/_build/*
+__pycache__/
+.idea/
+playground/

@@ -107,15 +107,15 @@ def run_scenario(scenario):
     data, vertex, edge = scenario(data, vertex, edge)
     
     # create & solve model
-    model = rivus.create_model(data, vertex, edge)
+    prob = rivus.create_model(data, vertex, edge)
     if PYOMO3:
-        prob = model.create() # no longer needed in Pyomo 4+
+        prob = prob.create() # no longer needed in Pyomo 4+
     optim = SolverFactory('gurobi')
     optim = setup_solver(optim)
     result = optim.solve(prob, tee=True)
     if PYOMO3:
         prob.load(result) # no longer needed in Pyomo 4+
-        
+
     # create result directory if not existent
     result_dir = os.path.join('result', os.path.basename(base_directory))
     if not os.path.exists(result_dir):
