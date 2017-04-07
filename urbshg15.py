@@ -1,10 +1,16 @@
-import coopr.environ
+try:
+    import pyomo.environ
+    from pyomo.opt.base import SolverFactory
+    PYOMO3 = False
+except ImportError:
+    import coopr.environ
+    from coopr.opt.base import SolverFactory
+    PYOMO3 = True
 import geopandas
 import os
 import pandas as pd
 import pandashp as pdshp
 import rivus
-from coopr.opt.base import SolverFactory
 from datetime import datetime
 
 base_directory = os.path.join('data', 'haag15')
@@ -220,11 +226,13 @@ def run_scenario(scenario, result_dir):
     #reduced_peak = scale_peak_demand(model, peak_demand_prefactor)
     #model.peak = reduced_peak
     
-    prob = model.create()
+    if PYOMO3:
+        prob = model.create()
     optim = SolverFactory('gurobi')
     optim = setup_solver(optim, logfile=log_filename)
     result = optim.solve(prob, tee=True)
-    prob.load(result)
+    if PYOMO3:
+        prob.load(result)
 
     # report
     rivus.save(prob, os.path.join(result_dir, sce+'.pgz'))

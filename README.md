@@ -28,7 +28,7 @@ rivus is a [mixed integer linear programming](https://en.wikipedia.org/wiki/Inte
    1. Then add the subdirectory `w64`, which contains `glpsol.exe`, to the system path ([how](http://geekswithblogs.net/renso/archive/2009/10/21/how-to-set-the-windows-path-in-windows-7.aspx)), so that the `glpsol` command is available on the command prompt.
 3. **Pyomo**
    1. Launch a new command prompt (Win+R, type "cmd", Enter)
-   2. Type `pip install pyomo`, hit Enter.
+   2. Type `pip install pyomo`, hit Enter. (run scripts now handle both 3.5 and 4+ versions)
 
 4. Add **shapefile support**:
    ```

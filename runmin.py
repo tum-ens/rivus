@@ -1,10 +1,16 @@
-import coopr.environ
+try:
+    import pyomo.environ
+    from pyomo.opt.base import SolverFactory
+    PYOMO3 = False
+except ImportError:
+    import coopr.environ
+    from coopr.opt.base import SolverFactory
+    PYOMO3 = True
 import matplotlib.pyplot as plt
 import os
 import pandas as pd
 import pandashp as pdshp
 import rivus
-from coopr.opt.base import SolverFactory
 
 base_directory = os.path.join('data', 'mnl')
 building_shapefile = os.path.join(base_directory, 'building')
@@ -39,10 +45,12 @@ data = rivus.read_excel(data_spreadsheet)
 
 # create and solve model
 model = rivus.create_model(data, vertex, edge)
-prob = model.create()
-solver = SolverFactory('gurobi')
+if PYOMO3:
+    prob = model.create() # no longer needed in Pyomo 4<
+solver = SolverFactory('glpk')
 result = solver.solve(prob, tee=True)
-prob.load(result)
+if PYOMO3:
+    prob.load(result) #no longer needed in Pyomo 4<
 
 # load results
 costs, Pmax, Kappa_hub, Kappa_process = rivus.get_constants(prob)

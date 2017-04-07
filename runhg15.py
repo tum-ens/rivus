@@ -1,9 +1,15 @@
-import coopr.environ
+try:
+    import pyomo.environ
+    from pyomo.opt.base import SolverFactory
+    PYOMO3 = False
+except ImportError:
+    import coopr.environ
+    from coopr.opt.base import SolverFactory
+    PYOMO3 = True
 import geopandas
 import os
 import pandashp as pdshp
 import rivus
-from coopr.opt.base import SolverFactory
 from datetime import datetime
 
 base_directory = os.path.join('data', 'haag15')
@@ -198,11 +204,13 @@ def run_scenario(scenario, result_dir):
 
     # create & solve model
     model = rivus.create_model(data, vertex, edge)
-    prob = model.create()
+    if PYOMO:
+        prob = model.create() # no longer needed in Pyomo 4+
     optim = SolverFactory('gurobi')
     optim = setup_solver(optim, logfile=log_filename)
     result = optim.solve(prob, tee=True)
-    prob.load(result)
+    if PYOMO:
+        prob.load(result) # no longer needed in Pyomo 4+
 
     # report
     rivus.save(prob, os.path.join(result_dir, sce+'.pgz'))
