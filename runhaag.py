@@ -1,10 +1,16 @@
-import coopr.environ
 import matplotlib.pyplot as plt
 import os
 import pandas as pd
 import pandashp as pdshp
 import rivus
-from coopr.opt.base import SolverFactory
+try:
+    import pyomo.environ
+    from pyomo.opt.base import SolverFactory
+    PYOMO3 = False
+except ImportError:
+    import coopr.environ
+    from coopr.opt.base import SolverFactory
+    PYOMO3 = True
 
 base_directory = os.path.join('data', 'haag')
 building_shapefile = os.path.join(base_directory, 'building')
@@ -101,13 +107,15 @@ def run_scenario(scenario):
     data, vertex, edge = scenario(data, vertex, edge)
     
     # create & solve model
-    model = rivus.create_model(data, vertex, edge)
-    prob = model.create()
+    prob = rivus.create_model(data, vertex, edge)
+    if PYOMO3:
+        prob = prob.create() # no longer needed in Pyomo 4+
     optim = SolverFactory('gurobi')
     optim = setup_solver(optim)
     result = optim.solve(prob, tee=True)
-    prob.load(result)
-        
+    if PYOMO3:
+        prob.load(result) # no longer needed in Pyomo 4+
+
     # create result directory if not existent
     result_dir = os.path.join('result', os.path.basename(base_directory))
     if not os.path.exists(result_dir):
