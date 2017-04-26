@@ -9,8 +9,8 @@ except ImportError:
 import matplotlib.pyplot as plt
 import os
 import pandas as pd
-import pandashp as pdshp
-import rivus
+from rivus.utils import pandashp as pdshp
+from rivus.main import rivus
 
 base_directory = os.path.join('data', 'mnl')
 building_shapefile = os.path.join(base_directory, 'building')
@@ -43,42 +43,46 @@ vertex = pdshp.read_shp(vertex_shapefile)
 # load spreadsheet data
 data = rivus.read_excel(data_spreadsheet)
 
-# create and solve model
-prob = rivus.create_model(data, vertex, edge)
-if PYOMO3:
-    prob = prob.create() # no longer needed in Pyomo 4<
-solver = SolverFactory('glpk')
-result = solver.solve(prob, tee=True)
-if PYOMO3:
-    prob.load(result) #no longer needed in Pyomo 4<
+print(edge)
+print(vertex)
 
-# load results
-costs, Pmax, Kappa_hub, Kappa_process = rivus.get_constants(prob)
-source, flows, hub_io, proc_io, proc_tau = rivus.get_timeseries(prob)
+if False:
+    # create and solve model
+    prob = rivus.create_model(data, vertex, edge)
+    if PYOMO3:
+        prob = prob.create() # no longer needed in Pyomo 4<
+    solver = SolverFactory('glpk')
+    result = solver.solve(prob, tee=True)
+    if PYOMO3:
+        prob.load(result) #no longer needed in Pyomo 4<
+
+    # load results
+    costs, Pmax, Kappa_hub, Kappa_process = rivus.get_constants(prob)
+    source, flows, hub_io, proc_io, proc_tau = rivus.get_timeseries(prob)
 
 
-result_dir = os.path.join('result', os.path.basename(base_directory))
+    result_dir = os.path.join('result', os.path.basename(base_directory))
 
-# create result directory if not existing already
-if not os.path.exists(result_dir):
-    os.makedirs(result_dir)
-    
-rivus.save(prob, os.path.join(result_dir, 'prob.pgz'))
-rivus.report(prob, os.path.join(result_dir, 'report.xlsx'))
+    # create result directory if not existing already
+    if not os.path.exists(result_dir):
+        os.makedirs(result_dir)
+        
+    rivus.save(prob, os.path.join(result_dir, 'prob.pgz'))
+    rivus.report(prob, os.path.join(result_dir, 'report.xlsx'))
 
-# plot all caps (and demands if existing)
-for com, plot_type in [('Elec', 'caps'), ('Heat', 'caps'), ('Gas', 'caps'),
-                       ('Elec', 'peak'), ('Heat', 'peak')]:
-    
-    # create plot
-    fig = rivus.plot(prob, com, mapscale=False, tick_labels=False, 
-                      plot_demand=(plot_type == 'peak'))
-    plt.title('')
-    # save to file
-    for ext in ['png', 'pdf']:
-            
-        # determine figure filename from plot type, commodity and extension
-        fig_filename = os.path.join(
-            result_dir, '{}-{}.{}').format(plot_type, com, ext)
-        fig.savefig(fig_filename, dpi=300, bbox_inches='tight', 
-                    transparent=(ext=='pdf'))
+    # plot all caps (and demands if existing)
+    for com, plot_type in [('Elec', 'caps'), ('Heat', 'caps'), ('Gas', 'caps'),
+                           ('Elec', 'peak'), ('Heat', 'peak')]:
+        
+        # create plot
+        fig = rivus.plot(prob, com, mapscale=False, tick_labels=False, 
+                          plot_demand=(plot_type == 'peak'))
+        plt.title('')
+        # save to file
+        for ext in ['png', 'pdf']:
+                
+            # determine figure filename from plot type, commodity and extension
+            fig_filename = os.path.join(
+                result_dir, '{}-{}.{}').format(plot_type, com, ext)
+            fig.savefig(fig_filename, dpi=300, bbox_inches='tight', 
+                        transparent=(ext=='pdf'))

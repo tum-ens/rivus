@@ -1,20 +1,20 @@
 import glob
 import os
-import rivus
+from rivus.main import rivus
 import sys
 
 def replot(directory):
     """Recreate result figures for all pickled rivus results in directory
-    
+
     Args:
         directory: a directory with 1 or multiple pickled rivus instances
-        
+
     Returns:
         Nothing
     """
     glob_pattern = os.path.join(directory, '*.pgz')
     pickle_filenames = glob.glob(glob_pattern)
-    
+
     data_dir = os.path.join('data', os.path.basename(directory).split('-')[0])
     # if directory = 'result/moosh' try to find a suitable building shapefile
     # in 'data/moosh'
@@ -22,7 +22,7 @@ def replot(directory):
     building_filename = os.path.join(data_dir, 'building')
     if os.path.exists(building_filename+'.shp'):
         buildings = (building_filename, False)  # if True, color buildings
-        
+
     # if data/.../to_edge exists, paint it
     shapefiles = None
     to_edge_filename = os.path.join(data_dir, 'to_edge')
@@ -38,12 +38,11 @@ def replot(directory):
         figure_basename = os.path.splitext(pf)[0]
         if buildings:
             figure_basename += '_bld'
-        rivus.result_figures(prob, figure_basename, 
+        rivus.result_figures(prob, figure_basename,
                              buildings=buildings,
                              shapefiles=shapefiles)
 
-            
+
 if __name__ == '__main__':
     for directory in sys.argv[1:]:
         replot(directory)
-

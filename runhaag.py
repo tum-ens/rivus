@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import os
 import pandas as pd
-import pandashp as pdshp
-import rivus
+from rivus.utils import pandashp as pdshp
+from rivus.main import rivus
 try:
     import pyomo.environ
     from pyomo.opt.base import SolverFactory

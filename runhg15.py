@@ -8,8 +8,8 @@ except ImportError:
     PYOMO3 = True
 import geopandas
 import os
-import pandashp as pdshp
-import rivus
+from rivus.utils import pandashp as pdshp
+from rivus.main import rivus
 from datetime import datetime
 
 base_directory = os.path.join('data', 'haag15')
@@ -21,10 +21,12 @@ data_spreadsheet = os.path.join(base_directory, 'data.xlsx')
 
 # scenarios
 
+
 def scenario_base(data, vertex, edge):
     """Base scenario: change nothing-"""
     return data, vertex, edge
-    
+
+
 def scenario_no_heat_pump(data, vertex, edge):
     """No heat pump: not allowed"""
     process = data['process']
@@ -33,7 +35,8 @@ def scenario_no_heat_pump(data, vertex, edge):
     process.loc['Heat pump plant', 'cap-min'] = 0
     process.loc['Heat pump plant', 'cap-max'] = 0
     return data, vertex, edge
-    
+
+
 def scenario_no_electric_heating(data, vertex, edge):
     """No electric heating at all"""
     process = data['process']
@@ -44,10 +47,12 @@ def scenario_no_electric_heating(data, vertex, edge):
     process.loc['Elec heating domestic', 'cap-max'] = 0
     return data, vertex, edge
 
+
 def scenario_high_demand(data, vertex, edge):
     """High demand: increase demand by 100%"""
     data['area_demand'] *= 2
     return data, vertex, edge
+
 
 def scenario_renovation(data, vertex, edge):
     """Renovation: reduce heat demand of residential/commercial by 50%"""
@@ -59,6 +64,7 @@ def scenario_renovation(data, vertex, edge):
     area_demand.ix[('other', 'Heat'), 'peak'] *= 0.5
     return data, vertex, edge
 
+
 def scenario_dh_cheap(data, vertex, edge):
     """DH cheap: reduce cost of DH pipe by 50%"""
     commodity = data['commodity']
@@ -66,38 +72,44 @@ def scenario_dh_cheap(data, vertex, edge):
     commodity.loc['Heat', 'cost-inv-var'] *= 0.5
     return data, vertex, edge
 
+
 def scenario_gas_expensive(data, vertex, edge):
     """Gas expensive: increase gas price by 50%"""
     commodity = data['commodity']
     commodity.loc['Gas', 'cost-var'] *= 1.5
     return data, vertex, edge
-    
+
+
 def scenario_gas_cheap(data, vertex, edge):
     """Gas cheap: decrease gas price by 50%"""
     commodity = data['commodity']
     commodity.loc['Gas', 'cost-var'] *= 0.5
     return data, vertex, edge
 
+
 def scenario_elec_expensive(data, vertex, edge):
     """Elec expensive: increase electricity price by 100%"""
     commodity = data['commodity']
     commodity.loc['Elec', 'cost-var'] *= 2
     return data, vertex, edge
-    
+
+
 def scenario_dh_plant_cheap(data, vertex, edge):
     """DH plant cheap: decrease cost of DH plant by 50%"""
     process = data['process']
     process.loc['District heating plant', 'cost-inv-fix'] *= 0.5
     process.loc['District heating plant', 'cost-inv-var'] *= 0.5
     return data, vertex, edge
-    
+
+
 def scenario_heat_pump_better(data, vertex, edge):
     """Heat pump better: increase output ratio by 50%"""
     pro_co = data['process_commodity']
     pro_co.loc[('Heat pump domestic', 'Heat', 'Out'), 'ratio'] *= 1.5
     pro_co.loc[('Heat pump plant', 'Heat', 'Out'), 'ratio'] *= 1.5
     return data, vertex, edge
-    
+
+
 def scenario_heat_pump_expensive(data, vertex, edge):
     """Heat pump expensive: increase investment costs by 100%"""
     pro = data['process']
@@ -106,13 +118,15 @@ def scenario_heat_pump_expensive(data, vertex, edge):
     pro.loc['Heat pump plant', 'cost-inv-fix'] *= 2
     pro.loc['Heat pump plant', 'cost-inv-var'] *= 2
     return data, vertex, edge
-    
+
+
 def scenario_elec_very_expensive(data, vertex, edge):
     """Elec very expensive: increase electricity price by 400%"""
     commodity = data['commodity']
     commodity.loc['Elec', 'cost-var'] *= 5
     return data, vertex, edge
-    
+
+
 def scenario_elec_very_very_expensive(data, vertex, edge):
     """Elec very expensive: increase electricity price tenfold """
     commodity = data['commodity']
@@ -121,12 +135,13 @@ def scenario_elec_very_very_expensive(data, vertex, edge):
 
 # solver
 
+
 def setup_solver(optim, logfile='solver.log'):
     """Change solver options to custom values."""
     if optim.name == 'gurobi':
         # reference with list of option names
         # http://www.gurobi.com/documentation/5.6/reference-manual/parameters
-        optim.set_options("logfile={}".format(logfile)) 
+        optim.set_options("logfile={}".format(logfile))
         optim.set_options("TimeLimit=12000")  # seconds
         optim.set_options("MIPFocus=2")  # 1=feasible, 2=optimal, 3=bound
         optim.set_options("MIPGap=1e-3")  # default = 1e-4
@@ -137,8 +152,9 @@ def setup_solver(optim, logfile='solver.log'):
         optim.set_options("log={}".format(logfile))
     else:
         print("Warning from setup_solver: no options set for solver "
-            "'{}'!".format(optim.name))
+              "'{}'!".format(optim.name))
     return optim
+
 
 # helper functions
 def prepare_result_directory(result_name):
@@ -153,6 +169,7 @@ def prepare_result_directory(result_name):
 
     return result_dir
 
+
 def prepare_edge(edge_shapefile, building_shapefile):
     """Create edge graph with grouped building demands.
     """
@@ -160,8 +177,9 @@ def prepare_edge(edge_shapefile, building_shapefile):
     # 1. read shapefile to DataFrame (with special geometry column)
     # 2. group DataFrame by columns 'nearest' (ID of nearest edge) and 'type'
     #    (residential, commercial, industrial, other)
-    # 3. sum by group and unstack, i.e. convert secondary index 'type' to columns
-    buildings = geopandas.read_file(building_shapefile+'.shp')
+    # 3. sum by group and unstack, i.e. convert secondary index 'type' to
+    # columns
+    buildings = geopandas.read_file(building_shapefile + '.shp')
     buildings = buildings.convert_objects(convert_numeric=True)
     building_type_mapping = {
         'basin': 'other', 'chapel': 'other', 'church': 'other',
@@ -186,7 +204,6 @@ def prepare_edge(edge_shapefile, building_shapefile):
     return edge
 
 
-
 def run_scenario(scenario, result_dir):
     # scenario name
     sce = scenario.__name__
@@ -200,53 +217,53 @@ def run_scenario(scenario, result_dir):
     # apply scenario function to input data
     data, vertex, edge = scenario(data, vertex, edge)
 
-    log_filename = os.path.join(result_dir, sce+'.log')
+    log_filename = os.path.join(result_dir, sce + '.log')
 
     # create & solve model
     prob = rivus.create_model(data, vertex, edge)
     if PYOMO3:
-        prob = prob.create() # no longer needed in Pyomo 4+
+        prob = prob.create()  # no longer needed in Pyomo 4+
     optim = SolverFactory('glpk')
     optim = setup_solver(optim, logfile=log_filename)
     result = optim.solve(prob, tee=True)
     if PYOMO3:
-        prob.load(result) # no longer needed in Pyomo 4+
+        prob.load(result)  # no longer needed in Pyomo 4+
 
     # report
-    rivus.save(prob, os.path.join(result_dir, sce+'.pgz'))
-    rivus.report(prob, os.path.join(result_dir, sce+'.xlsx'))
-    
+    rivus.save(prob, os.path.join(result_dir, sce + '.pgz'))
+    rivus.report(prob, os.path.join(result_dir, sce + '.xlsx'))
+
     # plot without buildings
     rivus.result_figures(prob, os.path.join(result_dir, sce))
-    
+
     # plot with buildings and to_edge lines
     more_shapefiles = [{'name': 'to_edge',
                         'color': rivus.to_rgb(192, 192, 192),
                         'shapefile': to_edge_shapefile,
                         'zorder': 1,
                         'linewidth': 0.1}]
-    rivus.result_figures(prob, os.path.join(result_dir, sce+'_bld'), 
+    rivus.result_figures(prob, os.path.join(result_dir, sce + '_bld'),
                          buildings=(building_shapefile, False),
                          shapefiles=more_shapefiles)
     return prob
 
 
 if __name__ == '__main__':
-    # prepare result directory 
+    # prepare result directory
     result_name = os.path.basename(base_directory)
     result_dir = prepare_result_directory(result_name)  # name + time stamp
 
     scenarios = [
-        scenario_base, 
+        scenario_base,
         scenario_no_electric_heating,
-        scenario_renovation, 
+        scenario_renovation,
         scenario_no_heat_pump,
-        scenario_dh_cheap, 
+        scenario_dh_cheap,
         scenario_high_demand,
-        scenario_gas_expensive, 
+        scenario_gas_expensive,
         scenario_gas_cheap,
         scenario_elec_expensive,
-        scenario_dh_plant_cheap, 
+        scenario_dh_plant_cheap,
         scenario_heat_pump_better,
         scenario_heat_pump_expensive,
         scenario_elec_very_expensive,
@@ -254,4 +271,3 @@ if __name__ == '__main__':
 
     for scenario in scenarios[-1:]:
         prob = run_scenario(scenario, result_dir)
-
