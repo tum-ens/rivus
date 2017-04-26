@@ -12,7 +12,6 @@ from pyproj import Proj, transform
 from rivus.main import rivus
 from rivus.gridder.create_grid import create_square_grid as SquareGrid
 from rivus.gridder.extend_grid import extend_edge_data, vert_init_commodities
-from rivus.utils import pandashp
 
 # Constants - Inputs
 GLOB_EPSG = 4326  # WGS84 (OSM, GoogleMaps)

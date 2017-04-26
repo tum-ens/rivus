@@ -45,7 +45,8 @@ rivus is a [mixed integer linear programming](https://en.wikipedia.org/wiki/Inte
    pip install geopandas
    ```
    
-7. Some custom Python helper functions (*to be included in rivus*):
+7. ~~Some custom Python helper functions (*to be included in rivus*)~~ 
+`Solved by pull request #8`: these functions are now included in this repository
    1. Launch a new command prompt (Win+R, type "cmd", Enter)
    2. Start a python interactive session by starting `python`. Within, execute the following commands:
 
@@ -58,6 +59,12 @@ rivus is a [mixed integer linear programming](https://en.wikipedia.org/wiki/Inte
 
 > :information_source: **Note** Steps 5 and 6 can be merged to `conda install -c conda-forge geopandas` once [issue #9 in geopandas-feedstock](https://github.com/conda-forge/geopandas-feedstock/issues/9) is resolved.
 
+## Documentation / Tutorials
+
+List of helpful ipynb-gists:
++ [join data from building.shp and edge.shp](https://gist.github.com/lnksz/6edcd0a877997e9365e808146e9b51fe)
++ [OSM street data to vertex.shp and edge.shp](https://gist.github.com/lnksz/7977c4cff9c529ca137b67b6774c60d7)
++ [Square grid to vertex.shp and edge.shp](https://gist.github.com/lnksz/bd8ce0a79e499479b61ea7b45d5c661d)
 
 ## Copyright
 
