@@ -20,9 +20,7 @@ rivus is a [mixed integer linear programming](https://en.wikipedia.org/wiki/Inte
 
 ### Windows
 
-> :information_source: **Note** Steps 1 to 3 are identical to the installation of [urbs](https://github.com/tum-ens/urbs). In case you already have that model installed, they can be skipped.
-
-1. [**Anaconda (Python 3.5)**](http://continuum.io/downloads). Choose the 64-bit installer if possible.
+1. [**Anaconda (Python 3.6)**](http://continuum.io/downloads). Choose the 64-bit installer if possible.
 
 2. **Pyomo** and **GLPK**
    1. Launch a new command prompt (Win+R, type "cmd", Enter)
@@ -40,12 +38,11 @@ rivus is a [mixed integer linear programming](https://en.wikipedia.org/wiki/Inte
 
 ## Documentation / Tutorials
 
-Official documentation
-
-List of helpful ipynb-gists:
-+ [join data from building.shp and edge.shp](https://gist.github.com/lnksz/6edcd0a877997e9365e808146e9b51fe)
-+ [OSM street data to vertex.shp and edge.shp](https://gist.github.com/lnksz/7977c4cff9c529ca137b67b6774c60d7)
-+ [Square grid to vertex.shp and edge.shp](https://gist.github.com/lnksz/bd8ce0a79e499479b61ea7b45d5c661d)
+  * [Official documentation](http://rivus.readthedocs.io/en/latest/) (still a skeleton only)
+  * List of helpful IPython notebooks on handling geographic input data:
+    + [join data from building.shp and edge.shp](https://gist.github.com/lnksz/6edcd0a877997e9365e808146e9b51fe)
+    + [OSM street data to vertex.shp and edge.shp](https://gist.github.com/lnksz/7977c4cff9c529ca137b67b6774c60d7)
+    + [Square grid to vertex.shp and edge.shp](https://gist.github.com/lnksz/bd8ce0a79e499479b61ea7b45d5c661d)
 
 ## Copyright
 
