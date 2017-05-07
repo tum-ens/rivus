@@ -9,9 +9,9 @@ except ImportError:
 import matplotlib.pyplot as plt
 import os
 import pandas as pd
-import pandashp as pdshp
-import rivus
 from operator import itemgetter
+from rivus.utils import pandashp as pdshp
+from rivus.main import rivus
 
 base_directory = os.path.join('data', 'moosh')
 building_shapefile = os.path.join(base_directory, 'building')

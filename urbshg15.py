@@ -9,9 +9,9 @@ except ImportError:
 import geopandas
 import os
 import pandas as pd
-import pandashp as pdshp
-import rivus
 from datetime import datetime
+from rivus.utils import pandashp as pdshp
+from rivus.main import rivus
 
 base_directory = os.path.join('data', 'haag15')
 building_shapefile = os.path.join(base_directory, 'building')

@@ -20,7 +20,7 @@ import matplotlib.patheffects as pe
 import numpy as np
 import os
 import pandas as pd
-import pandashp as pdshp
+from ..utils import pandashp as pdshp
 import warnings
 from geopy.distance import distance
 from mpl_toolkits.basemap import Basemap
@@ -564,7 +564,7 @@ def def_costs_rule(m, cost_type):
             sum(m.Pmax[i,j,co] * m.params['commodity'].loc[co]['cost-fix'] *
                 line_length(m.params['edge'].loc[i, j]['geometry'])
                 for (i,j) in m.edge for co in m.co_transportable)
-            
+
     elif cost_type == 'Var':
         return m.costs['Var'] == \
             sum(m.Epsilon_hub[i,j,h,t] *
@@ -1248,7 +1248,7 @@ def result_figures(prob, file_basename, buildings=None, shapefiles=None):
             # create plot
             fig = plot(prob, com, mapscale=False, tick_labels=False,
                        plot_demand=(plot_type == 'peak'),
-                       buildings=buildings, 
+                       buildings=buildings,
                        shapefiles=shapefiles,
                        annotations=plot_annotations)
             plt.title('')
@@ -1257,20 +1257,20 @@ def result_figures(prob, file_basename, buildings=None, shapefiles=None):
             for ext, transp in [('png', True), ('png', False), ('pdf', True)]:
                 # split scenario name from subdirectory
                 base_dir, sce = os.path.split(file_basename)
-                
+
                 # create subdirectory according to plot variant
                 sub_dir = 'annotated' if plot_annotations else 'plain'
                 sub_dir += '-transparent' if transp and ext!= 'pdf' else ''
-                
+
                 # create subdirectory if does not exist yet
                 fig_dir = os.path.join(base_dir, sub_dir)
                 if not os.path.exists(fig_dir):
                     os.makedirs(fig_dir)
-                
+
                 # create complete relative figure filename
                 fig_basename = '{}-{}-{}.{}'.format(sce, plot_type, com, ext)
                 fig_filename = os.path.join(fig_dir, fig_basename)
-                
+
                 # save the figure
                 fig.savefig(fig_filename, dpi=300, bbox_inches='tight',
                             transparent=transp)
@@ -1315,11 +1315,11 @@ def report(prob, filename):
 
 def save_log(result, filename):
     """Save urbs result and solver information to a log file.
-    
+
     Args:
         result: as returned by the solve method of a solver object
         filename: log file to be written
-        
+
     Returns:
         Nothing
     """
@@ -1329,21 +1329,21 @@ def save_log(result, filename):
 
 def save(prob, filename):
     """Save rivus model instance to a gzip'ed pickle file
-    
+
     Pickle is the standard Python way of serializing and de-serializing Python
-    objects. By using it, saving any object, in case of this function a 
-    Pyomo ConcreteModel, becomes a twoliner. 
+    objects. By using it, saving any object, in case of this function a
+    Pyomo ConcreteModel, becomes a twoliner.
     <https://docs.python.org/2/library/pickle.html>
     GZip is a standard Python compression library that is used to transparently
     compress the pickle file further.
     <https://docs.python.org/2/library/gzip.html>
     It is used over the possibly more compact bzip2 compression due to the
     lower runtime. Source: <http://stackoverflow.com/a/18475192/2375855>
-    
+
     Args:
         prob: a rivus model instance
         filename: pickle file to be written
-        
+
     Returns:
         Nothing
     """
@@ -1357,10 +1357,10 @@ def save(prob, filename):
 
 def load(filename):
     """Load a rivus model instance from a gzip'ed pickle file
-    
+
     Args:
         filename: pickle file
-    
+
     Returns:
         prob: the unpickled rivus model instance
     """
@@ -1372,4 +1372,3 @@ def load(filename):
     with gzip.GzipFile(filename, 'r') as file_handle:
         prob = pickle.load(file_handle)
     return prob
-
