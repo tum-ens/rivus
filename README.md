@@ -23,43 +23,24 @@ rivus is a [mixed integer linear programming](https://en.wikipedia.org/wiki/Inte
 > :information_source: **Note** Steps 1 to 3 are identical to the installation of [urbs](https://github.com/tum-ens/urbs). In case you already have that model installed, they can be skipped.
 
 1. [**Anaconda (Python 3.5)**](http://continuum.io/downloads). Choose the 64-bit installer if possible.
-2. [**GLPK**](http://winglpk.sourceforge.net/).  (thanks to a [bug in pyomo](https://software.sandia.gov/trac/pyomo/ticket/4641), only version 4.57 or older is supported at the moment [September 2016])
-   1. Simply unzip the downloaded version to a folder, e.g. `C:\GLPK`. 
-   1. Then add the subdirectory `w64`, which contains `glpsol.exe`, to the system path ([how](http://geekswithblogs.net/renso/archive/2009/10/21/how-to-set-the-windows-path-in-windows-7.aspx)), so that the `glpsol` command is available on the command prompt.
-3. **Pyomo**
-   1. Launch a new command prompt (Win+R, type "cmd", Enter)
-   2. Type `pip install pyomo`, hit Enter. (run scripts now handle both 3.5 and 4+ versions)
 
-4. Add **shapefile support**:
+2. **Pyomo** and **GLPK**
+   1. Launch a new command prompt (Win+R, type "cmd", Enter)
+   2. Type `conda install -c conda-forge pyomo glpk`, hit Enter.
+
+3. Add **shapefile support**:
    ```
    conda install -c conda-forge pyshp shapely basemap
    ```
 
-5. Get **dependencies for geopandas**:
+4. Get **geopandas** and its dependencies:
    ```
-   conda install -c conda-forge pyproj fiona geopy
+   conda install -c conda-forge pyproj fiona geopy geopandas
    ```
-
-6. Get **geopandas** itself:
-   ```
-   pip install geopandas
-   ```
-   
-7. ~~Some custom Python helper functions (*to be included in rivus*)~~ 
-`Solved by pull request #8`: these functions are now included in this repository
-   1. Launch a new command prompt (Win+R, type "cmd", Enter)
-   2. Start a python interactive session by starting `python`. Within, execute the following commands:
-
-        ```python
-        import os, site
-        os.makedirs(site.USER_SITE)
-        os.chdir(site.USER_SITE)
-        os.system('git clone https://github.com/ojdo/python-tools.git .')
-        ```
-
-> :information_source: **Note** Steps 5 and 6 can be merged to `conda install -c conda-forge geopandas` once [issue #9 in geopandas-feedstock](https://github.com/conda-forge/geopandas-feedstock/issues/9) is resolved.
 
 ## Documentation / Tutorials
+
+Official documentation
 
 List of helpful ipynb-gists:
 + [join data from building.shp and edge.shp](https://gist.github.com/lnksz/6edcd0a877997e9365e808146e9b51fe)
@@ -68,7 +49,7 @@ List of helpful ipynb-gists:
 
 ## Copyright
 
-Copyright (C) 2015-2016  Johannes Dorfner
+Copyright (C) 2015-2017  Johannes Dorfner
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
