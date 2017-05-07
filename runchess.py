@@ -12,7 +12,6 @@ from pyproj import Proj, transform
 from rivus.main import rivus
 from rivus.gridder.create_grid import create_square_grid as SquareGrid
 from rivus.gridder.extend_grid import extend_edge_data, vert_init_commodities
-from rivus.utils import pandashp
 
 # Constants - Inputs
 GLOB_EPSG = 4326  # WGS84 (OSM, GoogleMaps)
@@ -30,7 +29,6 @@ data_spreadsheet = os.path.join(base_directory, 'data.xlsx')
 
 # Get Rivus Inputs
 vertex, edge = SquareGrid(origo_xy=ORIGOXY, epsg=PROJ_EPSG)
-pandashp.match_vertices_and_edges(vertex, edge)
 vertex, edge = [gdf.to_crs(epsg=GLOB_EPSG) for gdf in (vertex, edge)]
 sorts = ['residential', 'industrial']
 inits = [1000, 0]
@@ -38,10 +36,10 @@ extend_edge_data(edge, sorts=sorts, inits=inits)
 vert_init_commodities(vertex, ('Elec', 'Gas', 'Heat'),
                       [('Elec', 0, 100000), ('Gas', 1, 50000)])
 
-print(edge)
-print(vertex)
+# print(edge)
+# print(vertex)
 
-if True:
+if False:
     # load spreadsheet data
     data = rivus.read_excel(data_spreadsheet)
 
