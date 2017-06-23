@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from itertools import product as iter_product
 from shapely.geometry import Point, LineString
-from geopandas import GeoSeries, GeoDataFrame
+from geopandas import GeoDataFrame
 from ..utils import pandashp as pdshp
 
 
@@ -28,7 +28,7 @@ def _check_input(origo_xy, num_edge_x, num_edge_y, dx, dy, noise_prop):
 
 def create_square_grid(origo_xy=(0, 0), num_edge_x=1, num_edge_y=None, dx=100, dy=None, noise_prop=0.0, epsg=32632):
     '''Create chessboard grid with edges and vertices
-    
+
     Parameters
     ----------
     origo_xy : tuple, optional
@@ -50,6 +50,17 @@ def create_square_grid(origo_xy=(0, 0), num_edge_x=1, num_edge_y=None, dx=100, d
     Return : [vertices, edges] As GeoDataFrames
         vertices : [geometry, Vertex]
         edges : [geometry, Edge, Vertex1, Vertex2]
+
+    Indexes:
+        (2)══10══(5)══11══(8)
+         ║        ║        ║
+         1        3        5
+         ║        ║        ║
+        (1)══08══(4)══09══(7)
+         ║        ║        ║
+         0        2        4
+         ║        ║        ║
+        (0)══06══(3)══07══(6)
     '''
     # variable init
     MAX_NOISE = 0.45  # relative to dx dy
