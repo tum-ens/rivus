@@ -35,6 +35,11 @@ rivus is a [mixed integer linear programming](https://en.wikipedia.org/wiki/Inte
    ```
    conda install -c conda-forge pyproj fiona geopy geopandas
    ```
+   
+5. For interactive (3D) plots with **plotly**:
+   ```
+   pip install plotly
+   ```
 
 ## Documentation / Tutorials
 
