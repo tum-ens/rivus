@@ -636,7 +636,10 @@ def line_length(line):
     Returns:
         Length of line in meters
     """
-    return sum(distance(a, b).meters for (a, b) in pairs(line.coords))
+    # leaving the shapely lonlat order
+    # return sum(distance(a, b).meters for (a, b) in pairs(line.coords))
+    # new latlon order, with rounding to cm, as more numerical precision is useless
+    return round(sum(distance((a[-1],a[0]), (b[-1],b[0])).meters for (a, b) in pairs(line.coords)), 2)
 
 
 def pairs(lst):
