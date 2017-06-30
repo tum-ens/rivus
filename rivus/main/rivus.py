@@ -11,10 +11,7 @@ except ImportError:
     warnings.warn("Support for Pyomo 3.x is now deprecated and will be removed"
                   "removed with the next release. Please upgrade to Pyomo 4.",
                   FutureWarning, stacklevel=2)
-import geopandas
-import itertools
 import math
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as pe
 import numpy as np
