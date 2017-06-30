@@ -1,9 +1,20 @@
-*~
-*.log
-*.pyc
-result/*
-doc/_build/*
+# tools generate it, cash & co
+# ############################
 __pycache__/
 .idea/
-playground/
+.vscode/
+gdalwmscache/
+*~
+*.pyc
+
+# Re-generatable results
+# ######################
+*.log
+result/*
+doc/_build/*
+*.html
+
+# private / experimentals
+# #############
 *.ipynb
+playground/
