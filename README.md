@@ -12,9 +12,9 @@ rivus is a [mixed integer linear programming](https://en.wikipedia.org/wiki/Inte
 
 ## Screenshots
 
-<a href="doc/img/caps-elec.png"><img src="doc/img/caps-elec.png" alt="Electricity network capacities" style="width:400px"></a>
-<a href="doc/img/caps-heat.png"><img src="doc/img/caps-heat.png" alt="Heat network capacities" style="width:400px"></a>
-<a href="doc/img/caps-gas.png"><img src="doc/img/caps-gas.png" alt="Gas network capacities" style="width:400px"></a>
+Electricity network capacities|  Heat network capacities    |  Gas network capacities
+:----------------------------:|:---------------------------:|:---------------------------:
+![](doc/img/caps-elec.png)    |  ![](doc/img/caps-heat.png) |  ![](doc/img/caps-gas.png)
 
 ## Installation
 
