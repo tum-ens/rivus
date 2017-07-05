@@ -85,3 +85,60 @@ def to_igraph(vdf, edf, pmax, comms=None, peak=None, save_dir=None, ext='gml'):
     return graphs
 
 
+def to_nx(vdf, edf, pmax, comms=None, save_dir=None):
+    """Convert to networkx graph representation
+
+    Args:
+        vdf ([Geo]DataFrame): Holding Vertex Data id=Vertex
+            and Commodity Sources as columns
+        edf ([Geo]DataFrame): Holding (V1,V2) Multi-indexed Edge data
+            To be sure, that all edges are created.
+        pmax (DataFrame): Commodities as columns with max capacity per edge
+            returned by rivus.get_constants()
+        comms (iterable, optional): Names of commodities
+        save_dir (path string, optional): Path to a dir to save graphs as GML.
+            Path preferably constructed using the `os.path` module
+            If dir does not exit yet, it will be created.
+
+    Returns:
+        list of nx_graph object per in accordance with input `comms`
+        or commodities found in pmax.columns
+
+    Note:
+        nx.from_pandas_dataframe() was also investigated, but it is a bit
+        slower and does not improve code quality in my opinion.
+    """
+    import networks as nx
+    if len(edf) != len(pmax):
+        _pmax = edf.join(pmax).fillna(0)
+    else:
+        _pmax = pmax.copy()
+    comms = _pmax.columns.values if comms == None else comms
+
+    graphs = []
+    for comm in comms:
+        g = nx.Graph(Name='{} capacity graph'.format(comm.upper()),
+                     Commodity=comm)
+        g.add_nodes_from(vdf.index.values.tolist())
+        for x, row in vdf.iterrows():
+            g.node[x]['Label'] = x
+            g.node[x][comm] = row[comm]
+            g.node[x]['Longitude'] = row.geometry.x
+            g.node[x]['Latitude'] = row.geometry.y
+        cap_max = _pmax[comm].max()
+        for v1v2, row in _pmax.iterrows():
+            this_weight = row[comm] / cap_max
+            this_label = '{}-{}'.format(*v1v2)
+            g.add_edge(*v1v2, Label=this_label, Commodity=row[comm],
+                       Weight=this_weight)
+        graphs.append(g)
+
+    if save_dir:
+        ext = 'gml'  # TODO networkx has different function to do this...
+        if not os.path.isdir(save_dir):
+            os.makedirs(save_dir)
+        for graph in graphs:
+            gpath = os.path.join(save_dir, '{}.{}'.format(graph['name']), ext)
+            nx.write_gml(graph, gpath)
+
+    return graphs
