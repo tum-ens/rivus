@@ -4,7 +4,7 @@ igraph:
     + Included for speed and so scalability.
     × Docs are OK.
     - For windows install with unofficial wheel files. But it works.
-networkx: (todo)
+networkx:
     +/- Pure python implementation.
     + Widely used and tested.
     + Docs are quite good.
