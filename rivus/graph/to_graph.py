@@ -138,7 +138,7 @@ def to_nx(vdf, edf, pmax, comms=None, save_dir=None):
         if not os.path.isdir(save_dir):
             os.makedirs(save_dir)
         for graph in graphs:
-            gpath = os.path.join(save_dir, '{}.{}'.format(graph['name']), ext)
+            gpath = os.path.join(save_dir, '{}.{}'.format(graph['Name']), ext)
             nx.write_gml(graph, gpath)
 
     return graphs
