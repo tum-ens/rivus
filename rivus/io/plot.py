@@ -305,24 +305,22 @@ def fig3d(prob, comms=None, linescale=1.0, usehubs=False, hubopac=0.55, dz=5, la
         prob (rivus_archive): A rivus model (later extract of it)
         comms (None, optional): list/ndarray of commodity names to plot,
                Order: ['C1', 'C2', 'C3'] -> Bottom: C1, Top: C3
-        linescale (float, optional): a multiplier to get propotionally thicker lines
-        usehubs (bool, optional): switch to depict hub processes
-        hubopac (float, optional): 0-1 opacity param
-        dz (number, optional): distance between layers along 'z' axis 
-        layout (None, optional): a plotly layout dict to overwrite default
-        verbose (bool, optional): to print out progress and the time it took
+        linescale (float, optional):
+            A multiplier to get proportionally thicker lines.
+        usehubs (bool, optional): Switch to depict hub processes.
+        hubopac (float, optional): 0-1 opacity param.
+        dz (number, optional): Distance between layers along 'z' axis .
+        layout (None, optional): A plotly layout dict to overwrite default.
+        verbose (bool, optional): To print out progress and the time it took.
     
-    Example:
+    Usage:
         import plotly.offline as po
         fig = fig3d(prob, ['Gas', 'Heat', 'Elec'], hubopac=0.55, linescale=7)
         # po.plot(fig, filename='plotly-game.html', image='png') for static image
         po.plot(fig, filename='plotly-game.html')
     
-    Deleted Parameters:
-        Returns: plotly figure
-    
     Returns:
-        TYPE: plotly compatible figure dict (in plotly everything is kinda a dict.)
+        plotly compatible figure *dict* (in plotly everything is kinda a dict.)
     """
     if verbose:
         import time
