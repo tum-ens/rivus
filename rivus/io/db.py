@@ -11,7 +11,7 @@ For specific information on the entity relationschip of the expected DB visit:
 
 import psycopg2 as psql
 from datetime import datetime
-from pandas import DataFrame
+from pandas import DataFrame, read_sql
 
 # from psycopg2 import sql
 
@@ -116,12 +116,7 @@ def _handle_geoframe(engine, table, df, run_id):
     return
 
 
-def store(engine, prob, run_data=None, run_id=None, plot_data=None, graph=None):
-    if run_id is not None:
-        run_id = int(run_id)
-    else:
-        run_id = init_run(engine, **run_data) if run_data else init_run(engine)
-    print('store params for run <{}>'.format(run_id))
+def _fill_table(engine, prob, table, run_id):
     col_map = {
         'Edge': 'edge_num',
         'allowed-max': 'allowed_max',
@@ -134,53 +129,189 @@ def store(engine, prob, run_data=None, run_id=None, plot_data=None, graph=None):
         'loss-fix': 'loss_fix',
         'loss-var': 'loss_var',
     }
-
-    # PARAMETERS
-    # para_names = ['edge', 'vertex', 'process', 'hub', 'commodity',
-    #               'process_commodity', 'time', 'area_demand']
-    for para in prob.params:
-        df = prob.params[para]
-        print('para has <{}>'.format(para))
-
-        if para == 'commodity':
-            sql_df = df.rename(columns=col_map)
-            sql_df['run_id'] = run_id
-            sql_df.to_sql(para, engine, if_exists='append',
-                          index_label=para)
-        if para == 'process':
-            sql_df = df.loc[:, 'cost-inv-fix':'cap-max'].rename(columns=col_map)
-            sql_df['run_id'] = run_id
-            sql_df.to_sql(para, engine, if_exists='append',
-                          index_label=para)
-        if para == 'edge':
-            sql_df = df.loc[:, ('Edge', 'geometry')]
-            _handle_geoframe(engine, para, sql_df, run_id)
-            # sql_df.to_sql(para, engine, if_exists='append',
-            #               index_label=('vertex1', 'vertex2'))
-        if para == 'vertex':
-            sql_df = df.geometry.to_frame()
-            _handle_geoframe(engine, para, sql_df, run_id)
-            # sql_df.to_sql(para, engine, if_exists='append',
-            #               index_label='vertex_num')
-        if para == 'area_demand':
-            area_types = df.unstack(level='Commodity').index.values
-            sql_df = DataFrame({
-                'building_type': area_types,
-                'run_id': [run_id] * len(area_types)
-            })
-            sql_df.to_sql('area', engine, if_exists='append', index=False)
-            # TODO table `area_demand`
-        if para == 'process_commodity':
-            pass
-        if para == 'time':
-            sql_df = df.loc[:, 'weight'].to_frame()
-            sql_df['run_id'] = run_id
-            sql_df.to_sql(para, engine, if_exists='append',
-                          index_label='time_step')
-        # sql_str = _get_insert(para, prob.params[para])
-        # with connection.cursor() as curs:
-        #     curs.executemany(sql_str, )
+    if table == 'commodity':
+        df = prob.params[table]
+        sql_df = df.rename(columns=col_map)
+        sql_df['run_id'] = run_id
+        sql_df.to_sql(table, engine, if_exists='append', index_label=table)
+    elif table == 'process':
+        df = prob.params[table]
+        sql_df = df.loc[:, 'cost-inv-fix':'cap-max'].rename(columns=col_map)
+        sql_df['run_id'] = run_id
+        sql_df.to_sql(table, engine, if_exists='append', index_label=table)
+    elif table == 'edge':
+        df = prob.params[table]
+        sql_df = df.loc[:, ('Edge', 'geometry')]
+        _handle_geoframe(engine, table, sql_df, run_id)
+    elif table == 'vertex':
+        df = prob.params[table]
+        sql_df = df.geometry.to_frame()
+        _handle_geoframe(engine, table, sql_df, run_id)
+        df = df.loc[:, [c for c in df.columns.values if c != 'geometry']]
+        connection = engine.raw_connection()
+        try:
+            for ver, row in df.iterrows():
+                for comm, val in row.iteritems():
+                    values = dict(vertex=ver, commodity=comm,
+                                  value=val, run_id=run_id)
+                    with connection.cursor() as curs:
+                        curs.execute(
+                            """
+                            INSERT INTO vertex_source
+                            (vertex_id, commodity_id, value)
+                            VALUES (
+                                (SELECT vertex_id FROM vertex
+                                 WHERE run_id = %(run_id)s AND
+                                       vertex_num = %(vertex)s),
+                                (SELECT commodity_id FROM commodity
+                                 WHERE run_id = %(run_id)s AND
+                                       commodity LIKE %(commodity)s),
+                                %(value)s;
+                            """, values)
+                        connection.commit()
+        finally:
+            connection.close()
+    elif table == 'time':
+        df = prob.params[table]
+        sql_df = df.loc[:, 'weight'].to_frame()
+        sql_df['run_id'] = run_id
+        sql_df.to_sql(table, engine, if_exists='append',
+                      index_label='time_step')
+        df = df.loc[:, [c for c in df.columns.values if c != 'weight']]
+        connection = engine.raw_connection()
+        try:
+            for ver, row in df.iterrows():
+                for comm, val in row.iteritems():
+                    values = dict(vertex=ver, commodity=comm,
+                                  value=val, run_id=run_id)
+                    with connection.cursor() as curs:
+                        curs.execute(
+                            """
+                            INSERT INTO vertex_source
+                            (vertex_id, commodity_id, value)
+                            VALUES (
+                                (SELECT vertex_id FROM vertex
+                                 WHERE run_id = %(run_id)s AND
+                                       vertex_num = %(vertex)s),
+                                (SELECT commodity_id FROM commodity
+                                 WHERE run_id = %(run_id)s AND
+                                       commodity LIKE %(commodity)s),
+                                %(value)s;
+                            """, values)
+                        connection.commit()
+        finally:
+            connection.close()
+    elif table == 'area_demand':
+        df = prob.params[table]
+        area_types = df.unstack(level='Commodity').index.values
+        sql_df = DataFrame(dict(building_type=area_types,
+                                run_id=[run_id] * len(area_types)))
+        sql_df.to_sql('area', engine, if_exists='append', index=False)
+        connection = engine.raw_connection()
+        try:
+            for key, row in df.iterrows():
+                values = dict(row, area=key[0], commodity=key[1], run_id=run_id)
+                with connection.cursor() as curs:
+                    curs.execute(
+                        """
+                        INSERT INTO area_demand
+                        (area_id, commodity_id, peak)
+                        VALUES (
+                            (SELECT area_id FROM area
+                             WHERE run_id = %(run_id)s AND
+                                   building_type LIKE %(area)s),
+                            (SELECT commodity_id FROM commodity
+                             WHERE run_id = %(run_id)s AND
+                                   commodity LIKE %(commodity)s),
+                            %(peak)s);
+                        """, values)
+                    connection.commit()
+        finally:
+            connection.close()
+    elif table == 'process_commodity':
+        df = prob.params[table]
+        connection = engine.raw_connection()
+        try:
+            for key, row in df.iterrows():
+                values = dict(row, process=key[0], commodity=key[1],
+                              direction=key[2].lower(), run_id=run_id)
+                with connection.cursor() as curs:
+                    curs.execute(
+                        """
+                        INSERT INTO process_commodity
+                        (process_id, commodity_id, direction, ratio)
+                        VALUES (
+                            (SELECT process_id FROM process
+                             WHERE run_id = %(run_id)s AND
+                                   process LIKE %(process)s),
+                            (SELECT commodity_id FROM commodity
+                             WHERE run_id = %(run_id)s AND
+                                   commodity LIKE %(commodity)s),
+                            %(direction)s,
+                            %(ratio)s);
+                        """, values)
+                    connection.commit()
+        finally:
+            connection.close()
+    else:
+        pass
     return
+
+
+def store(engine, prob, run_data=None, run_id=None, plot_data=None, graph=None):
+    if run_id is not None:
+        run_id = int(run_id)
+    else:
+        run_id = init_run(engine, **run_data) if run_data else init_run(engine)
+    print('store params for run <{}>'.format(run_id))
+
+    # Parameter DataFrames=====================================================
+    # The order does matter.
+    # `process_commodity` after `process` and `commodity`
+    # `vertex` after `commodity`
+    # `time` after `commodity`
+    tables = ['commodity', 'process', 'edge', 'vertex', 'time', 'area_demand',
+              'process_commodity', 'vertex_source']
+    for table in tables:
+        _fill_table(engine, prob, table, run_id)
+    return
+
+
+def fetch_table(engine, table, run_id):
+    if table == 'process_commodity':
+        sql = """
+            SELECT P.process AS "Process", C.commodity AS "Commodity",
+                   PC.direction AS "Direction", PC.ratio AS ratio
+            FROM process_commodity AS PC
+            INNER JOIN commodity AS C ON PC.commodity_id = C.commodity_id
+            INNER JOIN process AS P ON PC.process_id = P.process_id
+            where P.run_id = %s;
+            """
+        df = read_sql(sql, engine, params=(run_id,),
+                      index_col=['Process', 'Commodity', 'Direction'])
+    else:
+        df = DataFrame()
+    return df
+
+
+def load(engine, run_id):
+    """Summary
+
+    Args:
+        engine (TYPE): Description
+        run_id (TYPE): Description
+    """
+    # Create Process-Commodity DataFrame
+    print("""
+        SELECT P.process AS "Process", C.commodity AS "Commodity",
+               PC.direction AS "Direction", PC.ratio AS ratio
+        FROM process_commodity AS PC
+        INNER JOIN commodity AS C ON PC.commodity_id=C.commodity_id
+        INNER JOIN process AS P ON PC.process_id=P.process_id
+        where P.run_id = 28;
+        """)
+
+    pass
 
 if __name__ == '__main__':
     def tester(prob=None):
