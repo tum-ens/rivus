@@ -127,31 +127,7 @@ if STORE_DB:
     engine = create_engine(engine_string)
     rdb.store(engine, prob)
     # print(rdb.fetch_table(engine, 'process_commodity', 28))
-    # =============================
-    # run_id = rdb.init_run(engine)
-    # print(run_id)
-    # col_map = {
-    #     'Edge': 'edge_num',
-    #     'allowed-max': 'allowed_max',
-    #     'cap-max': 'cap_max',
-    #     'cap-min': 'cap_min',
-    #     'cost-fix': 'cost_fix',
-    #     'cost-inv-fix': 'cost_inv_fix',
-    #     'cost-inv-var': 'cost_inv_var',
-    #     'cost-var': 'cost_var',
-    #     'loss-fix': 'loss_fix',
-    #     'loss-var': 'loss_var',
-    # }
-    # df = prob.params['commodity']
-    # sql_df = df.rename(columns=col_map)
-    # sql_df['run_id'] = run_id
-    # sql_df.to_sql('commodity', engine, if_exists='append',
-    #               index_label='commodity')
-    # df = prob.params['time']
-    # sql_df = df.loc[:, 'weight'].to_frame()
-    # sql_df['run_id'] = run_id
-    # sql_df.to_sql('time', engine, if_exists='append',
-    #               index_label='time_step')
+    
 
     profile_log['db'] = timenow() - dbstart
 

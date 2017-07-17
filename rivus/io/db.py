@@ -6,7 +6,7 @@ common tasks. Hopefully, this makes database integration easier in the future.
 Leading to better structured results.
 
 For specific information on the entity relationship of the expected DB visit:
-[rivus_db](https://github.com/lnksz/rivus_db)
+    [rivus_db](https://github.com/lnksz/rivus_db)
 """
 
 import psycopg2 as psql
@@ -16,10 +16,36 @@ from pandas import DataFrame, read_sql
 
 def init_run(engine, runner='Havasi', start_ts=None, status='prepared',
              outcome='not_run'):
+    """Initialize the `run` table with basic info.
+
+    Parameters
+    ----------
+    engine : sqlalchemy engine whit psycopg2 driver
+        For managing connection to the DB.
+    runner : str, optional
+        Person's name/identifier who created(executed) the data(process).
+    start_ts : datetime.datetime, optional
+        Timezone-less datetime object.
+        If omitted, .now() will be used.
+    status : str, optional
+        One of the following strings:
+        | 'prepared' (default) | 'run' | 'error'
+    outcome : str, optional
+        One of the following strings:
+        | 'not_run'  (default) | 'optima' | 'no_optima' | 'error'
+
+    Returns
+    -------
+    int
+        run_id of the initialized run row in the DB.
+    """
     try:
-        ts = datetime.strptime(start_ts, '%Y-%m-%d %H:%M:%S')
+        if start_ts.now():
+            ts = start_ts
+        else:
+            ts = datetime.strptime(start_ts, '%Y-%m-%d %H:%M:%S')
     except:
-        ts = datetime.now()
+        ts = start_ts.now()
     finally:
         start_ts = ts.strftime('%Y-%m-%d %H:%M:%S')
 
@@ -29,7 +55,7 @@ def init_run(engine, runner='Havasi', start_ts=None, status='prepared',
         with connection.cursor() as curs:
             curs.execute("""
                 INSERT INTO run (runner, start_ts, status, outcome)
-                VALUES (%s, TIMESTAMP %s, %s, %s)
+                VALUES (%s, %s, %s, %s)
                 RETURNING run_id;
                 """, (runner, start_ts, status, outcome))
             run_id = curs.fetchone()[0]
@@ -39,7 +65,26 @@ def init_run(engine, runner='Havasi', start_ts=None, status='prepared',
     return run_id
 
 
-def _delete_run_from_table(engine, table, run_id):
+def _purge_table(engine, table, run_id):
+    """Delete rows in `table` which are related to `run_id`.
+
+    Parameters
+    ----------
+    engine : sqlalchemy engine whit psycopg2 driver
+        For managing connection to the DB.
+    table : str
+        An existing table in database 'rivus_db'
+        See: [rivus_db](https://github.com/lnksz/rivus_db)
+    run_id : int
+        run_id of the initialized run row in the DB.
+        Used to identify related data to be removed:
+        directly (table has `run_in` as FK) and
+        indirectly (table has FK of an Entity with `run_id` FK)
+
+    Returns
+    ------------------
+    None
+    """
     if table in ['process', 'commodity', 'edge', 'vertex', 'area', 'time']:
         # These have run_id as FK
         connection = engine.raw_connection()
@@ -81,25 +126,56 @@ def _delete_run_from_table(engine, table, run_id):
             connection.close()
     else:
         pass
-    return
 
 
-def _purge_run(engine, run_id):
+def purge_run(engine, run_id):
+    """Delete all rows related to run_id across all tables.
+
+    Parameters
+    ----------
+    engine : sqlalchemy engine whit psycopg2 driver
+        For managing connection to the DB.
+    run_id : int
+        run_id of the initialized run row in the DB.
+        Used to identify related data to be removed:
+        directly (table has `run_in` as FK) and
+        indirectly (table has FK of an Entity with `run_id` FK)
+
+    Returns
+    -------
+    None
+    """
     # Table order matters: reverse of `store()` logic.
     second_gen = ['process_commodity', 'vertex_source', 'edge_demand',
                   'area_demand', 'time_demand']
     first_gen = ['edge', 'vertex', 'area', 'time', 'process', 'commodity']
     tables = second_gen + first_gen
     for table in tables:
-        _delete_run_from_table(engine, table, run_id)
-    return
+        _purge_table(engine, table, run_id)
 
 
-def _handle_geoframe(engine, table, df, run_id):
-    if table == 'vertex':
+def _handle_geoframe(engine, frame, df, run_id):
+    """Before inserting to the DB, convert `geometries` column to WKT.
+
+    Parameters
+    ----------
+    engine : sqlalchemy engine whit psycopg2 driver
+        For managing connection to the DB.
+    frame : str
+        Name of the DataFrame as in `prob.params[]`
+    df : GeoDataFrame
+        as retrieved from ˙prog.param[]`
+    run_id : int
+        run_id of the initialized run row in the DB.
+
+    Returns
+    -------
+    None
+    """
+    if frame == 'vertex':
         cols = ['run_id', 'vertex_num', 'geometry']
         vals = '%s, %s, ST_GeogFromText(%s)'
-    elif table == 'edge':
+    elif frame == 'edge':
         cols = ['run_id', 'edge_num', 'vertex1', 'vertex2', 'geometry']
         vals = '%s, %s, %s, %s, ST_GeogFromText(%s)'
 
@@ -107,16 +183,16 @@ def _handle_geoframe(engine, table, df, run_id):
     string_query = """
         INSERT INTO {0} ({1})
         VALUES ({2});
-        """.format(table, cols, vals)
+        """.format(frame, cols, vals)
 
     connection = engine.raw_connection()
     try:
         for key, row in df.iterrows():
             wkt = row['geometry'].wkt
             with connection.cursor() as curs:
-                if table == 'vertex':
+                if frame == 'vertex':
                     curs.execute(string_query, (run_id, int(key), wkt))
-                if table == 'edge':
+                if frame == 'edge':
                     v1, v2 = key
                     curs.execute(string_query, (run_id, row['Edge'],
                                                 v1, v2, wkt))
@@ -124,10 +200,27 @@ def _handle_geoframe(engine, table, df, run_id):
                 connection.commit()
     finally:
         connection.close()
-    return
 
 
 def _fill_table(engine, prob, frame, run_id):
+    """Summary
+
+    Parameters
+    ----------
+    engine : sqlalchemy engine whit psycopg2 driver
+        For managing connection to the DB.
+    prob : pyomo ConcreteModel
+        Created by rivus.create_model()
+    frame : str
+        Name of the DataFrame from which data will be exported to DB.
+    run_id : int
+        run_id of the initialized run row in the DB.
+
+    Returns
+    -------
+    TYPE
+        Description
+    """
     col_map = {
         'Edge': 'edge_num',
         'allowed-max': 'allowed_max',
@@ -293,6 +386,35 @@ def _fill_table(engine, prob, frame, run_id):
 
 def store(engine, prob, run_id=None, plot_obj=None, graph_df=None,
           run_data=None):
+    """Store I/O plus extras of a rivus model into a postgres DB.
+
+    Parameters
+    ----------
+    engine : sqlalchemy engine whit psycopg2 driver
+        For managing connection to the DB.
+    prob : pyomo ConcreteModel
+        Created by rivus.create_model()
+    run_id : int, optional
+        run_id of an initialized run row in the DB.
+        If omitted: init_run() will be called with `run_data`.
+    plot_obj : dict, optional
+        TODO
+        Result of rivus.io.plot.fig3d(). It will be stored as JSONb.
+    graph_df : DataFrame, optional
+        TODO
+        Results of the graph analysis
+    run_data : dict, optional
+        Keyword arguments to be passed to init_run().
+        runner, start_ts, status, outcome
+
+    Returns
+    -------
+    None
+
+    Raises
+    ------
+    Exception caught during data export.
+    """
     if run_id is not None:
         run_id = int(run_id)
     else:
@@ -312,14 +434,24 @@ def store(engine, prob, run_id=None, plot_obj=None, graph_df=None,
     except Exception as e:
         # TODO this is basically a quick'n'dirty transaction rollback.
         # One could dig into sqlalchemy.session to make it better.
-        _purge_run(engine, run_id)
+        purge_run(engine, run_id)
         raise e
 
     # Results DataFrames=======================================================
-    return
 
 
 def fetch_table(engine, table, run_id):
+    """TODO
+
+    Args:
+        engine (sqlalchemy engine whit psycopg2 driver):
+            For managing connection to the DB.
+        table (TYPE): Description
+        run_id (TYPE): Description
+
+    Returns:
+        TYPE: Description
+    """
     if table == 'process_commodity':
         sql = """
             SELECT P.process AS "Process", C.commodity AS "Commodity",
@@ -337,11 +469,15 @@ def fetch_table(engine, table, run_id):
 
 
 def load(engine, run_id):
-    """Summary
+    """TODO
 
     Args:
-        engine (TYPE): Description
+        engine (sqlalchemy engine whit psycopg2 driver):
+            For managing connection to the DB.
         run_id (TYPE): Description
+
+    Returns:
+        TYPE: Description
     """
     # Create Process-Commodity DataFrame
     print("""
@@ -354,24 +490,3 @@ def load(engine, run_id):
         """)
 
     return
-
-if __name__ == '__main__':
-    def tester(prob=None):
-        connection = psql.connect(database='rivus', user="postgres")
-        # cursor = connection.cursor()
-        # cursor.execute("""
-        #     SELECT relname FROM pg_class
-        #     WHERE relkind='r' and relname !~ '^(pg_|sql_)';
-        #     """)
-        run_obj = {
-            'runner': 'Havasi',
-            'start_ts': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            'status': 'prepared',
-            'outcame': 'not_run',
-        }
-        run_id = init_run(connection, **run_obj)
-        print(run_id)
-
-        connection.close()
-
-    tester()
