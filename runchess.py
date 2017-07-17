@@ -125,8 +125,8 @@ if STORE_DB:
     engine_string = ('postgresql://{}:{}@{}/{}'
                      .format(_user, _pass, _host, _base))
     engine = create_engine(engine_string)
-    # rdb.store(engine, prob)
-    print(rdb._fetch_table(engine, 'process_commodity', 28))
+    rdb.store(engine, prob)
+    # print(rdb.fetch_table(engine, 'process_commodity', 28))
     # =============================
     # run_id = rdb.init_run(engine)
     # print(run_id)
