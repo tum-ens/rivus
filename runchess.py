@@ -30,7 +30,7 @@ if PLOTTER:
     from plotly.offline import plot as plot3d
 
 if STORE_DB:
-    import psycopg2 as psql
+    from datetime import datetime
     from sqlalchemy import create_engine
 
 from rivus.gridder.create_grid import create_square_grid
@@ -125,9 +125,9 @@ if STORE_DB:
     engine_string = ('postgresql://{}:{}@{}/{}'
                      .format(_user, _pass, _host, _base))
     engine = create_engine(engine_string)
+    # rdb.init_run(engine)
     rdb.store(engine, prob)
     # print(rdb.fetch_table(engine, 'process_commodity', 28))
-    
 
     profile_log['db'] = timenow() - dbstart
 

@@ -9,9 +9,9 @@ For specific information on the entity relationship of the expected DB visit:
     [rivus_db](https://github.com/lnksz/rivus_db)
 """
 
-import psycopg2 as psql
 from datetime import datetime
 from pandas import DataFrame, read_sql
+from ..main.rivus import get_timeseries, get_constants
 
 
 def init_run(engine, runner='Havasi', start_ts=None, status='prepared',
@@ -39,15 +39,8 @@ def init_run(engine, runner='Havasi', start_ts=None, status='prepared',
     int
         run_id of the initialized run row in the DB.
     """
-    try:
-        if start_ts.now():
-            ts = start_ts
-        else:
-            ts = datetime.strptime(start_ts, '%Y-%m-%d %H:%M:%S')
-    except:
-        ts = start_ts.now()
-    finally:
-        start_ts = ts.strftime('%Y-%m-%d %H:%M:%S')
+    if start_ts is None:
+        start_ts = datetime.now()
 
     run_id = None
     connection = engine.raw_connection()
@@ -202,17 +195,18 @@ def _handle_geoframe(engine, frame, df, run_id):
         connection.close()
 
 
-def _fill_table(engine, prob, frame, run_id):
+def _fill_table(engine, frame, df, run_id):
     """Summary
 
     Parameters
     ----------
     engine : sqlalchemy engine whit psycopg2 driver
         For managing connection to the DB.
-    prob : pyomo ConcreteModel
-        Created by rivus.create_model()
     frame : str
         Name of the DataFrame from which data will be exported to DB.
+    df : DataFrame
+        Expected is a DataFrame, which is an input or output of the rivus
+        ConcreteModel. (create_model(), solve(), ...)
     run_id : int
         run_id of the initialized run row in the DB.
 
@@ -234,17 +228,14 @@ def _fill_table(engine, prob, frame, run_id):
         'loss-var': 'loss_var',
     }
     if frame == 'commodity':
-        df = prob.params[frame]
         sql_df = df.rename(columns=col_map)
         sql_df['run_id'] = run_id
         sql_df.to_sql(frame, engine, if_exists='append', index_label=frame)
     elif frame == 'process':
-        df = prob.params[frame]
         sql_df = df.loc[:, 'cost-inv-fix':'cap-max'].rename(columns=col_map)
         sql_df['run_id'] = run_id
         sql_df.to_sql(frame, engine, if_exists='append', index_label=frame)
     elif frame == 'edge':
-        df = prob.params[frame]
         sql_df = df.loc[:, ('Edge', 'geometry')]
         _handle_geoframe(engine, frame, sql_df, run_id)
         df = df.loc[:, [c for c in df.columns.values if c != 'geometry']]
@@ -273,7 +264,6 @@ def _fill_table(engine, prob, frame, run_id):
         finally:
             connection.close()
     elif frame == 'vertex':
-        df = prob.params[frame]
         sql_df = df.geometry.to_frame()
         _handle_geoframe(engine, frame, sql_df, run_id)
         df = df.loc[:, [c for c in df.columns.values if c != 'geometry']]
@@ -300,7 +290,6 @@ def _fill_table(engine, prob, frame, run_id):
         finally:
             connection.close()
     elif frame == 'time':
-        df = prob.params[frame]
         sql_df = df.loc[:, 'weight'].to_frame()
         sql_df['run_id'] = run_id
         sql_df.to_sql(frame, engine, if_exists='append',
@@ -329,7 +318,6 @@ def _fill_table(engine, prob, frame, run_id):
         finally:
             connection.close()
     elif frame == 'area_demand':
-        df = prob.params[frame]
         area_types = df.unstack(level='Commodity').index.values
         sql_df = DataFrame(dict(building_type=area_types,
                                 run_id=[run_id] * len(area_types)))
@@ -356,7 +344,6 @@ def _fill_table(engine, prob, frame, run_id):
         finally:
             connection.close()
     elif frame == 'process_commodity':
-        df = prob.params[frame]
         connection = engine.raw_connection()
         try:
             for key, row in df.iterrows():
@@ -379,13 +366,122 @@ def _fill_table(engine, prob, frame, run_id):
                     connection.commit()
         finally:
             connection.close()
+    elif frame == 'source':
+        connection = engine.raw_connection()
+        try:
+            for (vertex, comm), row in df.iterrows():
+                for time_step, val in row.iteritems():
+                    values = dict(run_id=run_id, vertex=vertex, commodity=comm,
+                                  time_step=time_step, value=float(val))
+                    with connection.cursor() as curs:
+                        curs.execute("""
+                            INSERT INTO {0}
+                            (vertex_id, commodity_id, time_id, capacity)
+                            VALUES (
+                                (SELECT vertex_id FROM vertex
+                                 WHERE run_id = %(run_id)s AND
+                                       vertex_num = %(vertex)s),
+                                (SELECT commodity_id FROM commodity
+                                 WHERE run_id = %(run_id)s AND
+                                       commodity LIKE %(commodity)s),
+                                (SELECT time_id FROM "time"
+                                 WHERE run_id = %(run_id)s AND
+                                       time_step = %(time_step)s),
+                                %(value)s);
+                            """.format(frame), values)
+                        connection.commit()
+        finally:
+            connection.close()
+    elif frame in ['flow', 'hub', 'proc_io', 'proc_tau']:
+        # TODO if needed
+        pass
+    elif frame == 'cost':
+        series = df.rename(dict(Inv='investment', Fix='fix', Var='variable'))
+        values = {k: int(v) for k, v in series.iteritems()}
+        values['run_id'] = run_id
+        connection = engine.raw_connection()
+        try:
+            with connection.cursor() as curs:
+                curs.execute("""
+                    INSERT INTO {0} (run_id, variable, investment, fix)
+                    VALUES (%(run_id)s, %(variable)s, %(investment)s, %(fix)s);
+                    """.format(frame), values)
+                connection.commit()
+        finally:
+            connection.close()
+    elif frame == 'pmax':
+        connection = engine.raw_connection()
+        try:
+            for (v1, v2), row in df.iterrows():
+                for comm, val in row.iteritems():
+                    values = dict(va=v1, vb=v2, commodity=comm, val=int(val),
+                                  run_id=run_id)
+                    with connection.cursor() as curs:
+                        curs.execute("""
+                            INSERT INTO {0} (edge_id, commodity_id, capacity)
+                            VALUES (
+                                (SELECT edge_id FROM edge
+                                 WHERE run_id = %(run_id)s AND
+                                       vertex1 = %(va)s AND vertex2 = %(vb)s),
+                                (SELECT commodity_id from commodity
+                                 WHERE run_id = %(run_id)s AND
+                                       commodity LIKE %(commodity)s),
+                                %(val)s);
+                            """.format(frame), values)
+                        connection.commit()
+        finally:
+            connection.close()
+    elif frame == 'kappa_hub':
+        connection = engine.raw_connection()
+        try:
+            for (v1, v2), row in df.iterrows():
+                for hub, val in row.iteritems():
+                    values = dict(va=v1, vb=v2, hub=hub, val=int(val),
+                                  run_id=run_id)
+                    with connection.cursor() as curs:
+                        curs.execute("""
+                            INSERT INTO {0} (edge_id, process_id, capacity)
+                            VALUES (
+                                (SELECT edge_id FROM edge
+                                 WHERE run_id = %(run_id)s AND
+                                       vertex1 = %(va)s AND vertex2 = %(vb)s),
+                                (SELECT process_id from process
+                                 WHERE run_id = %(run_id)s AND
+                                       process LIKE %(hub)s),
+                                %(val)s);
+                            """.format(frame), values)
+                        connection.commit()
+        finally:
+            connection.close()
+    elif frame == 'kappa_process':
+        connection = engine.raw_connection()
+        try:
+            for ver, row in df.iterrows():
+                for proc, val in row.iteritems():
+                    values = dict(vertex=ver, process=proc, val=int(val),
+                                  run_id=run_id)
+                    with connection.cursor() as curs:
+                        curs.execute("""
+                            INSERT INTO {0} (vertex_id, process_id, capacity)
+                            VALUES (
+                                (SELECT vertex_id FROM vertex
+                                 WHERE run_id = %(run_id)s AND
+                                       vertex_num = %(vertex)s),
+                                (SELECT process_id from process
+                                 WHERE run_id = %(run_id)s AND
+                                       process LIKE %(process)s),
+                                %(val)s);
+                            """.format(frame), values)
+                        connection.commit()
+        finally:
+            connection.close()
     else:
         pass
     return
 
 
 def store(engine, prob, run_id=None, plot_obj=None, graph_df=None,
-          run_data=None):
+          run_data=None, time_series=None, constants=None):
     """Store I/O plus extras of a rivus model into a postgres DB.
 
     Parameters
@@ -406,6 +502,10 @@ def store(engine, prob, run_id=None, plot_obj=None, graph_df=None,
     run_data : dict, optional
         Keyword arguments to be passed to init_run().
         runner, start_ts, status, outcome
+    time_series : None, optional
+        Description
+    constants : None, optional
+        Description
 
     Returns
     -------
@@ -421,16 +521,32 @@ def store(engine, prob, run_id=None, plot_obj=None, graph_df=None,
         run_id = init_run(engine, **run_data) if run_data else init_run(engine)
     print('Store params for run <{}>'.format(run_id))
 
-    # Parameter DataFrames=====================================================
-    # The order of frames -> table does matter. Followings apply to `frames`:
-    # `process_commodity` after `process` and `commodity`
-    # `vertex`, `area_demand` and `time` after `commodity`
-    # `edge` after `area_demand`
     try:
+        # Parameter DataFrames
+        # --------------------
+        # The order of frames -> table does matter.
+        # Followings apply to `frames`:
+        # `process_commodity` after `process` and `commodity`
+        # `vertex`, `area_demand` and `time` after `commodity`
+        # `edge` after `area_demand`
         frames = ['commodity', 'process', 'process_commodity', 'area_demand',
                   'vertex', 'time', 'edge']
         for frame in frames:
-            _fill_table(engine, prob, frame, run_id)
+            # frame should be the same as df.name... but GeoDataFrames does not
+            # have a name etc..
+            df = prob.params[frame]
+            _fill_table(engine, frame, df, run_id)
+
+        # Result DataFrames
+        # -----------------
+        series_names = ['source', 'flow', 'hub', 'proc_io', 'proc_tau']
+        series = get_timeseries(prob)  # source, flows, hubs, proc_io, proc_tau
+        consts_names = ['cost', 'pmax', 'kappa_hub', 'kappa_process']
+        consts = get_constants(prob)  # costs, Pmax, Kappa_hub, Kappa_process
+
+        for df, name in zip(series+consts, series_names+consts_names):
+            if not df.empty:
+                _fill_table(engine, name, df, run_id)
     except Exception as e:
         # TODO this is basically a quick'n'dirty transaction rollback.
         # One could dig into sqlalchemy.session to make it better.
