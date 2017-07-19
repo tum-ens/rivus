@@ -620,6 +620,7 @@ def fetch_table(engine, table, run_id):
         # join edge AS E ON E.edge_id=ED.edge_id
         # join area AS A ON A.area_id=ED.area_id
         # where E.run_id=2;
+
         # sql = """
         #     SELECT
         #         (SELECT vertex1 AS "Vertex1", vertex2 AS "Vertex2", geometry,
