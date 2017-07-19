@@ -21,7 +21,7 @@ except ImportError:  # zip is a builtin in Python 3.x
 import numpy as np
 import pandas as pd
 import shapefile
-import shapelytools
+from . import shapelytools
 import warnings
 from shapely.geometry import LineString, Point, Polygon
 

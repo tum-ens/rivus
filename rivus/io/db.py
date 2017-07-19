@@ -196,7 +196,7 @@ def _handle_geoframe(engine, frame, df, run_id):
 
 
 def _fill_table(engine, frame, df, run_id):
-    """Summary
+    """Insert data to db.table from dataframe.
 
     Parameters
     ----------
@@ -557,7 +557,13 @@ def store(engine, prob, run_id=None, plot_obj=None, graph_df=None,
 
 
 def fetch_table(engine, table, run_id):
-    """TODO
+    """Extract data form the database into a dataframe in a form, that is common
+    during the rivus workflow.
+    Implemented dataframes:
+        - rivus_model.params[] dataframes:
+            - process
+            - commodity
+            - process_commodity
 
     Args:
         engine (sqlalchemy engine whit psycopg2 driver):
@@ -579,6 +585,73 @@ def fetch_table(engine, table, run_id):
             """
         df = read_sql(sql, engine, params=(run_id,),
                       index_col=['Process', 'Commodity', 'Direction'])
+    elif table == 'process':
+        sql = """
+            SELECT process AS "Process", unit,
+                   cost_inv_fix AS "cost-inv-fix",
+                   cost_inv_var AS "cost-inv-var",
+                   cost_fix AS "cost-fix",
+                   cost_var AS "cost-var",
+                   cap_min AS "cap-min",
+                   cap_max AS "cap-max"
+            FROM process WHERE run_id = %s;
+            """
+        df = read_sql(sql, engine, params=(run_id,),
+                      index_col='Process')
+    elif table == 'commodity':
+        sql = """
+            SELECT commodity AS "Commodity", unit,
+                   cost_inv_fix AS "cost-inv-fix",
+                   cost_inv_var AS "cost-inv-var",
+                   cost_fix AS "cost-fix",
+                   cost_var AS "cost-var",
+                   loss_fix AS "loss-fix",
+                   loss_var AS "loss-var",
+                   cap_max AS "cap-max",
+                   allowed_max AS "allowed-max"
+            FROM commodity WHERE run_id = %s;
+            """
+        df = read_sql(sql, engine, params=(run_id,),
+                      index_col='Commodity')
+    elif table == 'edge':
+        # TODO
+        # https://www.postgresql.org/docs/9.1/static/tablefunc.html
+        # select * from edge_demand as ED
+        # join edge AS E ON E.edge_id=ED.edge_id
+        # join area AS A ON A.area_id=ED.area_id
+        # where E.run_id=2;
+        # sql = """
+        #     SELECT
+        #         (SELECT vertex1 AS "Vertex1", vertex2 AS "Vertex2", geometry,
+        #                 edge_num AS "Edge"
+        #          FROM edge WHERE run_id = %s),
+
+        #     SELECT *
+        #     FROM edge_demand AS ED
+        #     INNER JOIN edge AS E ON ED.edge_id = ED.edge_id
+        #     INNER JOIN commodity AS C ON ED.commodity_id = C.commodity_id
+        #     WHERE P.run_id = %s;
+        #     """
+        # df = read_sql(sql, engine, params=(run_id,),
+        #               index_col=['Process', 'Commodity', 'Direction'])
+    elif table == 'vertex':
+        pass
+    elif table == 'time':
+        pass
+    elif table == 'area_demand':
+        pass
+    elif table == 'source':
+        pass
+    elif table == 'cost':
+        pass
+    elif table == 'pmax':
+        pass
+    elif table == 'kappa_hub':
+        pass
+    elif table == 'kappa_process':
+        pass
+    elif table in ['flow', 'hub', 'proc_io', 'proc_tau']:
+        df = DataFrame()
     else:
         df = DataFrame()
     return df
