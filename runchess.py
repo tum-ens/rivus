@@ -37,7 +37,7 @@ from rivus.gridder.create_grid import create_square_grid
 from rivus.gridder.extend_grid import extend_edge_data, vert_init_commodities
 from rivus.io import db as rdb
 
-# Files Access
+# Files Access | INITs
 datenow = datetime.now().strftime('%y%m%dT%H%M')
 proj_name = 'chessboard'
 base_directory = os.path.join('data', proj_name)
@@ -127,9 +127,14 @@ if STORE_DB:
     engine = create_engine(engine_string)
     # rdb.init_run(engine)
     rdb.store(engine, prob)
-    # print(rdb.fetch_table(engine, 'process_commodity', 28))
+    # fetched_df = rdb.fetch_table(engine, 'edge', 2)
+    # print(fetched_df)
 
     profile_log['db'] = timenow() - dbstart
+
+    # import pandas as pd
+    # with pd.ExcelWriter('./fetched.xlsx') as writer:
+    #     fetched_df.to_excel(writer, 'edge')
 
 print('{1} Script parts took: (sec) {1}\n{0:s}\n{1}{1}{1}{1}'.format(
     Series(profile_log, name='mini-profile').to_string(),

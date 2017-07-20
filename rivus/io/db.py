@@ -11,6 +11,8 @@ For specific information on the entity relationship of the expected DB visit:
 
 from datetime import datetime
 from pandas import DataFrame, read_sql
+from geopandas import GeoDataFrame
+from shapely.wkt import loads as wkt_load
 from ..main.rivus import get_timeseries, get_constants
 
 
@@ -614,27 +616,33 @@ def fetch_table(engine, table, run_id):
         df = read_sql(sql, engine, params=(run_id,),
                       index_col='Commodity')
     elif table == 'edge':
-        # TODO
-        # https://www.postgresql.org/docs/9.1/static/tablefunc.html
-        # select * from edge_demand as ED
-        # join edge AS E ON E.edge_id=ED.edge_id
-        # join area AS A ON A.area_id=ED.area_id
-        # where E.run_id=2;
+        sql_demand = """
+            SELECT E.vertex1 AS "Vertex1", E.vertex2 AS "Vertex2",
+                   A.building_type, ED.value
+            FROM edge_demand AS ED
+            JOIN edge AS E ON E.edge_id = ED.edge_id
+            JOIN area AS A ON A.area_id = ED.area_id
+            WHERE E.run_id = %s
+            ORDER BY 1,2;
+            """
+        df_demand = read_sql(sql_demand, engine, params=(run_id,),
+                             index_col=['Vertex1', 'Vertex2', 'building_type']
+                             ).unstack(level=-1).fillna(0)
+        df_demand = df_demand['value']
 
-        # sql = """
-        #     SELECT
-        #         (SELECT vertex1 AS "Vertex1", vertex2 AS "Vertex2", geometry,
-        #                 edge_num AS "Edge"
-        #          FROM edge WHERE run_id = %s),
+        sql_edge = """
+            SELECT vertex1 AS "Vertex1", vertex2 AS "Vertex2",
+                   ST_AsText(geometry) AS "geometry", edge_num AS "Edge"
+            FROM edge
+            WHERE run_id = %s
+            ORDER BY 1,2;
+            """
+        df_edge = read_sql(sql_edge, engine, params=(run_id,),
+                           index_col=['Vertex1', 'Vertex2'])
+        df_edge['geometry'] = df_edge['geometry'].apply(wkt_load)
 
-        #     SELECT *
-        #     FROM edge_demand AS ED
-        #     INNER JOIN edge AS E ON ED.edge_id = ED.edge_id
-        #     INNER JOIN commodity AS C ON ED.commodity_id = C.commodity_id
-        #     WHERE P.run_id = %s;
-        #     """
-        # df = read_sql(sql, engine, params=(run_id,),
-        #               index_col=['Process', 'Commodity', 'Direction'])
+        df = df_edge.join(df_demand)
+        df = GeoDataFrame(df)
     elif table == 'vertex':
         pass
     elif table == 'time':
