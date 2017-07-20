@@ -80,7 +80,10 @@ def _purge_table(engine, table, run_id):
     ------------------
     None
     """
-    if table in ['process', 'commodity', 'edge', 'vertex', 'area', 'time']:
+
+kappa_process
+    if table in ['process', 'commodity', 'edge', 'vertex', 'area', 'time',
+                 'cost']:
         # These have run_id as FK
         connection = engine.raw_connection()
         try:
@@ -93,7 +96,7 @@ def _purge_table(engine, table, run_id):
         finally:
             connection.close()
     elif table in ['process_commodity', 'vertex_source', 'area_demand',
-                   'time_demand']:
+                   'time_demand', 'pmax', 'flow', 'source']:
         # These have commodity_id as FK
         connection = engine.raw_connection()
         try:
@@ -106,8 +109,8 @@ def _purge_table(engine, table, run_id):
                 connection.commit()
         finally:
             connection.close()
-    elif table == 'edge_demand':
-        # This has edge_id as FK
+    elif table in ['edge_demand', 'time_hub', 'kappa_hub']:
+        # These have edge_id as FK
         connection = engine.raw_connection()
         try:
             with connection.cursor() as curs:
@@ -119,8 +122,22 @@ def _purge_table(engine, table, run_id):
                 connection.commit()
         finally:
             connection.close()
+    elif table in ['kappa_process']:
+        # These have vertex_id as FK
+        connection = engine.raw_connection()
+        try:
+            with connection.cursor() as curs:
+                curs.execute("""
+                    DELETE FROM {0} USING vertex
+                    WHERE {0}.vertex_id = edge.vertex_id AND
+                          vertex.run_id = %s;
+                    """.format(table), (run_id, ))
+                connection.commit()
+        finally:
+            connection.close()
     else:
-        pass
+        warnings.warn("<{}> is not recognized."
+                      "So it was not purged from database".format(table))
 
 
 def purge_run(engine, run_id):
@@ -141,10 +158,12 @@ def purge_run(engine, run_id):
     None
     """
     # Table order matters: reverse of `store()` logic.
+    results = ['source', 'cost', 'pmax', 'kappa_hub', 'kappa_process',
+               'time_hub', 'flow']
     second_gen = ['process_commodity', 'vertex_source', 'edge_demand',
                   'area_demand', 'time_demand']
     first_gen = ['edge', 'vertex', 'area', 'time', 'process', 'commodity']
-    tables = second_gen + first_gen
+    tables = results + second_gen + first_gen
     for table in tables:
         _purge_table(engine, table, run_id)
 
