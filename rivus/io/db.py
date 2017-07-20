@@ -8,9 +8,9 @@ Leading to better structured results.
 For specific information on the entity relationship of the expected DB visit:
     [rivus_db](https://github.com/lnksz/rivus_db)
 """
-
+import warnings
 from datetime import datetime
-from pandas import DataFrame, read_sql
+from pandas import Series, DataFrame, read_sql
 from geopandas import GeoDataFrame
 from shapely.wkt import loads as wkt_load
 from ..main.rivus import get_timeseries, get_constants
@@ -395,8 +395,8 @@ def _fill_table(engine, frame, df, run_id):
         finally:
             connection.close()
     elif frame in ['flow', 'hub', 'proc_io', 'proc_tau']:
-        # TODO if needed
-        pass
+        warnings.warn("<{}> is not implemented yet."
+                      "Nothing was inserted to the database".format(frame))
     elif frame == 'cost':
         series = df.rename(dict(Inv='investment', Fix='fix', Var='variable'))
         values = {k: int(v) for k, v in series.iteritems()}
@@ -478,7 +478,8 @@ def _fill_table(engine, frame, df, run_id):
         finally:
             connection.close()
     else:
-        pass
+        warnings.warn("<{}> is unknown."
+                      "Nothing was inserted to the database".format(frame))
     return
 
 
@@ -558,25 +559,40 @@ def store(engine, prob, run_id=None, plot_obj=None, graph_df=None,
     # Results DataFrames=======================================================
 
 
-def fetch_table(engine, table, run_id):
-    """Extract data form the database into a dataframe in a form, that is common
-    during the rivus workflow.
+def df_from_table(engine, fname, run_id):
+    """Extract data form the database into a dataframe in a form,
+    that is common during the rivus work-flow.
     Implemented dataframes:
         - rivus_model.params[] dataframes:
             - process
             - commodity
             - process_commodity
+            - edge
+            - vertex
+            - time
+            - area_demand
+        - get_timeseries dataframes:
+            - source
+        - get_constants dataframes:
+            - cost
+            - pmax
+            - kappa_hub
+            - kappa_process
 
     Args:
         engine (sqlalchemy engine whit psycopg2 driver):
             For managing connection to the DB.
-        table (TYPE): Description
-        run_id (TYPE): Description
+        fname (str): One of the implemented dataframes. (See summary.)
+        run_id (int): run_id of an initialized run row in the DB.
+            You could query the run table for e.g. start date,
+            or join it vertex table and execute a geographical query
+            and get the run_id(s) you want to work with
 
     Returns:
-        TYPE: Description
+        DataFrame or Series: depending on the data's dimensions.
+        Only `cost` returns a Series to be consequent with get_constants.
     """
-    if table == 'process_commodity':
+    if fname == 'process_commodity':
         sql = """
             SELECT P.process AS "Process", C.commodity AS "Commodity",
                    PC.direction AS "Direction", PC.ratio AS ratio
@@ -587,7 +603,8 @@ def fetch_table(engine, table, run_id):
             """
         df = read_sql(sql, engine, params=(run_id,),
                       index_col=['Process', 'Commodity', 'Direction'])
-    elif table == 'process':
+
+    elif fname == 'process':
         sql = """
             SELECT process AS "Process", unit,
                    cost_inv_fix AS "cost-inv-fix",
@@ -600,7 +617,8 @@ def fetch_table(engine, table, run_id):
             """
         df = read_sql(sql, engine, params=(run_id,),
                       index_col='Process')
-    elif table == 'commodity':
+
+    elif fname == 'commodity':
         sql = """
             SELECT commodity AS "Commodity", unit,
                    cost_inv_fix AS "cost-inv-fix",
@@ -615,7 +633,13 @@ def fetch_table(engine, table, run_id):
             """
         df = read_sql(sql, engine, params=(run_id,),
                       index_col='Commodity')
-    elif table == 'edge':
+
+    elif fname == 'edge':
+        # Performance Note:
+        # A server side solution could be crosstab() from Tabletool extension.
+        # https://www.postgresql.org/docs/9.6/static/tablefunc.html
+        # But I rather kept the SQL queries simpler, and reshape data in the
+        # generally more well-known pandas.DataFrame format.
         sql_demand = """
             SELECT E.vertex1 AS "Vertex1", E.vertex2 AS "Vertex2",
                    A.building_type, ED.value
@@ -643,25 +667,148 @@ def fetch_table(engine, table, run_id):
 
         df = df_edge.join(df_demand)
         df = GeoDataFrame(df)
-    elif table == 'vertex':
-        pass
-    elif table == 'time':
-        pass
-    elif table == 'area_demand':
-        pass
-    elif table == 'source':
-        pass
-    elif table == 'cost':
-        pass
-    elif table == 'pmax':
-        pass
-    elif table == 'kappa_hub':
-        pass
-    elif table == 'kappa_process':
-        pass
-    elif table in ['flow', 'hub', 'proc_io', 'proc_tau']:
+
+    elif fname == 'vertex':
+        sql_source = """
+            SELECT V.vertex_num AS "Vertex",
+                   C.commodity, VS.value
+            FROM vertex_source AS VS
+            JOIN vertex AS V ON V.vertex_id = VS.vertex_id
+            JOIN commodity AS C ON C.commodity_id = VS.commodity_id
+            WHERE V.run_id = %s
+            ORDER BY 1,2;
+            """
+        df_source = read_sql(sql_source, engine, params=(run_id,),
+                             index_col=['Vertex', 'commodity']
+                             ).unstack(level=-1).fillna(0)
+        df_source = df_source['value']
+
+        sql_vertex = """
+            SELECT vertex_num AS "Vertex", ST_AsText(geometry) AS "geometry"
+            FROM vertex
+            WHERE run_id = %s
+            ORDER BY 1,2;
+            """
+        df_vertex = read_sql(sql_vertex, engine, params=(run_id,),
+                             index_col='Vertex')
+        df_vertex['geometry'] = df_vertex['geometry'].apply(wkt_load)
+
+        df = GeoDataFrame(df_vertex.join(df_source))
+
+    elif fname == 'time':
+        sql_source = """
+            SELECT T.time_step AS "Time", C.commodity, TD.scale
+            FROM time_demand AS TD
+            JOIN "time" AS T ON T.time_id = TD.time_id
+            JOIN commodity AS C ON C.commodity_id = TD.commodity_id
+            WHERE T.run_id = %s
+            ORDER BY 1,2;
+            """
+        df_source = read_sql(sql_source, engine, params=(run_id,),
+                             index_col=['Time', 'commodity']
+                             ).unstack(level=-1).fillna(0)
+        df_source = df_source['scale']
+
+        sql_vertex = """
+            SELECT time_step AS "Time", weight
+            FROM "time"
+            WHERE run_id = %s;
+            """
+        df_vertex = read_sql(sql_vertex, engine, params=(run_id,),
+                             index_col='Time')
+        df = df_vertex.join(df_source)
+
+    elif fname == 'area_demand':
+        sql = """
+            SELECT A.building_type AS "Area", C.commodity as "Commodity",
+                   AD.peak
+            FROM area_demand AS AD
+            JOIN area AS A ON A.area_id = AD.area_id
+            JOIN commodity AS C ON C.commodity_id = AD.commodity_id
+            WHERE A.run_id = %s
+            ORDER BY 1,2;
+            """
+        df = read_sql(sql, engine, params=(run_id,),
+                      index_col=['Area', 'Commodity']).fillna(0)
+
+    elif fname == 'source':
+        sql = """
+            SELECT V.vertex_num AS "vertex", C.commodity,
+                   T.time_step as "time", S.capacity
+            FROM source AS S
+            JOIN vertex AS V ON V.vertex_id = S.vertex_id
+            JOIN commodity AS C ON C.commodity_id = S.commodity_id
+            JOIN "time" AS T ON T.time_id = S.time_id
+            WHERE V.run_id = %s
+            ORDER BY 1,2;
+            """
+        df = read_sql(sql, engine, params=(run_id,),
+                      index_col=['vertex', 'commodity', 'time']
+                      ).unstack(level=-1).fillna(0)
+        df = df['capacity']
+
+    elif fname == 'cost':
+        sql = """
+            SELECT variable AS "Var", investment AS "Inv", fix as "Fix"
+            FROM cost
+            WHERE run_id = %s;
+            """
+        df = read_sql(sql, engine, params=(run_id,))
+        if not df.empty:
+            df = Series(df.iloc[0], name='costs')
+
+    elif fname == 'pmax':
+        sql = """
+            SELECT E.vertex1 AS "Vertex1", E.vertex2 AS "Vertex2", C.commodity,
+                   P.capacity
+            FROM pmax AS P
+            JOIN edge AS E ON E.edge_id = P.edge_id
+            JOIN commodity AS C ON C.commodity_id = P.commodity_id
+            WHERE E.run_id = %s
+            ORDER BY 1,2;
+            """
+        df = read_sql(sql, engine, params=(run_id,),
+                      index_col=['Vertex1', 'Vertex2', 'commodity']
+                      ).unstack(level=-1).fillna(0)
+        df = df['capacity']
+
+    elif fname == 'kappa_hub':
+        sql = """
+            SELECT E.vertex1 AS "Vertex1", E.vertex2 AS "Vertex2", P.process,
+                   KH.capacity
+            FROM kappa_hub AS KH
+            JOIN edge AS E ON E.edge_id = KH.edge_id
+            JOIN process AS P ON P.process_id = KH.process_id
+            WHERE E.run_id = %s
+            ORDER BY 1,2;
+            """
+        df = read_sql(sql, engine, params=(run_id,),
+                      index_col=['Vertex1', 'Vertex2', 'process']
+                      ).unstack(level=-1).fillna(0)
+        df = df['capacity']
+
+    elif fname == 'kappa_process':
+        # TODO test
+        sql = """
+            SELECT V.vertex_num AS "Vertex", P.process, KP.capacity
+            FROM kappa_process AS KP
+            JOIN vertex AS V ON V.vertex_id = KP.vertex_id
+            JOIN process AS P ON P.process_id = KP.process_id
+            WHERE V.run_id = %s
+            ORDER BY 1,2;
+            """
+        df = read_sql(sql, engine, params=(run_id,),
+                      index_col=['Vertex', 'process']
+                      ).unstack(level=-1).fillna(0)
+        df = df['capacity']
+
+    elif fname in ['flow', 'hub', 'proc_io', 'proc_tau']:
+        warnings.warn("<{}> is not impolemented yet."
+                      "Returning an empty DataFrame".format(fname))
         df = DataFrame()
     else:
+        warnings.warn("<{}> is un-known."
+                      "Returning an empty DataFrame".format(fname))
         df = DataFrame()
     return df
 

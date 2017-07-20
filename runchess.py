@@ -126,9 +126,9 @@ if STORE_DB:
                      .format(_user, _pass, _host, _base))
     engine = create_engine(engine_string)
     # rdb.init_run(engine)
-    rdb.store(engine, prob)
-    # fetched_df = rdb.fetch_table(engine, 'edge', 2)
-    # print(fetched_df)
+    # rdb.store(engine, prob)
+    fetched_df = rdb.df_from_table(engine, 'time', 2)
+    print('Fetched table:\n', fetched_df)
 
     profile_log['db'] = timenow() - dbstart
 
