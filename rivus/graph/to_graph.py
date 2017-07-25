@@ -112,7 +112,7 @@ def to_nx(vdf, edf, pmax, comms=None, save_dir=None):
         nx.from_pandas_dataframe() was also investigated, but it is a bit
         slower and does not improve code quality in my opinion.
     """
-    import networks as nx
+    import networkx as nx
     if len(edf) != len(pmax):
         _pmax = edf.join(pmax).fillna(0)
     else:

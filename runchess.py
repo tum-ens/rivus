@@ -30,15 +30,17 @@ if PLOTTER:
     from rivus.io.plot import fig3d
     from plotly.offline import plot as plot3d
 if STORE_DB:
-    from datetime import datetime
+    # from datetime import datetime
     from sqlalchemy import create_engine
+    from rivus.io import db as rdb
 if GRAPHS:
+    import networkx as nx
     from rivus.graph.to_graph import to_nx
+    from rivus.main.rivus import get_constants
 
 
 from rivus.gridder.create_grid import create_square_grid
 from rivus.gridder.extend_grid import extend_edge_data, vert_init_commodities
-from rivus.io import db as rdb
 
 # Files Access | INITs
 datenow = datetime.now().strftime('%y%m%dT%H%M')
@@ -117,6 +119,19 @@ if PLOTTER:
         plot3d(fig, filename=os.path.join(arch_dir, 'rivus_result.html'))
     profile_log['plotting'] = timenow() - myprintstart
 
+if GRAPHS:
+    graphstart = timenow()
+    vdf = prob.params['vertex']
+    edf = prob.params['edge']
+    _, pmax, _, _ = get_constants(prob)
+    graphs = to_nx(vdf, edf, pmax)
+    for G in graphs:
+        print(nx.is_connected(G))
+
+    profile_log['rivus load'] = timenow() - graphstart
+    print('Graphs: done.')
+
+
 if STORE_DB:
     print('Using DB')
     dbstart = timenow()
@@ -138,10 +153,6 @@ if STORE_DB:
     # import pandas as pd
     # with pd.ExcelWriter('./fetched.xlsx') as writer:
     #     fetched_df.to_excel(writer, 'edge')
-
-
-if GRAPHS:
-    pass
 
 
 print('{1} Script parts took: (sec) {1}\n{0:s}\n{1}{1}{1}{1}'.format(
