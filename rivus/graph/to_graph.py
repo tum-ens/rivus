@@ -29,7 +29,9 @@ def to_igraph(vdf, edf, pmax, comms=None, peak=None, save_dir=None, ext='gml'):
             To be sure, that all edges are created.
         pmax (DataFrame): Commodities as columns with max capacity per edge
             returned by rivus.get_constants()
-        comms (iterable, optional): Names of commodities
+        comms (iterable, optional): Names of the commodities from which we
+            build the graphs. (Each as separate graph.) If omitted, the columns
+            of pmax will be used.
         peak (DataFrame, optional): Commodities as columns with demands
             in t_peak time-step. Calculated in main.rivus
         save_dir (path string, optional): Path to a dir to save graphs as `ext`
@@ -37,8 +39,8 @@ def to_igraph(vdf, edf, pmax, comms=None, peak=None, save_dir=None, ext='gml'):
             If dir does not exit yet, it will be created.
         ext (string) file extension, supported by igraph.save()
             If not one of the following, the default 'gml' will be applied.
-            'adjacency', 'dimacs', 'dot', 'graphviz', 'edgelist', 'edges', 
-            'edge', 'gml', 'graphml', 'graphmlz', 'gw', 'leda', 'lgl', 'lgr', 
+            'adjacency', 'dimacs', 'dot', 'graphviz', 'edgelist', 'edges',
+            'edge', 'gml', 'graphml', 'graphmlz', 'gw', 'leda', 'lgl', 'lgr',
             'ncol', 'net', 'pajek', 'pickle', 'picklez', 'svg'
 
     Returns:
@@ -52,7 +54,7 @@ def to_igraph(vdf, edf, pmax, comms=None, peak=None, save_dir=None, ext='gml'):
         ext = 'gml'
     if len(edf) != len(pmax):
         pmax = edf.join(pmax).fillna(0)
-    comms = pmax.columns.values if comms == None else comms
+    comms = pmax.columns.values if comms is None else comms
 
     graphs = []
     for comm in comms:
@@ -68,7 +70,7 @@ def to_igraph(vdf, edf, pmax, comms=None, peak=None, save_dir=None, ext='gml'):
         g.es[comm] = pmax[comm].tolist()
         weights = pmax[comm] / pmax[comm].max()
         g.es['Weight'] = weights.tolist()
-        if peak != None:
+        if peak is not None:
             g.es[comm + '-peak'] = peak[comm].tolist()
         # For possible GeoLayout (e.g. in Gephi)
         g.vs['Longitude'] = vdf.geometry.map(lambda p: p.x).tolist()
@@ -95,7 +97,9 @@ def to_nx(vdf, edf, pmax, comms=None, save_dir=None):
             To be sure, that all edges are created.
         pmax (DataFrame): Commodities as columns with max capacity per edge
             returned by rivus.get_constants()
-        comms (iterable, optional): Names of commodities
+        comms (iterable, optional): Names of the commodities from which we
+            build the graphs. (Each as separate graph.) If omitted, the columns
+            of pmax will be used.
         save_dir (path string, optional): Path to a dir to save graphs as GML.
             Path preferably constructed using the `os.path` module
             If dir does not exit yet, it will be created.
@@ -113,7 +117,7 @@ def to_nx(vdf, edf, pmax, comms=None, save_dir=None):
         _pmax = edf.join(pmax).fillna(0)
     else:
         _pmax = pmax.copy()
-    comms = _pmax.columns.values if comms == None else comms
+    comms = _pmax.columns.values if comms is None else comms
 
     graphs = []
     for comm in comms:
