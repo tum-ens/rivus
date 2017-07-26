@@ -81,7 +81,6 @@ def _purge_table(engine, table, run_id):
     None
     """
 
-kappa_process
     if table in ['process', 'commodity', 'edge', 'vertex', 'area', 'time',
                  'cost']:
         # These have run_id as FK
