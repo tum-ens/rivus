@@ -17,7 +17,7 @@ from ..main.rivus import get_timeseries, get_constants
 
 
 def init_run(engine, runner='Havasi', start_ts=None, status='prepared',
-             outcome='not_run'):
+             outcome='not_run', comment=None, plot_dict=None, profiler=None):
     """Initialize the `run` table with basic info.
 
     Parameters
@@ -35,6 +35,13 @@ def init_run(engine, runner='Havasi', start_ts=None, status='prepared',
     outcome : str, optional
         One of the following strings:
         | 'not_run'  (default) | 'optima' | 'no_optima' | 'error'
+    comment : str, optional
+        Any text based comment. (No length limit.)
+    plot_dict : dict, optional
+        Dictionary returned by the rivus.io.plot.fig3d function.
+    profiler : pandas.Series, optional
+        Series containing profiled process name and execution time pairs.
+        Execution time is measured in *seconds*
 
     Returns
     -------
@@ -49,10 +56,12 @@ def init_run(engine, runner='Havasi', start_ts=None, status='prepared',
     try:
         with connection.cursor() as curs:
             curs.execute("""
-                INSERT INTO run (runner, start_ts, status, outcome)
-                VALUES (%s, %s, %s, %s)
+                INSERT INTO run (runner, start_ts, status, outcome, comment,
+                                 plot, profiler)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
                 RETURNING run_id;
-                """, (runner, start_ts, status, outcome))
+                """, (runner, start_ts, status, outcome, comment, plot_dict,
+                      profiler.to_json()))
             run_id = curs.fetchone()[0]
             connection.commit()
     finally:
@@ -211,6 +220,43 @@ def _handle_geoframe(engine, frame, df, run_id):
                                                 v1, v2, wkt))
                 # run_id = curs.fetchone()[0]
                 connection.commit()
+    finally:
+        connection.close()
+
+
+def _handle_graph(engine, graph_dict, run_id):
+    """Insert the results of the graph analysis into the proper table.
+
+    Parameters
+    ----------
+    engine : sqlalchemy engine whit psycopg2 driver
+        For managing connection to the DB.
+    graph_dict : dict
+        Analysis results. Keys:
+        - commodity: String denotation. e.g. 'Elec'
+        - is_connected: Boolean.
+        - connected_components: Int. Number of connected components.
+        - is_minimal: Boolean.
+            Is the graph also a minimal spanning tree/forest?
+    run_id : int
+        run_id of the initialized run row in the DB.
+    """
+    values = dict(graph_dict, run_id=run_id)
+    connection = engine.raw_connection()
+    try:
+        with connection.cursor() as curs:
+            curs.execute("""
+                 INSERT INTO graph_analysis (commodity_id, is_connected,
+                                             connected_components, is_minimal)
+                 VALUES (
+                     (SELECT commodity_id FROM commodity
+                      WHERE run_id = %(run_id)s AND
+                         commodity LIKE %(commodity)s),
+                     %(is_connected)s,
+                     %(connected_components)s,
+                     %(is_minimal)s);
+                 """, values)
+            connection.commit()
     finally:
         connection.close()
 
@@ -413,7 +459,7 @@ def _fill_table(engine, frame, df, run_id):
         finally:
             connection.close()
     elif frame in ['flow', 'hub', 'proc_io', 'proc_tau']:
-        warnings.warn("<{}> is not implemented yet."
+        warnings.warn("<{}> is not implemented yet. "
                       "Nothing was inserted to the database".format(frame))
     elif frame == 'cost':
         series = df.rename(dict(Inv='investment', Fix='fix', Var='variable'))
@@ -501,7 +547,7 @@ def _fill_table(engine, frame, df, run_id):
     return
 
 
-def store(engine, prob, run_id=None, plot_obj=None, graph_df=None,
+def store(engine, prob, run_id=None, plot_obj=None, graph_results=None,
           run_data=None, time_series=None, constants=None):
     """Store I/O plus extras of a rivus model into a postgres DB.
 
@@ -517,16 +563,17 @@ def store(engine, prob, run_id=None, plot_obj=None, graph_df=None,
     plot_obj : dict, optional
         TODO
         Result of rivus.io.plot.fig3d(). It will be stored as JSONb.
-    graph_df : DataFrame, optional
-        TODO
-        Results of the graph analysis
+    graph_results : iterable, optional
+        Results of the graph analysis. Each graph should have its own dict.
+        For implemented result keys see `_handle_graph`.
+        E.g. [{'is_connected':True, 'is_minimal':True}, {'is_connected':True}]
     run_data : dict, optional
         Keyword arguments to be passed to init_run().
-        runner, start_ts, status, outcome
+        runner, start_ts, status, outcome, comment
     time_series : None, optional
-        Description
+        TODO If already present at function call, this could save time.
     constants : None, optional
-        Description
+        TODO If already present at function call, this could save time.
 
     Returns
     -------
@@ -547,11 +594,13 @@ def store(engine, prob, run_id=None, plot_obj=None, graph_df=None,
         # --------------------
         # The order of frames -> table does matter.
         # Followings apply to `frames`:
-        # `process_commodity` after `process` and `commodity`
-        # `vertex`, `area_demand` and `time` after `commodity`
-        # `edge` after `area_demand`
-        frames = ['commodity', 'process', 'process_commodity', 'area_demand',
-                  'vertex', 'time', 'edge']
+        # `process_commodity` ---> after `process` and `commodity`
+        # `vertex`, `area_demand` and `time` ---> after `commodity`
+        # `edge` ---> after `area_demand`
+        independend = ['commodity', 'process']
+        comm_dependent = ['process_commodity', 'area_demand', 'vertex', 'time']
+        area_dependent = ['edge']
+        frames = independend + comm_dependent + area_dependent
         for frame in frames:
             # frame should be the same as df.name... but GeoDataFrames does not
             # have a name etc..
@@ -568,9 +617,12 @@ def store(engine, prob, run_id=None, plot_obj=None, graph_df=None,
         for df, name in zip(series+consts, series_names+consts_names):
             if not df.empty:
                 _fill_table(engine, name, df, run_id)
+        if graph_results is not None:
+            for g_res in graph_results:
+                _handle_graph(engine, g_res, run_id)
     except Exception as e:
-        # TODO this is basically a quick'n'dirty transaction rollback.
-        # One could dig into sqlalchemy.session to make it better.
+        # Note: This is basically a quick'n'dirty transaction rollback.
+        # One could dig into sqlalchemy.session to make it more conformal.
         purge_run(engine, run_id)
         raise e
 
@@ -829,27 +881,3 @@ def df_from_table(engine, fname, run_id):
                       "Returning an empty DataFrame".format(fname))
         df = DataFrame()
     return df
-
-
-def load(engine, run_id):
-    """TODO
-
-    Args:
-        engine (sqlalchemy engine whit psycopg2 driver):
-            For managing connection to the DB.
-        run_id (TYPE): Description
-
-    Returns:
-        TYPE: Description
-    """
-    # Create Process-Commodity DataFrame
-    print("""
-        SELECT P.process AS "Process", C.commodity AS "Commodity",
-               PC.direction AS "Direction", PC.ratio AS ratio
-        FROM process_commodity AS PC
-        INNER JOIN commodity AS C ON PC.commodity_id=C.commodity_id
-        INNER JOIN process AS P ON PC.process_id=P.process_id
-        where P.run_id = 28;
-        """)
-
-    return
