@@ -34,7 +34,7 @@ def init_run(engine, runner='Havasi', start_ts=None, status='prepared',
         | 'prepared' (default) | 'run' | 'error'
     outcome : str, optional
         One of the following strings:
-        | 'not_run'  (default) | 'optima' | 'no_optima' | 'error'
+        | 'not_run'  (default) | 'optimum' | 'optimum_not_found' | 'error'
     comment : str, optional
         Any text based comment. (No length limit.)
     plot_dict : dict, optional
