@@ -1,5 +1,5 @@
 """Functions to hold dedicated analysis runs on the graph objects.
-networkx is the de facto graph package, but igraph compatibility is also aimed.
+networkx is the de-facto graph package, but igraph compatibility is also aimed.
 """
 import networx as nx
 import warnings
@@ -10,12 +10,14 @@ def minimal_graph_anal(graphs, calc_spanning=True, graph_package='NX'):
 
     Parameters
     ----------
-    graphs : networkx or
-        Description
+    graphs : networkx or igraph Graph objects
+        Awaited is the resulting ITERABLE of rivus.graph.to_graph functions.
     calc_spanning : bool, optional
-        Description
+        Default: True, decides, whether to include the analysis:
+        Is the graph also a minimal spanning tree.
     graph_package : str, optional
-        Description
+        Default: 'NX', Accepted: 'NX' or 'IGRAPH'.
+        To ease the decision of which package is used.
 
     Returns
     -------
@@ -44,7 +46,7 @@ def minimal_graph_anal(graphs, calc_spanning=True, graph_package='NX'):
                 spanner = nx.minimum_spanning_tree(G)
                 g_data['is_minimal'] = nx.is_isomorphic(G, spanner)
         elif graph_package == 'IGRAPH':
-            # TODO Validate
+            # TODO Check this with igraph
             g_data = {
                 'commodity': G['Commodity'],
                 'is_connected': G.is_connected(),
