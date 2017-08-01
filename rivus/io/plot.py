@@ -168,8 +168,8 @@ def _add_points(prob, bm, comm_zs, source, proc):
 
 
 def _add_edges(prob, bm, comms, comm_zs, Pmax, Hubs, dz=5,
-               usehubs=False, hubopac=0.2, linescale=1,
-               captxt=True, lentxt=True):
+               use_hubs=False, hub_opac=0.2, linescale=1,
+               cap_txt=True, len_txt=True):
     # Inits =======================================
     capacities = []
     annots = []  # for hub connectors and capacity infos
@@ -177,7 +177,7 @@ def _add_edges(prob, bm, comms, comm_zs, Pmax, Hubs, dz=5,
     comm_offs = {
         # for placing anchors on a line
         # 0 for middle, 1 for one annot_devider further...
-        'cap': -3 if usehubs else 0,  # capacity of the line
+        'cap': -3 if use_hubs else 0,  # capacity of the line
         'Cool': -2,
         'Elec': -1,
         'Heat': 0,
@@ -190,7 +190,7 @@ def _add_edges(prob, bm, comms, comm_zs, Pmax, Hubs, dz=5,
         'mode': 'lines',
         'hoverinfo': 'skip'
     }
-    capsgrps = {}
+    cap_groups = {}
 
     # Add dummies for legend formatting
     for com in comms:
@@ -207,7 +207,7 @@ def _add_edges(prob, bm, comms, comm_zs, Pmax, Hubs, dz=5,
         })
         if com not in Pmax.columns.values:
             continue
-        capsgrps[com] = {
+        cap_groups[com] = {
             'type': 'scatter3d',
             'x': [], 'y': [], 'z': [],
             'mode': 'markers', 'opacity': 0.5,
@@ -219,10 +219,10 @@ def _add_edges(prob, bm, comms, comm_zs, Pmax, Hubs, dz=5,
                 'color': COLORS[com]
             }
         }
-        capacities.append(capsgrps[com])  # it a convinience link
+        capacities.append(cap_groups[com])  # it a convinience link
 
-    if usehubs:
-        hublegends = []
+    if use_hubs:
+        hub_legends = []
 
     # Iterate over edges ==========================
     for v1v2, line in prob.params['edge'].geometry.iteritems():
@@ -230,13 +230,13 @@ def _add_edges(prob, bm, comms, comm_zs, Pmax, Hubs, dz=5,
         xs, ys = zip(*linprj)
         anchor_x, anchor_y = sum(xs) / len(xs), sum(ys) / len(ys)
         for com in comms:
-            isbuiltcom = com in Pmax.columns.values
-            if isbuiltcom:
-                comcap = Pmax.xs(v1v2)[com]
-                lwidth = _linewidth(comcap, linescale)
+            is_built_comm = com in Pmax.columns.values
+            if is_built_comm:
+                comm_cap = Pmax.xs(v1v2)[com]
+                lwidth = _linewidth(comm_cap, linescale)
                 dash = 'solid'
             else:
-                comcap = 0
+                comm_cap = 0
                 lwidth = 3
                 dash = 'dot'
             capacities.append(
@@ -247,38 +247,38 @@ def _add_edges(prob, bm, comms, comm_zs, Pmax, Hubs, dz=5,
                          color=COLORS[com],
                          dash=dash)))
 
-            if usehubs:
-                thesehubs = Hubs.xs(v1v2)
-                for hub, val in thesehubs[thesehubs > 0].iteritems():
+            if use_hubs:
+                these_hubs = Hubs.xs(v1v2)
+                for hub, val in these_hubs[these_hubs > 0].iteritems():
                     produced = prob.r_out.xs(hub, level='Process') * val
                     from_com = prob.r_in.xs(
                         hub, level='Process').index.values[0]
                     from_z = comm_zs[from_com]
-                    for prodcom, prodval in produced.iteritems():
-                        if not (from_com in comms and prodcom in comms):
+                    for prod_com, prod_val in produced.iteritems():
+                        if not (from_com in comms and prod_com in comms):
                             continue  # only show connections to given comms
-                        to_z = comm_zs[prodcom]
+                        to_z = comm_zs[prod_com]
                         xx = (abs(anchor_x - xs[0]) / annot_devider *
-                              comm_offs[prodcom] + anchor_x)
+                              comm_offs[prod_com] + anchor_x)
                         yy = (abs(anchor_y - ys[0]) / annot_devider *
-                              comm_offs[prodcom] + anchor_y)
-                        legend = 'Hub: {} -> {}'.format(from_com, prodcom)
-                        isfirst = legend not in hublegends
-                        if isfirst:
-                            hublegends.append(legend)
+                              comm_offs[prod_com] + anchor_y)
+                        legend = 'Hub: {} -> {}'.format(from_com, prod_com)
+                        is_first = legend not in hub_legends
+                        if is_first:
+                            hub_legends.append(legend)
                         produced_txt = produced.to_string(header=False)
                         annot_text = '{0}:<br>{1}'.format(hub, produced_txt)
                         annots.append({
                             'type': 'scatter3d',
                             'x': [xx] * 2, 'y': [yy] * 2, 'z': [from_z, to_z],
-                            'showlegend': isfirst, 'legendgroup': legend,
+                            'showlegend': is_first, 'legendgroup': legend,
                             'name': legend,
-                            'opacity': hubopac, "hoverinfo": "text",
+                            'opacity': hub_opac, "hoverinfo": "text",
                             'text': [annot_text, ''],
                             'mode': 'lines+markers',
                             'line': {
-                                'color': COLORS[prodcom],
-                                'width': 8,  # prodval * 2,
+                                'color': COLORS[prod_com],
+                                'width': 8,  # prod_val * 2,
                                 'dash': 'longdash',
                             },
                             'marker': {
@@ -287,28 +287,28 @@ def _add_edges(prob, bm, comms, comm_zs, Pmax, Hubs, dz=5,
                             }
                         })
 
-            if captxt and isbuiltcom:
-                if lentxt:
+            if cap_txt and is_built_comm:
+                if len_txt:
                     linelength = line_length(line)
                 xx = abs(anchor_x - xs[0]) / \
                     annot_devider * comm_offs['cap'] + anchor_x
                 yy = abs(anchor_y - ys[0]) / \
                     annot_devider * comm_offs['cap'] + anchor_y
-                hovertext = 'cap: {}'.format(comcap) if not lentxt \
-                    else 'cap: {0}<br>len: {1:.1f} m'.format(comcap,
+                hovertext = 'cap: {}'.format(comm_cap) if not len_txt \
+                    else 'cap: {0}<br>len: {1:.1f} m'.format(comm_cap,
                                                              linelength)
-                capsgrps[com]['x'].append(xx)
-                capsgrps[com]['y'].append(yy)
-                capsgrps[com]['z'].append(comm_zs[com])
-                capsgrps[com]['text'].append(hovertext)
+                cap_groups[com]['x'].append(xx)
+                cap_groups[com]['y'].append(yy)
+                cap_groups[com]['z'].append(comm_zs[com])
+                cap_groups[com]['text'].append(hovertext)
 
-            if lentxt and not captxt:
+            if len_txt and not cap_txt:
                 pass
 
     return capacities, annots
 
 
-def fig3d(prob, comms=None, linescale=1.0, usehubs=False, hubopac=0.55, dz=5,
+def fig3d(prob, comms=None, linescale=1.0, use_hubs=False, hub_opac=0.55, dz=5,
           layout=None, verbose=False):
     """
     Generate 3D representation of the rivus results using plotly
@@ -319,15 +319,15 @@ def fig3d(prob, comms=None, linescale=1.0, usehubs=False, hubopac=0.55, dz=5,
                Order: ['C1', 'C2', 'C3'] -> Bottom: C1, Top: C3
         linescale (float, optional):
             A multiplier to get proportionally thicker lines.
-        usehubs (bool, optional): Switch to depict hub processes.
-        hubopac (float, optional): 0-1 opacity param.
+        use_hubs (bool, optional): Switch to depict hub processes.
+        hub_opac (float, optional): 0-1 opacity param.
         dz (number, optional): Distance between layers along 'z' axis .
         layout (None, optional): A plotly layout dict to overwrite default.
         verbose (bool, optional): To print out progress and the time it took.
 
     Usage:
         import plotly.offline as po
-        fig = fig3d(prob, ['Gas', 'Heat', 'Elec'], hubopac=0.55, linescale=7)
+        fig = fig3d(prob, ['Gas', 'Heat', 'Elec'], hub_opac=0.55, linescale=7)
         # for static image
         # po.plot(fig, filename='plotly-game.html', image='png')
         po.plot(fig, filename='plotly-game.html')
@@ -389,10 +389,10 @@ def fig3d(prob, comms=None, linescale=1.0, usehubs=False, hubopac=0.55, dz=5,
         layersstart = time.time()
 
     # Adding capacity lines: capacities and hubs
-    edgekwargs = {
+    edge_kwargs = {
         'Pmax': Pmax, 'Hubs': Kappa_hub, 'dz': 5,
-        'usehubs': usehubs, 'hubopac': hubopac, 'linescale': linescale}
-    caplayers, hublayer = _add_edges(prob, bm, comms, comm_zs, **edgekwargs)
+        'use_hubs': use_hubs, 'hub_opac': hub_opac, 'linescale': linescale}
+    cap_layers, hub_layer = _add_edges(prob, bm, comms, comm_zs, **edge_kwargs)
     # Adding markers
     markers = _add_points(prob, bm, comm_zs, source, Kappa_process)
     if verbose:
@@ -432,6 +432,6 @@ def fig3d(prob, comms=None, linescale=1.0, usehubs=False, hubopac=0.55, dz=5,
         # 'width' : 700
     }
 
-    data = caplayers + hublayer + markers
+    data = cap_layers + hub_layer + markers
     fig = dict(data=data, layout=layout)
     return fig
