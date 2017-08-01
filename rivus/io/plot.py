@@ -145,8 +145,7 @@ def _add_points(prob, bm, comm_zs, source, proc):
                 # m_size.append(marker_size)
                 m_stly.append(marker_style)
                 # look up unit ? TODO
-                m_text.append('Src: {:.0f}'.format(
-                              com_val))
+                m_text.append('Src: {:.0f}'.format(com_val))
                 # font_size = 5 + 5 * math.sqrt(com_val) / 200
 
         # Append a scatter dict per commodity
