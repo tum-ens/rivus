@@ -1,7 +1,7 @@
 """Functions to hold dedicated analysis runs on the graph objects.
-networkx is the de-facto graph package, but igraph compatibility is also aimed.
+networkx is the de facto graph package, but igraph compatibility is also aimed.
 """
-import networx as nx
+import networkx as nx
 import warnings
 
 
