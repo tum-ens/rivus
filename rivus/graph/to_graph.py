@@ -1,15 +1,17 @@
 """Functions to convert tabular data to popular python graph structures
-igraph:
-    + C based with python wrappers.
-    + Included for speed and so scalability.
-    × Docs are OK.
-    - For windows install with unofficial wheel files. But it works.
 networkx:
     +/- Pure python implementation.
     + Widely used and tested.
     + Docs are quite good.
     + Easy (platform independent) installation
     - Slower than igraph (and graph-tools)
+igraph:
+    + C based with python wrappers.
+    + Mature library package.
+    + Included for speed and so for scalability.
+    × Docs are OK.
+    - Windows install can be somewhat tedious (with unofficial wheel files).
+      But it works.
 graph-tools: (maybe added in the future)
     + Self proclaimed: fastest in graph analyses
     - Not really windows user friendly (docker install should be tested)
@@ -75,8 +77,9 @@ def to_igraph(vdf, edf, pmax, comms=None, peak=None, save_dir=None, ext='gml'):
             weights = [0] * len(pmax)
         else:
             weights = pmax[comm] / cap_max
-        g.es['Weight'] = weights.tolist()  # Camel case for Gephi
-        g.es['weight'] = weights.tolist()
+            weights = weights.tolist()
+        g.es['Weight'] = weights  # Camel case for Gephi
+        g.es['weight'] = weights
         if peak is not None:
             g.es[comm + '-peak'] = peak[comm].tolist()
 
@@ -154,7 +157,7 @@ def to_nx(vdf, edf, pmax, comms=None, save_dir=None):
         graphs.append(g)
 
     if save_dir:
-        ext = 'gml'  # TODO networkx has different function to do this...
+        ext = 'gml'  # TODO networkx has different functions for each format...
         if not os.path.isdir(save_dir):
             os.makedirs(save_dir)
         for graph in graphs:
