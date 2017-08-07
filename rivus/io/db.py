@@ -13,6 +13,7 @@ from datetime import datetime
 from pandas import Series, DataFrame, read_sql
 from geopandas import GeoDataFrame
 from shapely.wkt import loads as wkt_load
+import json
 from ..main.rivus import get_timeseries, get_constants
 
 
@@ -53,6 +54,10 @@ def init_run(engine, runner='Havasi', start_ts=None, status='prepared',
 
     run_id = None
     connection = engine.raw_connection()
+    if profiler is not None:
+        profiler = profiler.to_json()
+    if plot_dict is not None:
+        plot = json.dumps(plot_dict)
     try:
         with connection.cursor() as curs:
             curs.execute("""
@@ -60,8 +65,8 @@ def init_run(engine, runner='Havasi', start_ts=None, status='prepared',
                                  plot, profiler)
                 VALUES (%s, %s, %s, %s, %s, %s, %s)
                 RETURNING run_id;
-                """, (runner, start_ts, status, outcome, comment, plot_dict,
-                      profiler.to_json()))
+                """, (runner, start_ts, status, outcome, comment, plot,
+                      profiler))
             run_id = curs.fetchone()[0]
             connection.commit()
     finally:
