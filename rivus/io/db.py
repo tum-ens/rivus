@@ -440,10 +440,11 @@ def _fill_table(engine, frame, df, run_id):
     elif frame == 'source':
         connection = engine.raw_connection()
         try:
+            df.fillna(0, inplace=True)
             for (vertex, comm), row in df.iterrows():
                 for time_step, val in row.iteritems():
                     values = dict(run_id=run_id, vertex=vertex, commodity=comm,
-                                  time_step=time_step, value=float(val))
+                                  time_step=time_step, value=int(val))
                     with connection.cursor() as curs:
                         curs.execute("""
                             INSERT INTO {0}
@@ -529,7 +530,7 @@ def _fill_table(engine, frame, df, run_id):
         try:
             for ver, row in df.iterrows():
                 for proc, val in row.iteritems():
-                    values = dict(vertex=ver, process=proc, val=int(val),
+                    values = dict(vertex=int(ver), process=proc, val=int(val),
                                   run_id=run_id)
                     with connection.cursor() as curs:
                         curs.execute("""
