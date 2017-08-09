@@ -538,10 +538,11 @@ def process_capacity_max_rule(m, v, p):
     return m.Kappa_process[v, p] <= m.Phi[v, p] * m.params['process'].loc[p]['cap-max']
 
 def process_input_rule(m, v, p, co, t):
-    return m.Epsilon_in[v, p, co, t] == m.Tau[v, p, t] * m.r_in.loc[p, co]
+    return m.Epsilon_in[v, p, co, t] == m.Tau[v, p, t] * m.r_in_dict[(p, co)]
 
 def process_output_rule(m, v, p, co, t):
-    return m.Epsilon_out[v, p, co, t] == m.Tau[v, p, t] * m.r_out.loc[p, co]
+    # return m.Epsilon_out[v, p, co, t] == m.Tau[v, p, t] * m.r_out.loc[p, co]
+    return m.Epsilon_out[v, p, co, t] == m.Tau[v, p, t] * m.r_out_dict[(p, co)]
 
 # Objective
 
@@ -596,10 +597,10 @@ def hub_balance(m, i, j, co, t):
     """Calculate commodity balance in an edge {i,j} from/to hubs. """
     balance = 0
     for h in m.hub:
-        if co in m.r_in.loc[h].index:
-            balance -= m.Epsilon_hub[i,j,h,t] * m.r_in.loc[h,co] # m.r_in = 1 by definition
-        if co in m.r_out.loc[h].index:
-            balance += m.Epsilon_hub[i,j,h,t] * m.r_out.loc[h,co]
+        if (h, co) in m.r_in_dict:
+            balance -= m.Epsilon_hub[i,j,h,t] * m.r_in_dict[(h, co)] # m.r_in = 1 by definition
+        if (h, co) in m.r_out_dict:
+            balance += m.Epsilon_hub[i,j,h,t] * m.r_out_dict[(h, co)]
     return balance
 
 def flow_balance(m, v, co, t):
