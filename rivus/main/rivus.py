@@ -129,6 +129,9 @@ def create_model(data, vertex, edge, peak_multiplier=None):
     # process input/output ratios
     m.r_in = process_commodity.xs('In', level='Direction')['ratio']
     m.r_out = process_commodity.xs('Out', level='Direction')['ratio']
+    # For faster value retrieval
+    m.r_in_dict = m.r_in.to_dict()
+    m.r_out_dict = m.r_out.to_dict()
 
     # energy hubs
     # are processes that satisfy three conditions:
@@ -610,10 +613,15 @@ def flow_balance(m, v, co, t):
 def process_balance(m, v, co, t):
     """Calculate commodity balance in a vertex from/to processes. """
     balance = 0
+    # for p in m.process:
+    #     if co in m.r_in.loc[p].index:
+    #         balance -= m.Epsilon_in[v,p,co,t]
+    #     if co in m.r_out.loc[p].index:
+    #         balance += m.Epsilon_out[v,p,co,t]
     for p in m.process:
-        if co in m.r_in.loc[p].index:
+        if (p, co) in m.r_in_dict:
             balance -= m.Epsilon_in[v,p,co,t]
-        if co in m.r_out.loc[p].index:
+        if (p, co) in m.r_out_dict:
             balance += m.Epsilon_out[v,p,co,t]
     return balance
 
