@@ -543,7 +543,6 @@ def process_input_rule(m, v, p, co, t):
     return m.Epsilon_in[v, p, co, t] == m.Tau[v, p, t] * m.r_in_dict[(p, co)]
 
 def process_output_rule(m, v, p, co, t):
-    # return m.Epsilon_out[v, p, co, t] == m.Tau[v, p, t] * m.r_out.loc[p, co]
     return m.Epsilon_out[v, p, co, t] == m.Tau[v, p, t] * m.r_out_dict[(p, co)]
 
 # Objective
@@ -616,11 +615,6 @@ def flow_balance(m, v, co, t):
 def process_balance(m, v, co, t):
     """Calculate commodity balance in a vertex from/to processes. """
     balance = 0
-    # for p in m.process:
-    #     if co in m.r_in.loc[p].index:
-    #         balance -= m.Epsilon_in[v,p,co,t]
-    #     if co in m.r_out.loc[p].index:
-    #         balance += m.Epsilon_out[v,p,co,t]
     for p in m.process:
         if (p, co) in m.r_in_dict:
             balance -= m.Epsilon_in[v,p,co,t]
