@@ -177,10 +177,12 @@ def create_model(data, vertex, edge, peak_multiplier=None):
     # store geographic DataFrames vertex & edge for later use
     m.params['vertex'] = vertex.copy()
     m.params['edge'] = edge.copy()
+    m.edge_geo_dict = m.params['edge'].geometry.to_dict()
 
     if peak_multiplier:
         m.peak = peak_multiplier(m)
 
+    m.peak_dict = m.peak.to_dict()
     # construct arc set of directed (i,j), (j,i) edges
     arcs = [arc for (v1, v2) in edge.index for arc in ((v1, v2), (v2, v1))]
 
@@ -459,11 +461,11 @@ def create_model(data, vertex, edge, peak_multiplier=None):
 # edges/arcs
 def peak_satisfaction_rule(m, i, j, co, t):
     provided_power = hub_balance(m, i, j, co, t) + m.Sigma[i, j, co, t]
-    return provided_power >= m.peak.loc[i,j][co] * m.params['time'].loc[t][co]
+    return provided_power >= m.peak_dict[co][(i, j)] * m.params['time'].loc[t][co]
 
 def edge_equation_rule(m, i, j, co, t):
     if co in m.co_transportable:
-        length = line_length(m.params['edge'].loc[i, j]['geometry'])
+        length = line_length(m.edge_geo_dict[i, j])
 
         flow_in = ( 1 - length * m.params['commodity'].loc[co]['loss-var']) * \
                   ( m.Pin[i,j,co,t] + m.Pin[j,i,co,t] )
@@ -556,7 +558,7 @@ def def_costs_rule(m, cost_type):
                 for v in m.vertex for p in m.process) + \
             sum((m.Pmax[i,j,co] * m.params['commodity'].loc[co]['cost-inv-var'] +
                  m.Xi[i,j,co] * m.params['commodity'].loc[co]['cost-inv-fix']) *
-                line_length(m.params['edge'].loc[i, j]['geometry'])
+                line_length(m.edge_geo_dict[(i, j)])
                 for (i,j) in m.edge for co in m.co_transportable)
 
     elif cost_type == 'Fix':
@@ -566,7 +568,7 @@ def def_costs_rule(m, cost_type):
             sum(m.Kappa_process[v,p] * m.params['process'].loc[p]['cost-fix']
                 for v in m.vertex for p in m.process) + \
             sum(m.Pmax[i,j,co] * m.params['commodity'].loc[co]['cost-fix'] *
-                line_length(m.params['edge'].loc[i, j]['geometry'])
+                line_length(m.edge_geo_dict[(i, j)])
                 for (i,j) in m.edge for co in m.co_transportable)
 
     elif cost_type == 'Var':
