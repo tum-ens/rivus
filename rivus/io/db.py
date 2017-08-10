@@ -593,7 +593,7 @@ def store(engine, prob, run_id=None, plot_obj=None, graph_results=None,
         run_id = int(run_id)
     else:
         run_id = init_run(engine, **run_data) if run_data else init_run(engine)
-    print('Store params for run <{}>'.format(run_id))
+    print('\tStore params for run <{}>'.format(run_id))
 
     try:
         # Parameter DataFrames
