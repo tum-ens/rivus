@@ -139,10 +139,8 @@ def create_model(data, vertex, edge, peak_multiplier=None):
     has_cap_min_0 = process['cap-min'] == 0
     has_one_input = m.r_in.groupby(level='Process').count() == 1
     has_r_in_1 = m.r_in.groupby(level='Process').sum() == 1
-    hub = process[has_cost_inv_fix_0 &
-                  has_cap_min_0 &
-                  has_one_input &
-                  has_r_in_1]
+    is_hub = (has_cost_inv_fix_0 & has_cap_min_0 & has_one_input & has_r_in_1)
+    hub = process[is_hub.reindex(process.index)]
     m.params['hub'] = hub
 
     # derive peak and demand of edges
