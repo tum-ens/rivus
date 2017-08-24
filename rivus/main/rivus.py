@@ -89,9 +89,10 @@ def read_excel(filename):
 
     # sort nested indexes to make direct assignments work, cf
     # http://pandas.pydata.org/pandas-docs/stable/indexing.html#the-need-for-sortedness-with-multiindex
+    # https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.sort_index.html#pandas.DataFrame.sort_index
     for key in data:
         if isinstance(data[key].index, pd.core.index.MultiIndex):
-            data[key].sortlevel(inplace=True)
+            data[key].sort_index(inplace=True)
     return data
 
 
@@ -164,7 +165,7 @@ def create_model(data, vertex, edge, peak_multiplier=None):
     vertex.set_index('Vertex', inplace=True)
     edge.set_index(['Vertex1', 'Vertex2'], inplace=True)
     m.peak.index = edge.index
-    m.peak.sortlevel(inplace=True)
+    m.peak.sort_index(inplace=True)
 
     # store geographic DataFrames vertex & edge for later use
     m.params['vertex'] = vertex.copy()
