@@ -470,7 +470,8 @@ def _fill_table(engine, frame, df, run_id):
             connection.close()
     elif frame in ['flow', 'hub', 'proc_io', 'proc_tau']:
         warnings.warn("<{}> is not implemented yet. "
-                      "Nothing was inserted to the database".format(frame))
+                      "This frame was not inserted to the database"
+                      .format(frame))
     elif frame == 'cost':
         series = df.rename(dict(Inv='investment', Fix='fix', Var='variable'))
         values = {k: int(v) for k, v in series.iteritems()}
@@ -553,7 +554,7 @@ def _fill_table(engine, frame, df, run_id):
             connection.close()
     else:
         warnings.warn("<{}> is unknown."
-                      "Nothing was inserted to the database".format(frame))
+                      "Frame was not inserted to the database".format(frame))
     return
 
 
