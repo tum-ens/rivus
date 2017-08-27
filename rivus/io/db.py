@@ -52,12 +52,16 @@ def init_run(engine, runner='Havasi', start_ts=None, status='prepared',
     if start_ts is None:
         start_ts = datetime.now()
 
-    run_id = None
-    connection = engine.raw_connection()
     if profiler is not None:
         profiler = profiler.to_json()
+
     if plot_dict is not None:
         plot = json.dumps(plot_dict)
+    else:
+        plot = None
+
+    run_id = None
+    connection = engine.raw_connection()
     try:
         with connection.cursor() as curs:
             curs.execute("""
@@ -887,3 +891,18 @@ def df_from_table(engine, fname, run_id):
                       "Returning an empty DataFrame".format(fname))
         df = DataFrame()
     return df
+
+
+def get_plot_dict(engine, run_id):
+    string_query = """SELECT plot FROM RUN WHERE run_id = %s;"""
+
+    connection = engine.raw_connection()
+    plot_dict = {}
+    try:
+        with connection.cursor() as curs:
+            curs.execute(string_query, (run_id, ))
+            plot_dict = curs.fetchone()[0]
+            connection.commit()
+    finally:
+        connection.close()
+        return plot_dict
