@@ -233,13 +233,19 @@ def _add_edges(prob, bm, comms, comm_zs, Pmax, Hubs, dz=5,
         for com in comms:
             is_built_comm = com in Pmax.columns.values
             if is_built_comm:
-                comm_cap = Pmax.xs(v1v2)[com]
+                comm_cap = Pmax.get_value(v1v2, com)
+                if comm_cap > 0:
+                    is_built_edge = True
+                else:
+                    is_built_edge = False
+
+            if is_built_comm and is_built_edge:
                 lwidth = _linewidth(comm_cap, linescale)
                 dash = 'solid'
-            else:
+            elif not is_built_comm or not is_built_edge:
                 comm_cap = 0
-                lwidth = 3
-                dash = 'dot'
+                lwidth = 2
+                dash = 'dash'
             capacities.append(
                 dict(oneline, x=xs, y=ys, z=[comm_zs[com]] * len(xs),
                      legendgroup=com, name=com, showlegend=False,
@@ -363,7 +369,12 @@ def fig3d(prob, comms=None, linescale=1.0, use_hubs=False, hub_opac=0.55, dz=5,
             'Gas': 10,
             'CO2': 15,
         }
+        # Drop all 0 columns in Pmax
+        for column in Pmax:
+            if all(Pmax[column] == 0):
+                del Pmax[column]
         comms = Pmax.columns.values
+
         proc_used = Kappa_process.columns.values
         if len(proc_used):
             proc_comms = (prob.r_in.loc[proc_used].index
