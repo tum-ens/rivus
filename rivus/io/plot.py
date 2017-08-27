@@ -190,6 +190,8 @@ def _add_edges(prob, bm, comms, comm_zs, Pmax, Hubs, dz=5,
         'hoverinfo': 'skip'
     }
     cap_groups = {}
+    if Hubs.empty:
+        use_hubs = False
 
     # Add dummies for legend formatting
     for com in comms:
@@ -218,7 +220,7 @@ def _add_edges(prob, bm, comms, comm_zs, Pmax, Hubs, dz=5,
                 'color': COLORS[com]
             }
         }
-        capacities.append(cap_groups[com])  # it a convinience link
+        capacities.append(cap_groups[com])  # it's a convinience link
 
     if use_hubs:
         hub_legends = []
@@ -265,7 +267,8 @@ def _add_edges(prob, bm, comms, comm_zs, Pmax, Hubs, dz=5,
                         is_first = legend not in hub_legends
                         if is_first:
                             hub_legends.append(legend)
-                        produced_txt = produced.to_string(header=False)
+                        produced_txt = (produced.to_string(header=False)
+                                        .replace('\n', '<br>'))
                         annot_text = '{0}:<br>{1}'.format(hub, produced_txt)
                         annots.append({
                             'type': 'scatter3d',
