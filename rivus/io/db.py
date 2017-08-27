@@ -634,7 +634,7 @@ def store(engine, prob, run_id=None, plot_obj=None, graph_results=None,
     except Exception as e:
         # Note: This is basically a quick'n'dirty transaction rollback.
         # One could dig into sqlalchemy.session to make it more conformal.
-        purge_run(engine, run_id)
+        #purge_run(engine, run_id)
         raise e
 
     # Results DataFrames=======================================================
