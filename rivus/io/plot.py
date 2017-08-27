@@ -363,11 +363,11 @@ def fig3d(prob, comms=None, linescale=1.0, use_hubs=False, hub_opac=0.55, dz=5,
     if comms is None:
         comm_order = {  # values set the sort order
             'Demand': 0,
-            'Elec': 1,
-            'Cool': 3,
-            'Heat': 5,
-            'Gas': 10,
-            'CO2': 15,
+            'Gas': 5,
+            'CO2': 10,
+            'Heat': 15,
+            'Elec': 20,
+            'Cool': 25,
         }
         # Drop all 0 columns in Pmax
         for column in Pmax:
@@ -437,10 +437,10 @@ def fig3d(prob, comms=None, linescale=1.0, use_hubs=False, hub_opac=0.55, dz=5,
                 'visible': False,
                 # 'range' : [0, comm_zs[-1] + dz]
             },
-            'aspectmode': 'manual',
-            'aspectratio': {
-                'x': 1, 'y': 1, 'z': .6
-            }
+            'aspectmode': 'data',
+            # 'aspectratio': {
+            #     'x': 1, 'y': 1, 'z': .6
+            # }
         }
         # 'width' : 700
     }
