@@ -254,7 +254,7 @@ def _add_edges(prob, bm, comms, comm_zs, Pmax, Hubs, dz=5,
                          color=COLORS[com],
                          dash=dash)))
 
-            if use_hubs:
+            if use_hubs and v1v2 in Hubs.index.values:
                 these_hubs = Hubs.xs(v1v2)
                 for hub, val in these_hubs[these_hubs > 0].iteritems():
                     produced = prob.r_out.xs(hub, level='Process') * val
@@ -397,8 +397,6 @@ def fig3d(prob, comms=None, linescale=1.0, use_hubs=False, hub_opac=0.55, dz=5,
     # geoPmax = Pmax.join(prob.params['edge'].geometry, how='inner')
     if verbose:
         print("plot prep took: {:.4f}".format(time.time() - plotprep))
-
-    if verbose:
         layersstart = time.time()
 
     # Adding capacity lines: capacities and hubs
