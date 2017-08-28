@@ -152,7 +152,7 @@ def create_model(data, vertex, edge, peak_multiplier=None):
     # helper function: calculates outer product of column in table area_demand
     # with specified series, which is applied to the columns of edge_areas
     def multiply_by_area_demand(series, column):
-        return (area_demand[column].ix[series.name]
+        return (area_demand[column].loc[series.name]
                                    .apply(lambda x: x*series)
                                    .stack())
 
