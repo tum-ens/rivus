@@ -21,7 +21,3 @@ class RivusTest(unittest.TestCase):
 
     def test_read_excel(self):
         pass
-
-
-if __name__ == '__main__':
-    unittest.main()

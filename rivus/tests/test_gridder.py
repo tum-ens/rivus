@@ -15,7 +15,3 @@ class RivusTest(unittest.TestCase):
 
     def test_create_sq_grid(self):
         pass
-
-
-if __name__ == '__main__':
-    unittest.main()

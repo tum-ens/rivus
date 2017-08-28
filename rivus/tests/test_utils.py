@@ -68,7 +68,3 @@ class RivusTest(unittest.TestCase):
                '(e.g. electricity, heating, cooling, ...).')
         self.assertEqual(email_me(msg, subject=sub, **email_setup), 0,
                          msg='Something went wrong during email notification.')
-
-
-if __name__ == '__main__':
-    unittest.main()
