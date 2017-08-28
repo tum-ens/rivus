@@ -558,8 +558,8 @@ def _fill_table(engine, frame, df, run_id):
     return
 
 
-def store(engine, prob, run_id=None, plot_obj=None, graph_results=None,
-          run_data=None, time_series=None, constants=None):
+def store(engine, prob, run_id=None, graph_results=None, run_data=None,
+          time_series=None, constants=None):
     """Store I/O plus extras of a rivus model into a postgres DB.
 
     Parameters
@@ -571,16 +571,13 @@ def store(engine, prob, run_id=None, plot_obj=None, graph_results=None,
     run_id : int, optional
         run_id of an initialized run row in the DB.
         If omitted: init_run() will be called with `run_data`.
-    plot_obj : dict, optional
-        TODO
-        Result of rivus.io.plot.fig3d(). It will be stored as JSONb.
     graph_results : iterable, optional
         Results of the graph analysis. Each graph should have its own dict.
         For implemented result keys see `_handle_graph`.
         E.g. [{'is_connected':True, 'is_minimal':True}, {'is_connected':True}]
     run_data : dict, optional
         Keyword arguments to be passed to init_run().
-        runner, start_ts, status, outcome, comment
+        runner, start_ts, status, outcome, comment, plot_dict, profiler
     time_series : None, optional
         TODO If already present at function call, this could save time.
     constants : None, optional
@@ -625,7 +622,7 @@ def store(engine, prob, run_id=None, plot_obj=None, graph_results=None,
         consts_names = ['cost', 'pmax', 'kappa_hub', 'kappa_process']
         consts = get_constants(prob)  # costs, Pmax, Kappa_hub, Kappa_process
 
-        for df, name in zip(series+consts, series_names+consts_names):
+        for df, name in zip(series + consts, series_names + consts_names):
             if not df.empty:
                 _fill_table(engine, name, df, run_id)
         if graph_results is not None:
