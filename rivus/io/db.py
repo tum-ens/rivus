@@ -672,8 +672,10 @@ def df_from_table(engine, fname, run_id):
     """
     if fname == 'process_commodity':
         sql = """
-            SELECT P.process AS "Process", C.commodity AS "Commodity",
-                   PC.direction AS "Direction", PC.ratio AS ratio
+            SELECT P.process AS "Process",
+                   C.commodity AS "Commodity",
+                   initcap(PC.direction::text) AS "Direction",
+                   PC.ratio AS ratio
             FROM process_commodity AS PC
             INNER JOIN commodity AS C ON PC.commodity_id = C.commodity_id
             INNER JOIN process AS P ON PC.process_id = P.process_id
