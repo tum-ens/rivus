@@ -684,7 +684,7 @@ def df_from_table(engine, fname, run_id):
 
     elif fname == 'process':
         sql = """
-            SELECT process AS "Process", unit,
+            SELECT process AS "Process",
                    cost_inv_fix AS "cost-inv-fix",
                    cost_inv_var AS "cost-inv-var",
                    cost_fix AS "cost-fix",
