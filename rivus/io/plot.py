@@ -194,6 +194,8 @@ def _add_edges(prob, bm, comms, comm_zs, Pmax, Hubs, dz=5,
         use_hubs = False
 
     # Add dummies for legend formatting
+    # Legends symbol will have the line width
+    # of the first element in the legendgroup
     for com in comms:
         capacities.append({
             'type': 'scatter3d',
@@ -254,7 +256,7 @@ def _add_edges(prob, bm, comms, comm_zs, Pmax, Hubs, dz=5,
                          color=COLORS[com],
                          dash=dash)))
 
-            if use_hubs and v1v2 in Hubs.index.values:
+            if use_hubs and v1v2 in Hubs.index.values.tolist():
                 these_hubs = Hubs.xs(v1v2)
                 for hub, val in these_hubs[these_hubs > 0].iteritems():
                     produced = prob.r_out.xs(hub, level='Process') * val
