@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import numpy as np
 from itertools import product as iter_product
 from shapely.geometry import Point, LineString
@@ -217,14 +218,16 @@ def get_source_candidates(vdf, dim_x, dim_y, logic='sym'):
     -------
     List
         smy : 1D list [1,2,6,7,8]
-        extrema : 2D list - list of lists [[0,23],[0,5],[0,18]]
+        extrema, center : 2D list - list of lists [[0,23],[0,5],[0,18]]
     """
     mat = vdf.index.values.reshape(dim_y, dim_x)
 
+    lim_x = ceil(dim_x / 2)
+    lim_y = ceil(dim_y / 2)
     if logic == 'sym':
-        lim_x = ceil(dim_x / 2)
-        lim_y = ceil(dim_y / 2)
         return mat[0:lim_y, 0:lim_x].flatten().tolist()
+    elif logic == 'center':
+        return [[0, mat[lim_y, lim_x]], ]
     elif logic == 'extrema':
         corners = [(0, 0),
                    (0, dim_x - 1),
