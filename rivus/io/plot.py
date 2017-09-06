@@ -432,18 +432,32 @@ def fig3d(prob, comms=None, linescale=1.0, use_hubs=False, hub_opac=0.55, dz=5,
         # Figure out commodities involved through processes
         proc_used = kappa_process.columns.values
         if len(proc_used):
-            proc_comms = (prob.r_in.loc[proc_used].index
-                          .get_level_values(level='Commodity')
-                          .union(prob.r_out.loc[proc_used].index
-                                 .get_level_values(level='Commodity')))
+            in_comms = (prob.r_in.sort_index(
+                level=['Process', 'Commodity'], ascending=[1, 0])
+                .loc[proc_used].index
+                .get_level_values(level='Commodity')
+                .unique())
+            ot_comms = (prob.r_out.sort_index(
+                level=['Process', 'Commodity'], ascending=[1, 0])
+                .loc[proc_used].index
+                .get_level_values(level='Commodity')
+                .unique())
+            proc_comms = in_comms.union(ot_comms)
             comms = union1d(comms, proc_comms.values)
         # Figure out commodities involved through hubs
         hubs_used = kappa_hub.columns.values
         if len(hubs_used):
-            hub_comms = (prob.r_in.loc[hubs_used].index
-                         .get_level_values(level='Commodity')
-                         .union(prob.r_out.loc[hubs_used].index
-                                .get_level_values(level='Commodity')))
+            in_comms = (prob.r_in.sort_index(
+                level=['Process', 'Commodity'], ascending=[1, 0])
+                .loc[hubs_used].index
+                .get_level_values(level='Commodity')
+                .unique())
+            ot_comms = (prob.r_out.sort_index(
+                level=['Process', 'Commodity'], ascending=[1, 0])
+                .loc[hubs_used].index
+                .get_level_values(level='Commodity')
+                .unique())
+            hub_comms = in_comms.union(ot_comms)
             comms = union1d(comms, hub_comms.values)
         comms = sorted(comms, key=lambda comm: comm_order[comm])
 
