@@ -1,52 +1,54 @@
 """Functions to convert tabular data to popular python graph structures
-networkx:
-    +/- Pure python implementation.
-    + Widely used and tested.
-    + Docs are quite good.
-    + Easy (platform independent) installation
-    - Slower than igraph (and graph-tools)
-igraph:
-    + C based with python wrappers.
-    + Mature library package.
-    + Included for speed and so for scalability.
-    × Docs are OK.
-    - Windows install can be somewhat tedious (with unofficial wheel files).
-      But it works.
-graph-tools: (maybe added in the future)
-    + Self proclaimed: fastest in graph analyses
-    - Not really windows user friendly (docker install should be tested)
 """
 import os
 
 
 def to_igraph(vdf, edf, pmax, comms=None, peak=None, save_dir=None, ext='gml'):
-    """Convert Data from (Geo)DataFrames to igraph(s)
-    Each commodity gets its own graph
+    """Convert Data from (Geo)DataFrames to python-igraph's Graph class
+    Each commodity gets its own graph.
     Weights are derived from built capacity.
 
-    Args:
-        vdf ([Geo]DataFrame): Holding Vertex Data id=Vertex
-            and Commodity Sources as columns
-        edf ([Geo]DataFrame): Holding (V1,V2) Multi-indexed Edge data
-            To be sure, that all edges are created.
-        pmax (DataFrame): Commodities as columns with max capacity per edge
-            returned by rivus.get_constants()
-        comms (iterable, optional): Names of the commodities from which we
-            build the graphs. (Each as separate graph.) If omitted, the columns
-            of pmax will be used.
-        peak (DataFrame, optional): Commodities as columns with demands
-            in t_peak time-step. Calculated in main.rivus
-        save_dir (path string, optional): Path to a dir to save graphs as `ext`
-            Path preferably constructed using the os.path module.
-            If dir does not exit yet, it will be created.
-        ext (string) file extension, supported by igraph.save()
-            If not one of the following, the default 'gml' will be applied.
-            'adjacency', 'dimacs', 'dot', 'graphviz', 'edgelist', 'edges',
-            'edge', 'gml', 'graphml', 'graphmlz', 'gw', 'leda', 'lgl', 'lgr',
-            'ncol', 'net', 'pajek', 'pickle', 'picklez', 'svg'
+    Parameters
+    ----------
+    vdf : [Geo]DataFrame
+        Holding Vertex Data id=Vertex
+        and Commodity Sources as columns
+    edf : [Geo]DataFrame
+        Holding (V1,V2) Multi-indexed Edge data
+        To be sure, that all edges are created.
+    pmax : DataFrame
+        Commodities as columns with max capacity per edge
+        returned by rivus.get_constants()
+    comms : iterable, optional
+        Names of the commodities from which we
+        build the graphs. (Each as separate graph.) If omitted, the columns
+        of pmax will be used.
+    peak : DataFrame, optional
+        Commodities as columns with demands
+        in t_peak time-step. Calculated in main.rivus
+    save_dir : path string, optional
+        Path to a dir to save graphs as `ext`
+        Path preferably constructed using the os.path module.
+        If dir does not exit yet, it will be created.
+    ext : str, optional
+        Description
+    ext (string) file extension, supported by igraph.save()
+        If not one of the following, the default 'gml' will be applied.
+        'adjacency', 'dimacs', 'dot', 'graphviz', 'edgelist', 'edges',
+        'edge', 'gml', 'graphml', 'graphmlz', 'gw', 'leda', 'lgl', 'lgr',
+        'ncol', 'net', 'pajek', 'pickle', 'picklez', 'svg'
 
-    Returns:
-        List of igraph.Graph objects in order of `comms`
+    Returns
+    -------
+    list
+        List of igraph.Graph objects in order of ``comms``.
+        Graphs are undirected and weighted.
+
+    Example
+    -------
+    ::
+        _, pmax, _, _ = get_constants(prob)
+        graphs = to_igraph(vertex, edge, pmax, ['Gas', 'Heat'])
     """
     import igraph as ig
     ext_list = ['adjacency', 'dimacs', 'dot', 'graphviz', 'edgelist', 'edges',
@@ -68,7 +70,7 @@ def to_igraph(vdf, edf, pmax, comms=None, peak=None, save_dir=None, ext='gml'):
         g['Name'] = '{} capacity graph'.format(comm.upper())
         g['Commodity'] = comm
         g.vs['Label'] = vdf.index.values.tolist()
-        g.vs[comm] = vdf[comm].tolist()
+        g.vs[comm] = vdf[comm].tolist() if comm in vdf else [0, ] * len(vdf)
         g.es['Label'] = list(map(lambda v1v2: '{}-{}'.format(*v1v2),
                                  edf.index.values))
         g.es[comm] = pmax[comm].tolist()
@@ -103,27 +105,42 @@ def to_igraph(vdf, edf, pmax, comms=None, peak=None, save_dir=None, ext='gml'):
 def to_nx(vdf, edf, pmax, comms=None, save_dir=None):
     """Convert to networkx graph representation
 
-    Args:
-        vdf ([Geo]DataFrame): Holding Vertex Data id=Vertex
-            and Commodity Sources as columns
-        edf ([Geo]DataFrame): Holding (V1,V2) Multi-indexed Edge data
-            To be sure, that all edges are created.
-        pmax (DataFrame): Commodities as columns with max capacity per edge
-            returned by rivus.get_constants()
-        comms (iterable, optional): Names of the commodities from which we
-            build the graphs. (Each as separate graph.) If omitted, the columns
-            of pmax will be used.
-        save_dir (path string, optional): Path to a dir to save graphs as GML.
-            Path preferably constructed using the `os.path` module
-            If dir does not exit yet, it will be created.
+    Parameters
+    ----------
+    vdf : [Geo]DataFrame
+        Holding Vertex Data id=Vertex
+        and Commodity Sources as columns
+    edf : [Geo]DataFrame
+        Holding (V1,V2) Multi-indexed Edge data
+        To be sure, that all edges are created.
+    pmax : DataFrame
+        Commodities as columns with max capacity per edge
+        returned by rivus.get_constants()
+    comms : iterable, optional
+        Names of the commodities from which we
+        build the graphs. (Each as separate graph.) If omitted, the columns
+        of pmax will be used.
+    save_dir : path string, optional
+        Path to a dir to save graphs as GML.
+        Path preferably constructed using the `os.path` module
+        If dir does not exit yet, it will be created.
 
-    Returns:
-        list of nx_graph object per in accordance with input `comms`
-        or commodities found in pmax.columns
+    Returns
+    -------
+    list
+        nx_graph objects in accordance with input `comms` or all commodities
+        found in pmax.columns
 
-    Note:
-        nx.from_pandas_dataframe() was also investigated, but it is a bit
-        slower and does not improve code quality in my opinion.
+    Example
+    -------
+    ::
+        _, pmax, _, _ = get_constants(prob)
+        graphs = to_nx(vertex, edge, pmax, ['Gas', 'Heat'])
+
+    Note
+    ----
+    nx.from_pandas_dataframe() was also investigated for conversion, but it is a bit
+    slower and does not improve code quality in my opinion.
     """
     import networkx as nx
     comms = pmax.columns.values if comms is None else comms
@@ -140,7 +157,7 @@ def to_nx(vdf, edf, pmax, comms=None, save_dir=None):
         g.add_nodes_from(vdf.index.values.tolist())
         for x, row in vdf.iterrows():
             g.node[x]['Label'] = x
-            g.node[x][comm] = row[comm]
+            g.node[x][comm] = row[comm] if comm in row else 0
             g.node[x]['Longitude'] = row.geometry.x
             g.node[x]['Latitude'] = row.geometry.y
         cap_max = _pmax[comm].max()
