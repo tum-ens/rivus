@@ -7,9 +7,15 @@ from rivus.main.rivus import read_excel
 import json
 
 
-class RivusTest(unittest.TestCase):
+class RivusUtilsTest(unittest.TestCase):
 
     def test_parameter_range(self):
+        """Load minimal example data and test with one of the parameters
+
+        + Tests for side-effects on the original.
+        + Tests for the awaited numer of parameters.
+        + Tests for range of the parameters
+        """
         proj_name = 'mnl'
         base_directory = os.path.join('data', proj_name)
         data_spreadsheet = os.path.join(base_directory, 'data.xlsx')
@@ -44,6 +50,27 @@ class RivusTest(unittest.TestCase):
                             msg='Got parameter smaller than awaited.')
 
     def test_email_notification(self):
+        """It only can test, whether the notification function run trhrough
+        successfully.
+
+        Can be useful for quick testing the email parameters in the config file
+
+        Note
+        -----
+        Requires a ``config.json`` file in the root of rivus-repo with the
+        database credentials. For Example:
+        ::
+
+            {
+                "email" : {
+                    "s_user" : "robot.mail@gmail.com",
+                    "s_pass" : "TheAnswerIs42!",
+                    "r_user" : "my.mail@gmail.com",
+                    "smpt_addr" : "smtp.gmail.com",
+                    "smpt_port" : "587"
+                }
+            }
+        """
         # Concatenate the absolute path to the config file.
         # conf_path = __file__[:-len('rivus/tests/utils.py')] + 'config.json'
         conf_path = os.path.join(pdir(pdir(pdir(__file__))), 'config.json')

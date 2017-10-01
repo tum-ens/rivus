@@ -5,7 +5,7 @@ from rivus.gridder.create_grid import get_source_candidates
 from rivus.main.rivus import read_excel
 
 
-class RivusTest(unittest.TestCase):
+class RivusGridTest(unittest.TestCase):
 
     # TODO There is plenty of more functions (if not all)
     # which reside in the code-base untested. Bellow some placeholders.

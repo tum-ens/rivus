@@ -2,7 +2,7 @@ import unittest
 from rivus.main.rivus import read_excel
 
 
-class RivusTest(unittest.TestCase):
+class RivusMainTest(unittest.TestCase):
 
     # TODO There is plenty of more functions (if not all)
     # which reside in the code-base untested. Bellow some placeholders.

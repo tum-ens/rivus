@@ -18,10 +18,26 @@ class RivusDBTest(unittest.TestCase):
 
     def test_df_insert_query(self):
         """Are the stored dataframes and the retrieved ones identical?
-        - Comparison form is *after* create_model. (index is set)
+
+        - Comparison form of frames is *after* create_model. (index is set)
         - Comparison form expects that input dataframes only have meaningful
           columns. (See pull request #23)
         - Only implemented dataframes are tested.
+
+        Note
+        ----
+        Requires a ``config.json`` file in the root of rivus-repo with the
+        database credentials. For Example:
+        ::
+
+            {
+                "db" : {
+                    "user" : "postgres",
+                    "pass" : "postgres",
+                    "host" : "localhost",
+                    "base" : "rivus"
+                }
+            }
         """
         conf_path = os.path.join(pdir(pdir(pdir(__file__))), 'config.json')
         config = []
