@@ -1,6 +1,3 @@
-""" plotting functions for rivus result visualisation
-    Kristof Havasi
-"""
 from pandas import Series
 from numpy import union1d
 import math
@@ -380,30 +377,47 @@ def _add_edges(prob, bm, comms, comm_zs, pmax, hubs, proc, source, dz=5,
 
 def fig3d(prob, comms=None, linescale=1.0, use_hubs=False, hub_opac=0.55, dz=5,
           layout=None, verbose=False):
-    """
-    Generate 3D representation of the rivus results using plotly
+    """Generate 3D representation of the rivus results using plotly
 
-    Args:
-        prob (rivus_archive): A rivus model (later extract of it)
-        comms (None, optional): list/ndarray of commodity names to plot,
-               Order: ['C1', 'C2', 'C3'] -> Bottom: C1, Top: C3
-        linescale (float, optional):
-            A multiplier to get proportionally thicker lines.
-        use_hubs (bool, optional): Switch to depict hub processes.
-        hub_opac (float, optional): 0-1 opacity param.
-        dz (number, optional): Distance between layers along 'z' axis .
-        layout (None, optional): A plotly layout dict to overwrite default.
-        verbose (bool, optional): To print out progress and the time it took.
+    Parameters
+    ----------
+    prob : rivus_archive
+        A rivus model (later extract of it)
+    comms : None, optional
+        list/ndarray of commodity names to plot,
+        Order: ['C1', 'C2', 'C3'] -> Bottom: C1, Top: C3
+    linescale : float, optional
+        A multiplier to get proportionally thicker lines.
+    use_hubs : bool, optional
+        Switch to depict hub processes.
+    hub_opac : float, optional
+        0-1 opacity param.
+    dz : number, optional
+        Distance between layers along 'z' axis .
+    layout : None, optional
+        A plotly layout dict to overwrite default.
+    verbose : bool, optional
+        To print out progress and the time it took.
 
-    Usage:
+    Example
+    -------
+    ::
+
         import plotly.offline as po
         fig = fig3d(prob, ['Gas', 'Heat', 'Elec'], hub_opac=0.55, linescale=7)
         # for static image
         # po.plot(fig, filename='plotly-game.html', image='png')
         po.plot(fig, filename='plotly-game.html')
 
-    Returns:
-        plotly compatible figure *dict* (in plotly everything is kinda a dict.)
+    Returns
+    -------
+    plotly compatible figure *dict* (in plotly everything is kinda a dict.)
+
+    Note
+    -----
+        Greatly inspired by
+        `Example1 <https://plot.ly/python/lines-on-maps/>`_ and
+        `Example2 <https://plot.ly/python/3d-network-graph/>`_.
     """
     if verbose:
         import time
