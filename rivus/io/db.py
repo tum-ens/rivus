@@ -1,13 +1,3 @@
-"""Postgres helpers
-Of course after you established a connection to the database, you can do
-whatever you are capable of with your SQL-skills.
-However, to spare some effort, I added these helpers to avoid repetition of
-common tasks. Hopefully, this makes database integration easier in the future.
-Leading to better structured results.
-
-For specific information on the entity relationship of the expected DB visit:
-    [rivus_db](https://github.com/lnksz/rivus_db)
-"""
 import warnings
 from datetime import datetime
 from pandas import Series, DataFrame, read_sql
@@ -159,6 +149,8 @@ def _purge_table(engine, table, run_id):
 
 def purge_run(engine, run_id):
     """Delete all rows related to run_id across all tables.
+    **This is not a throughout reliable function, and can do some harm.
+    Use it with caution, and at your own risk!**
 
     Parameters
     ----------
@@ -640,34 +632,46 @@ def store(engine, prob, run_id=None, graph_results=None, run_data=None,
 def df_from_table(engine, fname, run_id):
     """Extract data form the database into a dataframe in a form,
     that is common during the rivus work-flow.
-    Implemented dataframes:
-        - rivus_model.params[] dataframes:
-            - process
-            - commodity
-            - process_commodity
-            - edge
-            - vertex
-            - time
-            - area_demand
-        - get_timeseries dataframes:
-            - source
-        - get_constants dataframes:
-            - cost
-            - pmax
-            - kappa_hub
-            - kappa_process
 
-    Args:
-        engine (sqlalchemy engine whit psycopg2 driver):
-            For managing connection to the DB.
-        fname (str): One of the implemented dataframes. (See summary.)
-        run_id (int): run_id of an initialized run row in the DB.
-            You could query the run table for e.g. start date,
-            or join it vertex table and execute a geographical query
-            and get the run_id(s) you want to work with
+    Implemented DataFrames:
 
-    Returns:
-        DataFrame or Series: depending on the data's dimensions.
+    * rivus_model.params[] dataframes:
+
+        - process
+        - commodity
+        - process_commodity
+        - edge
+        - vertex
+        - time
+        - area_demand
+
+    * get_timeseries dataframes:
+
+        - source
+
+    * get_constants dataframes:
+
+        - cost
+        - pmax
+        - kappa_hub
+        - kappa_process
+
+    Parameters
+    ----------
+    engine : sqlalchemy engine whit psycopg2 driver
+        For managing connection to the DB.
+    fname : str
+        One of the implemented dataframes. (See summary.)
+    run_id : int
+        run_id of an initialized run row in the DB.
+        You could query the run table for e.g. start date,
+        or join it vertex table and execute a geographical query
+        and get the run_id(s) you want to work with
+
+    Returns
+    -------
+    DataFrame or Series
+        depending on the data's dimensions.
         Only `cost` returns a Series to be consequent with get_constants.
     """
     if fname == 'process_commodity':
