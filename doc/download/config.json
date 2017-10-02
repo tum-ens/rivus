@@ -1,0 +1,22 @@
+{
+	"db" : {
+		"user" : "postgres",
+		"pass" : "postgres",
+		"host" : "localhost",
+		"base" : "rivus"
+	},
+	"email" : {
+		"s_user" : "your.robot@gmail.com",
+		"s_pass" : "thereIsASilverBullet!",
+		"r_user" : "your.address@gmail.com",
+		"smtp_addr" : "smtp.gmail.com",
+		"smtp_port" : 587
+	},
+	"solver" : "glpk",
+	"use_solver" : true,
+	"make_plot" : true,
+	"g_analysis" : false,
+	"calc_minimal" : false,
+	"store_db" : false,
+	"run_comment" : "Longtime run. :codename:lyon square grid from 10-15 edges"
+}
