@@ -13,6 +13,7 @@ with open('./config.json') as conf:
 SOLVER = config['use_solver']
 PLOTTER = config['make_plot']
 STORE_DB = config['store_db']
+GRAPHS = config['g_analysis']
 # ---- Solver = True to create and solve new problem
 # ---- Solver = False to load an already solved model and investigate it
 # =========================================================
@@ -28,6 +29,14 @@ if PLOTTER:
     # import matplotlib.pyplot as plt
     from rivus.io.plot import fig3d
     from plotly.offline import plot as plot3d
+if STORE_DB:
+    # from datetime import datetime
+    from sqlalchemy import create_engine
+    from rivus.io import db as rdb
+if GRAPHS:
+    import networkx as nx
+    from rivus.graph.to_graph import to_nx
+    from rivus.main.rivus import get_constants
 
 if STORE_DB:
     from datetime import datetime
@@ -36,6 +45,9 @@ if STORE_DB:
 from rivus.gridder.create_grid import create_square_grid
 from rivus.gridder.extend_grid import extend_edge_data, vert_init_commodities
 from rivus.io import db as rdb
+
+from rivus.gridder.create_grid import create_square_grid
+from rivus.gridder.extend_grid import extend_edge_data, vert_init_commodities
 
 # Files Access | INITs
 datenow = datetime.now().strftime('%y%m%dT%H%M')
@@ -113,6 +125,18 @@ if PLOTTER:
     else:
         plot3d(fig, filename=os.path.join(arch_dir, 'rivus_result.html'))
     profile_log['plotting'] = timenow() - myprintstart
+
+if GRAPHS:
+    graphstart = timenow()
+    vdf = prob.params['vertex']
+    edf = prob.params['edge']
+    _, pmax, _, _ = get_constants(prob)
+    graphs = to_nx(vdf, edf, pmax)
+    for G in graphs:
+        print(nx.is_connected(G))
+
+    profile_log['rivus load'] = timenow() - graphstart
+    print('Graphs: done.')
 
 if STORE_DB:
     print('Using DB')

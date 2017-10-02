@@ -35,6 +35,11 @@ Electricity network capacities|  Heat network capacities    |  Gas network capac
    ```
    conda install -c conda-forge pyproj fiona geopy geopandas
    ```
+   
+5. For interactive (3D) plots with **plotly**:
+   ```
+   pip install plotly
+   ```
 
 ## Documentation / Tutorials
 

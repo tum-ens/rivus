@@ -3,44 +3,95 @@ if __name__ == '__main__':
     from shapely.geometry import Point
 
 
-# Add Commodity columns filled with to the vertex DataFrame,
 def vert_init_commodities(vertex_df, commodities, sources=None):
-    """Add commodity columns with zeros to vertex DataFrame
-        source: (Commodity, Index, Value) tuples/lists
-            e.g. ('Elec', 1, 2000)
+    """Add commodity columns to the vertex DataFrame
+    with zeros to vertices without commodity source and
+    source capacity at the vertices provided by `sources`.
+
+    Parameters
+    ----------
+    vertex_df : (Geo)DataFrame
+        vertex dataframe input
+    commodities : list of str
+        Like ('Elec', 'Gas', 'Heat')
+    sources : list of tuples, optional
+        Init the source nodes.
+        Tuple form:(Commodity, Index, Value)
+
+    Raises
+    ------
+    ValueError
+    If parameters differ from awaited
+
+    Usage
+    -----
+    comms = ('Elec', 'Gas')
+    sources = [('Elec', 0, 1000), ('Gas', 1, 500)]
+    vert_init_commodities(vert, comms, sources)
     """
     for commo in commodities:
         vertex_df[commo] = len(vertex_df) * [0]
     if sources:
         for s in sources:
-            check1 = (len(s) == 3) and isinstance(s[0], str)
-            check2 = isinstance(s[1], int) and isinstance(s[2], (int, float))
-            if check1 and check2:
+            is_well_typed = (isinstance(s[0], str) and isinstance(s[1], int)
+                             and isinstance(s[2], (int, float)))
+            has_good_dims = (len(s) == 3) and s[1] < len(vertex_df)
+            if is_well_typed and has_good_dims:
                 vertex_df.set_value(index=s[1], col=s[0], value=s[2])
+            else:
+                raise ValueError('Parameter problem in function call. ' +
+                                 'Type is good: {}\n'.format(is_well_typed) +
+                                 'Dims are good: {}'.format(has_good_dims))
 
 
-def extend_edge_data(edge_df, dtype='area', strat='equal', sorts=None, inits=None):
-    """add various data to the edge (Geo)DataFrame"""
-    # TODO data validation
-    # sorts-initvals
+def extend_edge_data(edge_df, sorts=None, inits=None, strat='equal',
+                     strat_param=None):
+    """Add demand data to the edges in a (Geo)DataFrame
+
+    Parameters
+    ----------
+    edge_df : (Geo)DataFrame
+        edge dataframe to be extended
+    sorts : list of str, optional
+        The names of new columns (extensions)
+        Defaults to ['residential']
+    inits : list of int/float , optional
+        The parameter values, matching to sorts argument.
+        Defaults to [1000] for each sort.
+    strat : str, optional [TODO now only 'equal' has an effect]
+        How the data values will be created
+        + 'equal' - all edge demand is the same
+        + 'linear' - linearly decreasing
+        + 'exp' - exponentially decreasing
+        + 'manual' - provide mapper in strat_param
+    strat_param : optional [TODO no implemented yet]
+        Parameter for linear | exp | manual strategies.
+        + 'equal' - None - no effect
+        + 'linear' - minimum (lowest demand)
+        + 'exp' - minimum (lowest demand)
+        + 'manual' - function/dict to fetch value per edge
+
+    Raises
+    ------
+    ValueError
+    If inputs differ from awaited
+
+    Usage
+    -----
+    sorts = ('residential', 'other')
+    inits = (1000, 800)
+    extend_edge_data(edge, sorts=sorts, inits=inits)
+    """
 
     # How the data will be distributed among the edges
-    # equal: equally, each edge has same value(s)
-    # linear: TBD
-    # exp: TBD
-    # manual: could be cool for plug-in strategy / mask
-    strat = 'equal' if strat not in ['equal', 'linear', 'exp', 'manual'] else strat
-
-    # area: as used in the haag project
-    # demand: could be used after rivus can take direct demand values
-    #         could be proportional to edge length, or place in the grid?
-    dtypes = ['area', 'damand']
+    strat = 'equal' if strat not in [
+        'equal', 'linear', 'exp'] else strat
 
     # Value to the distribution, and types
-    sorts = ['residental'] if not sorts else sorts
+    sorts = ['residential'] if not sorts else sorts
     inits = [1000] * len(sorts) if not inits else inits
     if len(sorts) != len(inits):
-        raise ValueError('sorts ans initvals are not equal long')
+        raise ValueError('sorts and initvals do not have same length.')
 
     if strat == 'equal':
         for idx, sort in enumerate(sorts):

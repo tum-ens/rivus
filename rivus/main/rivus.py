@@ -11,10 +11,7 @@ except ImportError:
     warnings.warn("Support for Pyomo 3.x is now deprecated and will be removed"
                   "removed with the next release. Please upgrade to Pyomo 4.",
                   FutureWarning, stacklevel=2)
-import geopandas
-import itertools
 import math
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.patheffects as pe
 import numpy as np
@@ -636,7 +633,10 @@ def line_length(line):
     Returns:
         Length of line in meters
     """
-    return sum(distance(a, b).meters for (a, b) in pairs(line.coords))
+    # leaving the shapely lonlat order
+    # return sum(distance(a, b).meters for (a, b) in pairs(line.coords))
+    # new latlon order, with rounding to cm, as more numerical precision is useless
+    return round(sum(distance((a[-1],a[0]), (b[-1],b[0])).meters for (a, b) in pairs(line.coords)), 2)
 
 
 def pairs(lst):
