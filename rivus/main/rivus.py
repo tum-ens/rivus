@@ -89,13 +89,15 @@ def read_excel(filename):
 
     # sort nested indexes to make direct assignments work, cf
     # http://pandas.pydata.org/pandas-docs/stable/indexing.html#the-need-for-sortedness-with-multiindex
+    # https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.sort_index.html#pandas.DataFrame.sort_index
     for key in data:
         if isinstance(data[key].index, pd.core.index.MultiIndex):
-            data[key].sortlevel(inplace=True)
+            data[key].sort_index(inplace=True)
     return data
 
 
-def create_model(data, vertex, edge, peak_multiplier=None):
+def create_model(data, vertex, edge, peak_multiplier=None,
+                 hub_only_in_edge=True):
     """Return a rivus model instance from input file and spatial input.
 
     Args:
@@ -123,9 +125,22 @@ def create_model(data, vertex, edge, peak_multiplier=None):
     time = data['time']
     area_demand = data['area_demand']
 
+    # Handling the indexing of GeoDataFrames
+    # If we get "too clever" input,
+    # reset it to leave peak calculation untouched.
+    # If not, peak gets messed up through
+    # edge_areas and multiply_by_area_demand
+    if edge.index.names == ['Vertex1', 'Vertex2']:
+        edge = edge.reset_index()
+    if vertex.index.names == ['Vertex']:
+        vertex = vertex.reset_index()
+
     # process input/output ratios
     m.r_in = process_commodity.xs('In', level='Direction')['ratio']
     m.r_out = process_commodity.xs('Out', level='Direction')['ratio']
+    # For faster value retrieval
+    m.r_in_dict = m.r_in.to_dict()
+    m.r_out_dict = m.r_out.to_dict()
 
     # energy hubs
     # are processes that satisfy three conditions:
@@ -139,10 +154,8 @@ def create_model(data, vertex, edge, peak_multiplier=None):
     has_cap_min_0 = process['cap-min'] == 0
     has_one_input = m.r_in.groupby(level='Process').count() == 1
     has_r_in_1 = m.r_in.groupby(level='Process').sum() == 1
-    hub = process[has_cost_inv_fix_0 &
-                  has_cap_min_0 &
-                  has_one_input &
-                  has_r_in_1]
+    is_hub = (has_cost_inv_fix_0 & has_cap_min_0 & has_one_input & has_r_in_1)
+    hub = process[is_hub.reindex(process.index)]
     m.params['hub'] = hub
 
     # derive peak and demand of edges
@@ -153,7 +166,7 @@ def create_model(data, vertex, edge, peak_multiplier=None):
     # helper function: calculates outer product of column in table area_demand
     # with specified series, which is applied to the columns of edge_areas
     def multiply_by_area_demand(series, column):
-        return (area_demand[column].ix[series.name]
+        return (area_demand[column].loc[series.name]
                                    .apply(lambda x: x*series)
                                    .stack())
 
@@ -166,15 +179,17 @@ def create_model(data, vertex, edge, peak_multiplier=None):
     vertex.set_index('Vertex', inplace=True)
     edge.set_index(['Vertex1', 'Vertex2'], inplace=True)
     m.peak.index = edge.index
-    m.peak.sortlevel(inplace=True)
+    m.peak.sort_index(inplace=True)
 
     # store geographic DataFrames vertex & edge for later use
     m.params['vertex'] = vertex.copy()
     m.params['edge'] = edge.copy()
+    m.edge_geo_dict = m.params['edge'].geometry.to_dict()
 
     if peak_multiplier:
         m.peak = peak_multiplier(m)
 
+    m.peak_dict = m.peak.to_dict()
     # construct arc set of directed (i,j), (j,i) edges
     arcs = [arc for (v1, v2) in edge.index for arc in ((v1, v2), (v2, v1))]
 
@@ -234,21 +249,30 @@ def create_model(data, vertex, edge, peak_multiplier=None):
         doc='Commodities that have a maximum allowed generation (e.g. CO2)')
 
     # process
+    if hub_only_in_edge:
+        proc_init = process.index.difference(hub.index).values.tolist()
+        proc_input_init = m.r_in.to_frame().drop(hub.index, level=0).index.values.tolist()
+        proc_output_init = m.r_out.to_frame().drop(hub.index, level=0).index.values.tolist()
+    else:
+        proc_init = process.index
+        proc_input_init = m.r_in.index
+        proc_output_init = m.r_out.index
     m.process = pyomo.Set(
-        initialize=process.index,
+        initialize=proc_init,
         doc='Processes, converting commodities in vertices')
     m.process_input_tuples = pyomo.Set(
+        dimen=2,
         within=m.process*m.commodity,
-        initialize=m.r_in.index,
+        initialize=proc_input_init,
         doc='Commodities consumed by processes')
     m.process_output_tuples = pyomo.Set(
+        dimen=2,
         within=m.process*m.commodity,
-        initialize=m.r_out.index,
+        initialize=proc_output_init,
         doc='Commodities emitted by processes')
 
     # hub
     m.hub = pyomo.Set(
-        within=m.process,
         initialize=hub.index,
         doc='Hub processes, converting commodities in edges')
 
@@ -453,11 +477,11 @@ def create_model(data, vertex, edge, peak_multiplier=None):
 # edges/arcs
 def peak_satisfaction_rule(m, i, j, co, t):
     provided_power = hub_balance(m, i, j, co, t) + m.Sigma[i, j, co, t]
-    return provided_power >= m.peak.loc[i,j][co] * m.params['time'].loc[t][co]
+    return provided_power >= m.peak_dict[co][(i, j)] * m.params['time'].loc[t][co]
 
 def edge_equation_rule(m, i, j, co, t):
     if co in m.co_transportable:
-        length = line_length(m.params['edge'].loc[i, j]['geometry'])
+        length = line_length(m.edge_geo_dict[i, j])
 
         flow_in = ( 1 - length * m.params['commodity'].loc[co]['loss-var']) * \
                   ( m.Pin[i,j,co,t] + m.Pin[j,i,co,t] )
@@ -532,10 +556,10 @@ def process_capacity_max_rule(m, v, p):
     return m.Kappa_process[v, p] <= m.Phi[v, p] * m.params['process'].loc[p]['cap-max']
 
 def process_input_rule(m, v, p, co, t):
-    return m.Epsilon_in[v, p, co, t] == m.Tau[v, p, t] * m.r_in.loc[p, co]
+    return m.Epsilon_in[v, p, co, t] == m.Tau[v, p, t] * m.r_in_dict[(p, co)]
 
 def process_output_rule(m, v, p, co, t):
-    return m.Epsilon_out[v, p, co, t] == m.Tau[v, p, t] * m.r_out.loc[p, co]
+    return m.Epsilon_out[v, p, co, t] == m.Tau[v, p, t] * m.r_out_dict[(p, co)]
 
 # Objective
 
@@ -549,7 +573,7 @@ def def_costs_rule(m, cost_type):
                 for v in m.vertex for p in m.process) + \
             sum((m.Pmax[i,j,co] * m.params['commodity'].loc[co]['cost-inv-var'] +
                  m.Xi[i,j,co] * m.params['commodity'].loc[co]['cost-inv-fix']) *
-                line_length(m.params['edge'].loc[i, j]['geometry'])
+                line_length(m.edge_geo_dict[(i, j)])
                 for (i,j) in m.edge for co in m.co_transportable)
 
     elif cost_type == 'Fix':
@@ -559,7 +583,7 @@ def def_costs_rule(m, cost_type):
             sum(m.Kappa_process[v,p] * m.params['process'].loc[p]['cost-fix']
                 for v in m.vertex for p in m.process) + \
             sum(m.Pmax[i,j,co] * m.params['commodity'].loc[co]['cost-fix'] *
-                line_length(m.params['edge'].loc[i, j]['geometry'])
+                line_length(m.edge_geo_dict[(i, j)])
                 for (i,j) in m.edge for co in m.co_transportable)
 
     elif cost_type == 'Var':
@@ -590,10 +614,10 @@ def hub_balance(m, i, j, co, t):
     """Calculate commodity balance in an edge {i,j} from/to hubs. """
     balance = 0
     for h in m.hub:
-        if co in m.r_in.loc[h].index:
-            balance -= m.Epsilon_hub[i,j,h,t] * m.r_in.loc[h,co] # m.r_in = 1 by definition
-        if co in m.r_out.loc[h].index:
-            balance += m.Epsilon_hub[i,j,h,t] * m.r_out.loc[h,co]
+        if (h, co) in m.r_in_dict:
+            balance -= m.Epsilon_hub[i,j,h,t] * m.r_in_dict[(h, co)] # m.r_in = 1 by definition
+        if (h, co) in m.r_out_dict:
+            balance += m.Epsilon_hub[i,j,h,t] * m.r_out_dict[(h, co)]
     return balance
 
 def flow_balance(m, v, co, t):
@@ -608,9 +632,9 @@ def process_balance(m, v, co, t):
     """Calculate commodity balance in a vertex from/to processes. """
     balance = 0
     for p in m.process:
-        if co in m.r_in.loc[p].index:
+        if (p, co) in m.r_in_dict:
             balance -= m.Epsilon_in[v,p,co,t]
-        if co in m.r_out.loc[p].index:
+        if (p, co) in m.r_out_dict:
             balance += m.Epsilon_out[v,p,co,t]
     return balance
 
@@ -633,7 +657,10 @@ def line_length(line):
     Returns:
         Length of line in meters
     """
-    return sum(distance(a, b).meters for (a, b) in pairs(line.coords))
+    # leaving the shapely lonlat order
+    # return sum(distance(a, b).meters for (a, b) in pairs(line.coords))
+    # new latlon order, with rounding to cm, as more numerical precision is useless
+    return round(sum(distance((a[-1],a[0]), (b[-1],b[0])).meters for (a, b) in pairs(line.coords)), 2)
 
 
 def pairs(lst):

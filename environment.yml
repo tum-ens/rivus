@@ -1,0 +1,23 @@
+name: rivus
+channels:
+- conda-forge
+dependencies:
+  - python=3.5
+  - numpy
+  - pandas
+  - xlrd
+  - openpyxl
+  - pyomo
+  - glpk
+  - pyshp
+  - shapely
+  - basemap
+  - pyproj
+  - geopy
+  - plotly
+  - networkx
+  - psycopg2
+  - sqlalchemy
+  - python-igraph
+  - pip:
+      - geopandas

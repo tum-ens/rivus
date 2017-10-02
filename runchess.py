@@ -1,5 +1,4 @@
-"""pLAYGROUND script with the feauteres added by lnksz"""
-
+"""Playground script with the feauteres added by lnksz"""
 
 import os
 from pandas import Series
@@ -72,7 +71,7 @@ if SOLVER:
     excelread = timenow()
     data = rivus.read_excel(data_spreadsheet)
     profile_log['excel_read'] = timenow() - excelread
-
+    
     # Create and solve model
     rivusmain = timenow()
     prob = rivus.create_model(data, vertex, edge)
