@@ -38,6 +38,13 @@ if GRAPHS:
     from rivus.graph.to_graph import to_nx
     from rivus.main.rivus import get_constants
 
+if STORE_DB:
+    from datetime import datetime
+    from sqlalchemy import create_engine
+
+from rivus.gridder.create_grid import create_square_grid
+from rivus.gridder.extend_grid import extend_edge_data, vert_init_commodities
+from rivus.io import db as rdb
 
 from rivus.gridder.create_grid import create_square_grid
 from rivus.gridder.extend_grid import extend_edge_data, vert_init_commodities
@@ -131,7 +138,6 @@ if GRAPHS:
     profile_log['rivus load'] = timenow() - graphstart
     print('Graphs: done.')
 
-
 if STORE_DB:
     print('Using DB')
     dbstart = timenow()
@@ -153,7 +159,6 @@ if STORE_DB:
     # import pandas as pd
     # with pd.ExcelWriter('./fetched.xlsx') as writer:
     #     fetched_df.to_excel(writer, 'edge')
-
 
 print('{1} Script parts took: (sec) {1}\n{0:s}\n{1}{1}{1}{1}'.format(
     Series(profile_log, name='mini-profile').to_string(),
