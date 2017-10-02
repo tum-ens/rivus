@@ -125,6 +125,16 @@ def create_model(data, vertex, edge, peak_multiplier=None,
     time = data['time']
     area_demand = data['area_demand']
 
+    # Handling the indexing of GeoDataFrames
+    # If we get "too clever" input,
+    # reset it to leave peak calculation untouched.
+    # If not, peak gets messed up through
+    # edge_areas and multiply_by_area_demand
+    if edge.index.names == ['Vertex1', 'Vertex2']:
+        edge = edge.reset_index()
+    if vertex.index.names == ['Vertex']:
+        vertex = vertex.reset_index()
+
     # process input/output ratios
     m.r_in = process_commodity.xs('In', level='Direction')['ratio']
     m.r_out = process_commodity.xs('Out', level='Direction')['ratio']
