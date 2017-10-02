@@ -126,6 +126,9 @@ def create_model(data, vertex, edge, peak_multiplier=None):
     # process input/output ratios
     m.r_in = process_commodity.xs('In', level='Direction')['ratio']
     m.r_out = process_commodity.xs('Out', level='Direction')['ratio']
+    # For faster value retrieval
+    m.r_in_dict = m.r_in.to_dict()
+    m.r_out_dict = m.r_out.to_dict()
 
     # energy hubs
     # are processes that satisfy three conditions:
@@ -171,10 +174,12 @@ def create_model(data, vertex, edge, peak_multiplier=None):
     # store geographic DataFrames vertex & edge for later use
     m.params['vertex'] = vertex.copy()
     m.params['edge'] = edge.copy()
+    m.edge_geo_dict = m.params['edge'].geometry.to_dict()
 
     if peak_multiplier:
         m.peak = peak_multiplier(m)
 
+    m.peak_dict = m.peak.to_dict()
     # construct arc set of directed (i,j), (j,i) edges
     arcs = [arc for (v1, v2) in edge.index for arc in ((v1, v2), (v2, v1))]
 
@@ -453,11 +458,11 @@ def create_model(data, vertex, edge, peak_multiplier=None):
 # edges/arcs
 def peak_satisfaction_rule(m, i, j, co, t):
     provided_power = hub_balance(m, i, j, co, t) + m.Sigma[i, j, co, t]
-    return provided_power >= m.peak.loc[i,j][co] * m.params['time'].loc[t][co]
+    return provided_power >= m.peak_dict[co][(i, j)] * m.params['time'].loc[t][co]
 
 def edge_equation_rule(m, i, j, co, t):
     if co in m.co_transportable:
-        length = line_length(m.params['edge'].loc[i, j]['geometry'])
+        length = line_length(m.edge_geo_dict[i, j])
 
         flow_in = ( 1 - length * m.params['commodity'].loc[co]['loss-var']) * \
                   ( m.Pin[i,j,co,t] + m.Pin[j,i,co,t] )
@@ -532,10 +537,10 @@ def process_capacity_max_rule(m, v, p):
     return m.Kappa_process[v, p] <= m.Phi[v, p] * m.params['process'].loc[p]['cap-max']
 
 def process_input_rule(m, v, p, co, t):
-    return m.Epsilon_in[v, p, co, t] == m.Tau[v, p, t] * m.r_in.loc[p, co]
+    return m.Epsilon_in[v, p, co, t] == m.Tau[v, p, t] * m.r_in_dict[(p, co)]
 
 def process_output_rule(m, v, p, co, t):
-    return m.Epsilon_out[v, p, co, t] == m.Tau[v, p, t] * m.r_out.loc[p, co]
+    return m.Epsilon_out[v, p, co, t] == m.Tau[v, p, t] * m.r_out_dict[(p, co)]
 
 # Objective
 
@@ -549,7 +554,7 @@ def def_costs_rule(m, cost_type):
                 for v in m.vertex for p in m.process) + \
             sum((m.Pmax[i,j,co] * m.params['commodity'].loc[co]['cost-inv-var'] +
                  m.Xi[i,j,co] * m.params['commodity'].loc[co]['cost-inv-fix']) *
-                line_length(m.params['edge'].loc[i, j]['geometry'])
+                line_length(m.edge_geo_dict[(i, j)])
                 for (i,j) in m.edge for co in m.co_transportable)
 
     elif cost_type == 'Fix':
@@ -559,7 +564,7 @@ def def_costs_rule(m, cost_type):
             sum(m.Kappa_process[v,p] * m.params['process'].loc[p]['cost-fix']
                 for v in m.vertex for p in m.process) + \
             sum(m.Pmax[i,j,co] * m.params['commodity'].loc[co]['cost-fix'] *
-                line_length(m.params['edge'].loc[i, j]['geometry'])
+                line_length(m.edge_geo_dict[(i, j)])
                 for (i,j) in m.edge for co in m.co_transportable)
 
     elif cost_type == 'Var':
@@ -590,10 +595,10 @@ def hub_balance(m, i, j, co, t):
     """Calculate commodity balance in an edge {i,j} from/to hubs. """
     balance = 0
     for h in m.hub:
-        if co in m.r_in.loc[h].index:
-            balance -= m.Epsilon_hub[i,j,h,t] * m.r_in.loc[h,co] # m.r_in = 1 by definition
-        if co in m.r_out.loc[h].index:
-            balance += m.Epsilon_hub[i,j,h,t] * m.r_out.loc[h,co]
+        if (h, co) in m.r_in_dict:
+            balance -= m.Epsilon_hub[i,j,h,t] * m.r_in_dict[(h, co)] # m.r_in = 1 by definition
+        if (h, co) in m.r_out_dict:
+            balance += m.Epsilon_hub[i,j,h,t] * m.r_out_dict[(h, co)]
     return balance
 
 def flow_balance(m, v, co, t):
@@ -608,9 +613,9 @@ def process_balance(m, v, co, t):
     """Calculate commodity balance in a vertex from/to processes. """
     balance = 0
     for p in m.process:
-        if co in m.r_in.loc[p].index:
+        if (p, co) in m.r_in_dict:
             balance -= m.Epsilon_in[v,p,co,t]
-        if co in m.r_out.loc[p].index:
+        if (p, co) in m.r_out_dict:
             balance += m.Epsilon_out[v,p,co,t]
     return balance
 
