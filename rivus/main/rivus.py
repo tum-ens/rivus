@@ -89,9 +89,10 @@ def read_excel(filename):
 
     # sort nested indexes to make direct assignments work, cf
     # http://pandas.pydata.org/pandas-docs/stable/indexing.html#the-need-for-sortedness-with-multiindex
+    # https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.sort_index.html#pandas.DataFrame.sort_index
     for key in data:
         if isinstance(data[key].index, pd.core.index.MultiIndex):
-            data[key].sortlevel(inplace=True)
+            data[key].sort_index(inplace=True)
     return data
 
 
@@ -142,10 +143,8 @@ def create_model(data, vertex, edge, peak_multiplier=None):
     has_cap_min_0 = process['cap-min'] == 0
     has_one_input = m.r_in.groupby(level='Process').count() == 1
     has_r_in_1 = m.r_in.groupby(level='Process').sum() == 1
-    hub = process[has_cost_inv_fix_0 &
-                  has_cap_min_0 &
-                  has_one_input &
-                  has_r_in_1]
+    is_hub = (has_cost_inv_fix_0 & has_cap_min_0 & has_one_input & has_r_in_1)
+    hub = process[is_hub.reindex(process.index)]
     m.params['hub'] = hub
 
     # derive peak and demand of edges
@@ -156,7 +155,7 @@ def create_model(data, vertex, edge, peak_multiplier=None):
     # helper function: calculates outer product of column in table area_demand
     # with specified series, which is applied to the columns of edge_areas
     def multiply_by_area_demand(series, column):
-        return (area_demand[column].ix[series.name]
+        return (area_demand[column].loc[series.name]
                                    .apply(lambda x: x*series)
                                    .stack())
 
@@ -169,7 +168,7 @@ def create_model(data, vertex, edge, peak_multiplier=None):
     vertex.set_index('Vertex', inplace=True)
     edge.set_index(['Vertex1', 'Vertex2'], inplace=True)
     m.peak.index = edge.index
-    m.peak.sortlevel(inplace=True)
+    m.peak.sort_index(inplace=True)
 
     # store geographic DataFrames vertex & edge for later use
     m.params['vertex'] = vertex.copy()
