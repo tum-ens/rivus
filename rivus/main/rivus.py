@@ -96,7 +96,8 @@ def read_excel(filename):
     return data
 
 
-def create_model(data, vertex, edge, peak_multiplier=None):
+def create_model(data, vertex, edge, peak_multiplier=None,
+                 hub_only_in_edge=True):
     """Return a rivus model instance from input file and spatial input.
 
     Args:
@@ -238,21 +239,30 @@ def create_model(data, vertex, edge, peak_multiplier=None):
         doc='Commodities that have a maximum allowed generation (e.g. CO2)')
 
     # process
+    if hub_only_in_edge:
+        proc_init = process.index.difference(hub.index).values.tolist()
+        proc_input_init = m.r_in.to_frame().drop(hub.index, level=0).index.values.tolist()
+        proc_output_init = m.r_out.to_frame().drop(hub.index, level=0).index.values.tolist()
+    else:
+        proc_init = process.index
+        proc_input_init = m.r_in.index
+        proc_output_init = m.r_out.index
     m.process = pyomo.Set(
-        initialize=process.index,
+        initialize=proc_init,
         doc='Processes, converting commodities in vertices')
     m.process_input_tuples = pyomo.Set(
+        dimen=2,
         within=m.process*m.commodity,
-        initialize=m.r_in.index,
+        initialize=proc_input_init,
         doc='Commodities consumed by processes')
     m.process_output_tuples = pyomo.Set(
+        dimen=2,
         within=m.process*m.commodity,
-        initialize=m.r_out.index,
+        initialize=proc_output_init,
         doc='Commodities emitted by processes')
 
     # hub
     m.hub = pyomo.Set(
-        within=m.process,
         initialize=hub.index,
         doc='Hub processes, converting commodities in edges')
 
