@@ -47,6 +47,7 @@ def to_igraph(vdf, edf, pmax, comms=None, peak=None, save_dir=None, ext='gml'):
     Example
     -------
     ::
+
         _, pmax, _, _ = get_constants(prob)
         graphs = to_igraph(vertex, edge, pmax, ['Gas', 'Heat'])
     """
