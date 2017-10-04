@@ -31,6 +31,29 @@ def email_me(message, sender, send_pass, recipient, smtp_addr, smtp_port,
     integer
         0  - if run through without exception
         -1 - if encountered with a problem (mainly for unittest)
+
+    Example
+    -------
+    ::
+
+        email_setup = {
+            'sender': config['email']['s_user'],
+            'send_pass': config['email']['s_pass'],
+            'recipient': config['email']['r_user'],
+            'smtp_addr': config['email']['smtp_addr'],
+            'smtp_port': config['email']['smtp_port']}
+        ...
+        except Exception as solve_error:
+            sub = run_summary + '[rivus][solve-error]'
+            email_me(solve_error, subject=sub, **email_setup)
+
+        # or with traceback:
+
+        except Exception as plot_error:
+            err_tb = tb.format_exception(
+                        None, plot_error, plot_error.__traceback__)
+            sub = run_summary + '[rivus][plot-error]'
+            email_me(err_tb, subject=sub, **email_setup)
     """
     smtp_msg = MIMEMultipart()
     smtp_msg['From'] = sender
