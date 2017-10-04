@@ -11,11 +11,24 @@ from pyproj import Proj
 
 def _gen_grid_edges(point_matrix):
     '''Connecting vertices in a chessboard manner
-    1  2  3     1--2--3       1--2--3
-    4  5  6  -> 4--5--6   ->  |  |  |
-    7  8  9     7--8--9       4--5--6
+
+    .. code-block:: none
+
+        0  0  0    0--0--0    0--0--0
                               |  |  |
-                              7--8--9
+        0  0  0 -> 0--0--0 -> 0--0--0
+                              |  |  |
+        0  0  0    0--0--0    0--0--0
+
+    Parameters
+    ----------
+    point_matrix : numpy.arange
+        Two dimensional (matrix) with the coordinates of the vertices.
+
+    Returns
+    -------
+    list of Shapely.LineString
+        The connecting edges between vertices.
     '''
     lines = []
     for row in point_matrix:
@@ -39,52 +52,71 @@ def _check_input(origo_latlon, num_edge_x, num_edge_y, dx, dy, noise_prop):
 def create_square_grid(origo_latlon=(48.26739, 11.66842), num_edge_x=1,
                        num_edge_y=None, dx=100, dy=None, noise_prop=0.0,
                        epsg=None, match=0):
-    ''' Create chessboard grid with edges and vertices
-        on WGS84 suface with vincenty distance calculation
-        lat ~ x, lon ~ y
+    '''Create chessboard grid with edges and vertices
+    on WGS84 suface with vincenty distance calculation
+    lat ~ x, lon ~ y
 
-        Parameters
-        ----------
-        origo_latlon : tuple, optional
-            WGS84 latlon coordinates of the bottom left grid point
-            defaults to some the TUM-ENS dep. ;]
-        num_edge_x : int, optional
-            how many edges horizontally
-        num_edge_y : None, optional
-            How many edgey vertically
-        dx : int, optional
-            length of the horizontal edges (in meters)
-        dy : None, optional
-            length of the vertical edges (in meters)
-        noise_prop : float, optional
-            0.0 to MAX_NOISE < 1.0 effectively a relative missplacement radius
-        epsg : int, optional
-            If a valid epsg code which is supported py pyproy,
-            the coordinates are calculated in the carthesian UTM CRS
-            and then transformed into epsg4326 (latlon).
-            If `None` or omitted, then the coordinates are calculated
-            directly in epsg4326 with vincenty's formula for distance
-            and the grid lines up with the North and East directions
-        match : enumerated values, optional
-            0 : vertices and edges are matched by the logic of generation
-                (faster as less calculation is needed.)
-            1 : matching is done geographicaly
-                with pandashp helper (slower, but flexible)
+    Parameters
+    ----------
+    origo_latlon : tuple, optional
+        WGS84 latlon coordinates of the bottom left grid point
+        defaults to some the TUM-ENS dep. ;]
+    num_edge_x : int, optional
+        how many edges horizontally
+    num_edge_y : None, optional
+        How many edgey vertically
+    dx : int, optional
+        length of the horizontal edges (in meters)
+    dy : None, optional
+        length of the vertical edges (in meters)
+    noise_prop : float, optional
+        0.0 to MAX_NOISE (< 1.0) missplacement radius relative to dx and dy.
+    epsg : int, optional
+        If a valid epsg code which is supported py pyproy,
+        the coordinates are calculated in the carthesian UTM CRS
+        and then transformed into epsg4326 (latlon).
+        If `None` or omitted, then the coordinates are calculated
+        directly in epsg4326 with vincenty's formula for distance
+        and the grid lines up with the North and East directions
+    match : enumerated values, optional
+        + `0` - vertices and edges are matched by the logic of generation
+            (faster as less calculation is needed.)
+        + `1` - matching is done geographicaly
+            with pandashp helper (slower, but flexible)
 
-        Return : [vertices, edges] As GeoDataFrames
-            vertices : [geometry, Vertex]
-            edges : [geometry, Edge, Vertex1, Vertex2]
+    Return
+    ------
+    list of GeoDataFrames
+        + vertices : with [geometry, Vertex] columns
+        + edges : with [geometry, Edge, Vertex1, Vertex2] columns
 
-        Indexing:
-            (6)══04══(7)══05══(8)
-             ║        ║        ║
-             7        9        11
-             ║        ║        ║
-            (3)══02══(4)══03══(4)
-             ║        ║        ║
-             6        8        10
-             ║        ║        ║
-            (0)══00══(1)══01══(2)
+    Note
+    ----
+    Sequence of IDs:
+    From buttom left to upper right.
+    From row to row.
+    From left to right.
+
+    .. code-block:: none
+
+        bearing 0
+
+              (6)══04══(7)══05══(8)
+               ║        ║        ║
+               7        9        11
+               ║        ║        ║
+              (3)══02══(4)══03══(4)
+        ^      ║        ║        ║
+       (y)     6        8        10
+        L      ║        ║        ║
+        A     (0)══00══(1)══01══(2)
+        T
+          LON (x) -> bearing 90
+
+    Raises
+    ------
+    ValueError
+        Not supported epsg number
     '''
     # INIT
     # ---- Grid structure
@@ -115,6 +147,8 @@ def create_square_grid(origo_latlon=(48.26739, 11.66842), num_edge_x=1,
         startp = gPoint([lat, lon])
         # create the grid coordinates
         for _ in range(num_vert_y):
+            # In lon(x), lat(y) order to be passed to Shapeley.Point()
+            # Bearing 90->East 0->North
             points.append([startp.longitude, startp.latitude])
             _startp = startp
             for _ in range(num_edge_x):
@@ -144,10 +178,10 @@ def create_square_grid(origo_latlon=(48.26739, 11.66842), num_edge_x=1,
             else:
                 lon, lat = xy
                 fromP = gPoint([lat, lon])
-                londist = distance(meters=(fuzz_radius_x * np.random.rand()))
-                latdist = distance(meters=(fuzz_radius_y * np.random.rand()))
-                newX = latdist.destination(point=fromP, bearing=0)
-                newY = londist.destination(point=fromP, bearing=90)
+                lon_dist = distance(meters=(fuzz_radius_x * np.random.rand()))
+                lat_dist = distance(meters=(fuzz_radius_y * np.random.rand()))
+                newX = lon_dist.destination(point=fromP, bearing=90)
+                newY = lat_dist.destination(point=fromP, bearing=0)
                 return [newX.longitude, newY.latitude]
         points = list(map(lambda xy: _fuzz(xy), points))
 
@@ -205,20 +239,34 @@ def get_source_candidates(vdf, dim_x, dim_y, logic='sym'):
         Number of vertices along the y axis.
     logic : str, optional default='sym'
         what kind or source candidates are looked for.
-        sym : Minimal(ish) set of vertices based on symmetry.
+
+        + sym - Minimal(ish) set of vertices based on symmetry.
             E.g. here the indices marked with * are selected.
-            18, 19, 20, 21, 22, 23
-            12, 13, 14, 15, 16, 17
-            *6, *7, *8,  9, 10, 11
-            *0, *1, *2,  3,  4,  5
-        extrema: Pairs of vertices possibly further away from each other.
+            ::
+
+                18, 19, 20, 21, 22, 23
+                12, 13, 14, 15, 16, 17
+                *6, *7, *8,  9, 10, 11
+                *0, *1, *2,  3,  4,  5
+
+        + extrema - Pairs of vertices possibly further away from each other.
             Say: combination of the corners.
+            0: diagonal (0-23)
+            1: x-edge (0-5)
+            2: y-edge (0-18) if x-y have different lengths
+
+        + center - One corner and one center-ish ID
 
     Returns
     -------
-    List
-        smy : 1D list [1,2,6,7,8]
-        extrema, center : 2D list - list of lists [[0,23],[0,5],[0,18]]
+    List of different dimensions
+        + smy : 1D list [1,2,6,7,8]
+        + extrema, center : 2D list - list of lists [[0,23],[0,5],[0,18]]
+
+    Raises
+    ------
+    ValueError
+        Unsupported source vertex calculation logic
     """
     mat = vdf.index.values.reshape(dim_y, dim_x)
 
@@ -233,9 +281,13 @@ def get_source_candidates(vdf, dim_x, dim_y, logic='sym'):
                    (0, dim_x - 1),
                    (dim_y - 1, 0),
                    (dim_y - 1, dim_x - 1)]
-        borders = [[mat[corners[0]], mat[corners[3]]],
-                   [mat[corners[0]], mat[corners[1]]],
-                   [mat[corners[0]], mat[corners[2]]]]
+        if dim_y == dim_x:
+            borders = [[mat[corners[0]], mat[corners[3]]],
+                       [mat[corners[0]], mat[corners[1]]]]
+        else:
+            borders = [[mat[corners[0]], mat[corners[3]]],
+                       [mat[corners[0]], mat[corners[1]]],
+                       [mat[corners[0]], mat[corners[2]]]]
         return borders
     else:
         raise ValueError('Unsupported source vertex calculation logic: <{}>'
