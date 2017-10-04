@@ -135,13 +135,14 @@ def to_nx(vdf, edf, pmax, comms=None, save_dir=None):
     Example
     -------
     ::
+
         _, pmax, _, _ = get_constants(prob)
         graphs = to_nx(vertex, edge, pmax, ['Gas', 'Heat'])
 
     Note
     ----
-    nx.from_pandas_dataframe() was also investigated for conversion, but it is a bit
-    slower and does not improve code quality in my opinion.
+    ``nx.from_pandas_dataframe()`` was also investigated for conversion,
+    but it is a bit slower and does not improve code quality in my opinion.
     """
     import networkx as nx
     comms = pmax.columns.values if comms is None else comms
