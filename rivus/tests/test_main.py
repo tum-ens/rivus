@@ -1,7 +1,6 @@
 import unittest
 # For line length test
 from rivus.main.rivus import line_length
-from geopy.distance import distance
 from shapely.geometry import LineString
 
 
