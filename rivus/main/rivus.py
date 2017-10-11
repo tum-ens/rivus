@@ -1002,29 +1002,45 @@ def get_timeseries(prob):
 
 
 def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
-         annotations=True, buildings=None, shapefiles=None, decoration=True, boundary=False):
+         annotations=True, buildings=None, shapefiles=None, decoration=True,
+         boundary=False):
     """Plot a map of supply, conversion, transport and consumption.
 
     For given commodity, plot a map of all locations where the commodity is
     introduced (Rho), transported (Pin/Pot/Pmax), converted (Epsilon_*) and
     consumed (Sigma, peak).
 
-    Args:
-        prob: rivus ConcreteModel
-        commodity: str like `Elec`, `Heat` etc.
-        plot_demand: If True, plot demand, else plot capacities
-        mapscale: If True, add mapscale to plot (default: False)
-        tick_labels: If True, add lon/lat tick labels (default: True)
-        annotations: If True, add numeric labels to graph (default: True)
-        buildings: tuple of (filename to shapefile, boolean)
-                   if true, color buildings according to attribute column
-                   "type" and colors in constan rivus.COLORS; else use default
-                   COLOR['building'] for all
-        shapefiles: list of dicts of shapefiles that shall be drawn by
-                    basemap function readshapefile. is passed as `**kwargs`
-        decoration: Switch for map decoration (meridian, parallels)
-    Returns:
-        fig: the map figure object
+    Parameters
+    ----------
+    prob
+        rivus ConcreteModel
+    commodity
+        str like `Elec`, `Heat` etc.
+    plot_demand
+        If True, plot demand, else plot capacities
+    mapscale : Boolean
+        If True, add mapscale to plot (default: False)
+    tick_labels : Boolean
+        If True, add lon/lat tick labels (default: True)
+    annotations : Boolean
+        If True, add numeric labels to graph (default: True)
+    buildings : tuple
+        tuple of (filename to shapefile, boolean)
+        if true, color buildings according to attribute column
+        "type" and colors in constant rivus.COLORS; else use default
+        COLOR['building'] for all
+    shapefiles : list
+        list of dicts of shapefiles that shall be drawn by
+        basemap function readshapefile. is passed as `**kwargs`
+    decoration : Boolean
+        Switch for map decoration (meridian, parallels)
+    boundary : Boolean
+        Draw map border or not.
+
+    Returns
+    -------
+    fig
+        the map figure object
     """
     complex_plot = True
     # set up Basemap for extent
