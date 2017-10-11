@@ -72,13 +72,19 @@ def read_excel(filename):
         a dict of 6 DataFrames, one for each sheet
     """
     with pd.ExcelFile(filename) as xls:
-        commodity = xls.parse('Commodity').set_index(['Commodity'])
-        process = xls.parse('Process').set_index(['Process'])
-        time = xls.parse('Time').set_index(['Time'])
-        area_demand = xls.parse('Area-Demand').set_index(['Area', 'Commodity'])
+        commodity = (
+            xls.parse('Commodity', parse_cols='A:J')
+               .set_index(['Commodity']))
+        process = (
+            xls.parse('Process', parse_cols='A:G')
+               .set_index(['Process']))
         process_commodity = (
-            xls.parse('Process-Commodity')
+            xls.parse('Process-Commodity', parse_cols='A:D')
                .set_index(['Process', 'Commodity', 'Direction']))
+        area_demand = (
+            xls.parse('Area-Demand', parse_cols='A:C')
+               .set_index(['Area', 'Commodity']))
+        time = xls.parse('Time').set_index(['Time'])
 
     data = {
         'commodity': commodity,
