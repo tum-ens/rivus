@@ -940,6 +940,11 @@ def get_constants(prob):
     Kappa_hub = Kappa_hub[Kappa_hub > 0].unstack().fillna(0)
     Kappa_process = Kappa_process[Kappa_process > 0].unstack().fillna(0)
 
+    # Drop all 0 commodities
+    for column in Pmax:
+        if all(Pmax[column] == 0):
+            del Pmax[column]
+
     # round to integers
     if Pmax.empty:
         Pmax = pd.DataFrame([])
