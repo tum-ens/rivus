@@ -12,11 +12,13 @@
 		"smtp_addr" : "smtp.gmail.com",
 		"smtp_port" : 587
 	},
+	"use_pickle" : true,
+	"use_report" : true,
 	"solver" : "glpk",
 	"use_solver" : true,
 	"make_plot" : true,
-	"g_analysis" : false,
-	"calc_minimal" : false,
-	"store_db" : false,
-	"run_comment" : "Longtime run. :codename:lyon square grid from 10-15 edges"
+	"g_analysis" : true,
+	"calc_minimal" : true,
+	"store_db" : true,
+	"run_comment" : "runchess-test"
 }
