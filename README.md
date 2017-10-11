@@ -52,11 +52,12 @@ Electricity network capacities|  Heat network capacities    |  Gas network capac
 
 ## Documentation / Tutorials
 
-  * [Official documentation](http://rivus.readthedocs.io/en/latest/) (still a skeleton only)
+  * [Official documentation](http://rivus.readthedocs.io/en/latest/)
   * List of helpful IPython notebooks on handling geographic input data:
     + [join data from building.shp and edge.shp](https://nbviewer.jupyter.org/gist/lnksz/6edcd0a877997e9365e808146e9b51fe)
     + [OSM street data to vertex.shp and edge.shp](https://nbviewer.jupyter.org/gist/lnksz/7977c4cff9c529ca137b67b6774c60d7)
     + [Square grid to vertex.shp and edge.shp](https://nbviewer.jupyter.org/gist/lnksz/bd8ce0a79e499479b61ea7b45d5c661d)
+  * See repository-wiki for archive of interesting conversations, tips, and troubleshooting.
 
 ## Copyright
 
