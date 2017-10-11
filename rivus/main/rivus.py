@@ -657,10 +657,11 @@ def line_length(line):
     Returns:
         Length of line in meters
     """
-    # leaving the shapely lonlat order
-    # return sum(distance(a, b).meters for (a, b) in pairs(line.coords))
-    # new latlon order, with rounding to cm, as more numerical precision is useless
-    return round(sum(distance((a[-1],a[0]), (b[-1],b[0])).meters for (a, b) in pairs(line.coords)), 2)
+    # Swap shapely (lonlat) to geopy (latlon) points
+    latlon = lambda lonlat: (lonlat[1], lonlat[0])
+    total_length = sum(distance(latlon(a), latlon(b)).meters
+                       for (a, b) in pairs(line.coords))
+    return round(total_length, 0)
 
 
 def pairs(lst):
