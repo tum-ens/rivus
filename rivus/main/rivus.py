@@ -657,10 +657,11 @@ def line_length(line):
     Returns:
         Length of line in meters
     """
-    # leaving the shapely lonlat order
-    # return sum(distance(a, b).meters for (a, b) in pairs(line.coords))
-    # new latlon order, with rounding to cm, as more numerical precision is useless
-    return round(sum(distance((a[-1],a[0]), (b[-1],b[0])).meters for (a, b) in pairs(line.coords)), 2)
+    # Swap shapely (lonlat) to geopy (latlon) points
+    latlon = lambda lonlat: (lonlat[1], lonlat[0])
+    total_length = sum(distance(latlon(a), latlon(b)).meters
+                       for (a, b) in pairs(line.coords))
+    return round(total_length, 0)
 
 
 def pairs(lst):
@@ -1351,48 +1352,57 @@ def save_log(result, filename):
         file_handle.write(str(result))
 
 
-def save(prob, filename):
+def save(prob, filepath):
     """Save rivus model instance to a gzip'ed pickle file
 
     Pickle is the standard Python way of serializing and de-serializing Python
     objects. By using it, saving any object, in case of this function a
     Pyomo ConcreteModel, becomes a twoliner.
-    <https://docs.python.org/2/library/pickle.html>
     GZip is a standard Python compression library that is used to transparently
     compress the pickle file further.
-    <https://docs.python.org/2/library/gzip.html>
     It is used over the possibly more compact bzip2 compression due to the
-    lower runtime. Source: <http://stackoverflow.com/a/18475192/2375855>
+    lower runtime.
 
-    Args:
-        prob: a rivus model instance
-        filename: pickle file to be written
+    Parameters
+    ----------
+    prob
+        a rivus model instance
+    filepath
+        pickle file to be written
 
-    Returns:
-        Nothing
+    Notes
+    -----
+    `Pickle <https://docs.python.org/2/library/pickle.html>`_
+    `GZIP <https://docs.python.org/2/library/gzip.html>`_
+    `<>bzip2 <http://stackoverflow.com/a/18475192/2375855>`_
+
     """
     import gzip
     try:
         import cPickle as pickle
     except ImportError:
         import pickle
-    with gzip.GzipFile(filename, 'wb') as file_handle:
+    with gzip.GzipFile(filepath, 'wb') as file_handle:
         pickle.dump(prob, file_handle)
 
-def load(filename):
+def load(filepath):
     """Load a rivus model instance from a gzip'ed pickle file
 
-    Args:
-        filename: pickle file
+    Parameters
+    ----------
+    filepath
+        absolute or relative path to gzip'd pickle file
 
-    Returns:
-        prob: the unpickled rivus model instance
+    Returns
+    -------
+    prob
+        the unpickled rivus model instance
     """
     import gzip
     try:
         import cPickle as pickle
     except ImportError:
         import pickle
-    with gzip.GzipFile(filename, 'r') as file_handle:
+    with gzip.GzipFile(filepath, 'r') as file_handle:
         prob = pickle.load(file_handle)
     return prob

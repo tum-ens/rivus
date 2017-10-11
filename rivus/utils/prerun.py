@@ -1,8 +1,10 @@
 """Collection of small rivus related helper functions
 
 In use to avoid multiple solutions of the same task, like:
-    + Setting up the solver.
-    - Todo: Create needed directories
+
++ Setting up the solver.
++ Todo: Create needed directories
+
 """
 from multiprocessing import cpu_count
 
@@ -12,25 +14,44 @@ def setup_solver(optim, logfile='solver.log', guro_time_lim=12000,
                  log_to_console=True):
     """Change solver options to custom values.
 
-    Args:
-        optim: (pyomo Solver object): See usage for example
-        logfile (str, optional): default='solver.log'
-            Name (Path) to the logfile
-        guro_time_lim (int, optional): unit is seconds | default=12000
-        guro_mip_focus (int, optional): default=2
-            1=feasible, 2=optimal, 3=bound
-        guro_mip_gap (float, optional): our default=.001
-            (gurobi's default: 1e-4)
-        guro_threads (None, optional): parallel solver tasks | default=None
-            If None, no Threads parameter is set
-                (gurobi takes <=CPU_count threads automatically)
-            If greater than CPU_count then it is threshold to CPU_count
-            If less than CPU_count then Thread is set with the parameter
-        log_to_console (Boolean, optional) If False, the output of the solver
-            is not piped to the stdout.
-    Usage:
+    Parameters
+    ----------
+    optim : SolverFactory
+        pyomo Solver object from pyomo.opt.base
+    logfile : str, optional
+        default='solver.log'
+        Name (Path) to the logfile
+    guro_time_lim : int, optional
+        unit is seconds | default=12000
+    guro_mip_focus : int, optional
+        default=2
+        1=feasible, 2=optimal, 3=bound
+    guro_mip_gap : float, optional
+        our default=.001
+        (gurobi's default: 1e-4)
+    guro_threads : None, optional
+        parallel solver tasks | default=None
+        If None, no Threads parameter is set
+        (gurobi takes <=CPU_count threads automatically)
+        If greater than CPU_count then it is threshold to CPU_count
+        If less than CPU_count then Thread is set with the parameter
+    log_to_console : bool, optional
+        Description
+    log_to_console (Boolean, optional) If False, the output of the solver
+        is not piped to the stdout.
+
+    Example
+    -------
+    ::
+
+
         optim = SolverFactory('glpk')
         optim = setup_solver(optim, logfile=log_filename)
+
+    Returns
+    -------
+    SolverFactory
+        With applied modifications
     """
     if optim.name == 'gurobi':
         # reference with list of option names

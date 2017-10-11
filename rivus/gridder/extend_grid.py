@@ -23,18 +23,20 @@ def vert_init_commodities(vertex_df, commodities, sources=None, inplace=True):
     Returns
     -------
     None or DataFrame
-        DataFrame if inplace is False
+        DataFrame if inplace == False
 
     Raises
     ------
     ValueError
-    If parameters differ from awaited
+        If parameters differ from awaited
 
-    Usage
-    -----
-    comms = ('Elec', 'Gas')
-    sources = [('Elec', 0, 1000), ('Gas', 1, 500)]
-    vert_init_commodities(vert, comms, sources)
+    Example
+    --------
+    ::
+
+        comms = ('Elec', 'Gas')
+        sources = [('Elec', 0, 1000), ('Gas', 1, 500)]
+        vert_init_commodities(vert, comms, sources)
     """
     if inplace:
         vdf = vertex_df
@@ -74,29 +76,34 @@ def extend_edge_data(edge_df, sorts=None, inits=None, strat='equal',
     inits : list of int/float , optional
         The parameter values, matching to sorts argument.
         Defaults to [1000] for each sort.
-    strat : str, optional [TODO now only 'equal' has an effect]
+    strat : str, optional
+        **TODO now only 'equal' has an effect**
         How the data values will be created
         + 'equal' - all edge demand is the same
         + 'linear' - linearly decreasing
         + 'exp' - exponentially decreasing
         + 'manual' - provide mapper in strat_param
-    strat_param : optional [TODO no implemented yet]
+    strat_param : optional
+        **TODO not implemented yet**
         Parameter for linear | exp | manual strategies.
         + 'equal' - None - no effect
         + 'linear' - minimum (lowest demand)
         + 'exp' - minimum (lowest demand)
         + 'manual' - function/dict to fetch value per edge
 
+    Example
+    -------
+    ::
+
+        sorts = ('residential', 'other')
+        inits = (1000, 800)
+        extend_edge_data(edge, sorts=sorts, inits=inits)
+
     Raises
     ------
     ValueError
-    If inputs differ from awaited
+        If inputs differ from awaited
 
-    Usage
-    -----
-    sorts = ('residential', 'other')
-    inits = (1000, 800)
-    extend_edge_data(edge, sorts=sorts, inits=inits)
     """
 
     # How the data will be distributed among the edges

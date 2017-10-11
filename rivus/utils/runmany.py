@@ -7,6 +7,7 @@ from numpy import arange
 def parameter_range(data_df, index, column, lim_lo=None, lim_up=None,
                     step=None, zero_root=None):
     """Yield values of the parameter in a given range
+
     Parameters
     ----------
     data_df : DataFrame
@@ -29,10 +30,30 @@ def parameter_range(data_df, index, column, lim_lo=None, lim_up=None,
         proportions will fail.
         Use this value to set the root for the parameter range.
 
-    Returns
-    -------
+    Yields
+    ------
     DataFrame
         A modified version of xls[df_name]
+
+    Example
+    --------
+    ::
+
+        data = read_excel(data_spreadsheet)
+        interesting_parameters = [
+            {'df_name': 'commodity',
+             'args': {'index': 'Heat',
+                      'column': 'cost-inv-fix',
+                      'lim_lo': 0.5, 'lim_up': 1.6, 'step': 0.5}},
+            {'df_name': 'commodity',
+             'args': {'index': 'Heat',
+                      'column': 'cost-fix',
+                      'lim_lo': 0.5, 'lim_up': 1.6, 'step': 0.5}}]
+        for param in interesting_parameters :
+            sheet = data[param['df_name']]
+            param_path = param['args']
+            for variant in parameter_range(sheet, **param_path):
+                ...
     """
     df = data_df.copy()  # Leave the original untouched
     is_multi = len(df.index.names) > 1
