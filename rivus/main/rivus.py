@@ -1007,30 +1007,47 @@ def get_timeseries(prob):
 
 
 def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
-         annotations=True, buildings=None, shapefiles=None):
+         annotations=True, buildings=None, shapefiles=None, decoration=True,
+         boundary=False):
     """Plot a map of supply, conversion, transport and consumption.
 
     For given commodity, plot a map of all locations where the commodity is
     introduced (Rho), transported (Pin/Pot/Pmax), converted (Epsilon_*) and
     consumed (Sigma, peak).
 
-    Args:
-        prob: rivus ConcreteModel
-        commodity: str like `Elec`, `Heat` etc.
-        plot_demand: If True, plot demand, else plot capacities
-        mapscale: If True, add mapscale to plot (default: False)
-        tick_labels: If True, add lon/lat tick labels (default: True)
-        annotations: If True, add numeric labels to graph (default: True)
-        buildings: tuple of (filename to shapefile, boolean)
-                   if true, color buildings according to attribute column
-                   "type" and colors in constan rivus.COLORS; else use default
-                   COLOR['building'] for all
-        shapefiles: list of dicts of shapefiles that shall be drawn by
-                    basemap function readshapefile. is passed as **kwargs
-    Returns:
-        fig: the map figure object
-    """
+    Parameters
+    ----------
+    prob
+        rivus ConcreteModel
+    commodity
+        str like `Elec`, `Heat` etc.
+    plot_demand
+        If True, plot demand, else plot capacities
+    mapscale : Boolean
+        If True, add mapscale to plot (default: False)
+    tick_labels : Boolean
+        If True, add lon/lat tick labels (default: True)
+    annotations : Boolean
+        If True, add numeric labels to graph (default: True)
+    buildings : tuple
+        tuple of (filename to shapefile, boolean)
+        if true, color buildings according to attribute column
+        "type" and colors in constant rivus.COLORS; else use default
+        COLOR['building'] for all
+    shapefiles : list
+        list of dicts of shapefiles that shall be drawn by
+        basemap function readshapefile. is passed as `**kwargs`
+    decoration : Boolean
+        Switch for map decoration (meridian, parallels)
+    boundary : Boolean
+        Draw map border or not.
 
+    Returns
+    -------
+    fig
+        the map figure object
+    """
+    complex_plot = True
     # set up Basemap for extent
     bbox = pdshp.total_bounds(prob.params['vertex'])
     bbox = [bbox[1], bbox[0], bbox[3], bbox[2]]
@@ -1051,6 +1068,20 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
     annotate_defaults = dict(
         textcoords='offset points', ha='center', va='center', xytext=(0, 0),
         path_effects=[pe.withStroke(linewidth=1, foreground="w")])
+
+    annotate_source = dict(
+        textcoords='offset points', ha='center', va='center', xytext=(10, 10),
+        bbox=dict(boxstyle='round,pad=0.5', fc='k', alpha=0.3),
+        arrowprops=dict(arrowstyle='->', connectionstyle='arc3,rad=0'),
+        path_effects=[pe.withStroke(linewidth=1.5, foreground="w")]
+    )
+
+    annotate_consumer = dict(
+        textcoords='offset points', ha='center', va='center', xytext=(-10, -10),
+        bbox=dict(boxstyle='round,pad=0.5', fc='k', alpha=0.3),
+        arrowprops=dict(arrowstyle='<-', connectionstyle='arc3,rad=0'),
+        path_effects=[pe.withStroke(linewidth=1.5, foreground="w")]
+    )
 
     # create new figure with basemap in Transverse Mercator projection
     # centered on map location
@@ -1117,15 +1148,25 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
         if commodity in Pmax.columns:
             Pmax = Pmax.join(prob.params['edge'].geometry)
             for k, row in Pmax.iterrows():
+                comm_val = row[commodity]
                 # coordinates
                 line = row['geometry']
                 lon, lat = zip(*line.coords)
                 # linewidth
-                line_width = math.sqrt(row[commodity]) * 0.025
+                line_width = math.sqrt(comm_val) * 0.025 * 2
                 # plot
                 bm.plot(lon, lat, latlon=True, zorder=20,
                         color=COLORS[commodity], linewidth=line_width,
                         solid_capstyle='round', solid_joinstyle='round')
+
+                if annotations and complex_plot:
+                    font_size = 5 + 5 * math.sqrt(comm_val) / 200
+                    midp = line.centroid
+                    x, y = bm(midp.x, midp.y)
+                    plt.annotate(
+                        '%u' % comm_val, xy=(x, y),
+                        fontsize=font_size, zorder=28, color=COLORS[commodity],
+                        **annotate_defaults)
 
         # Kappa_process: Process capacities consuming/producing a commodity
         r_in = prob.r_in.xs(commodity, level='Commodity')
@@ -1169,12 +1210,12 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
                 lon, lat = row['geometry'].xy
                 # size
                 marker_size = 0 + math.sqrt(row[commodity]) * 1.5
-                font_size = 3 + 5 * math.sqrt(row[commodity]) / 200
+                font_size = 5 + 5 * math.sqrt(row[commodity]) / 200
                 # plot
                 bm.scatter(lon, lat, latlon=True,
-                            c=COLORS[commodity], s=marker_size,
-                            marker=marker_style, lw=0.5,
-                            edgecolor=(1, 1, 1), zorder=30)
+                           c=COLORS[commodity], s=marker_size,
+                           marker=marker_style, lw=0.5,
+                           edgecolor=(1, 1, 1), zorder=30)
                 # annotate at line midpoint
 
                 (x, y) = bm(lon[len(lon)//2], lat[len(lat)//2])
@@ -1210,22 +1251,42 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
             for k, row in kappa_sum.iterrows():
                 # coordinates
                 line = row['geometry']
-                midpoint = line.interpolate(0.5, normalized=True)
-                x, y = bm(midpoint.x, midpoint.y)
+                if complex_plot:
+                    if marker_style is 'v':
+                        anchorprop = 0.25
+                        annotsettings = annotate_consumer
+                    elif marker_style is '^':
+                        anchorprop = 0.75
+                        annotsettings = annotate_source
+                else:
+                    anchorprop = 0.5
+                    annotsettings = annotate_defaults
+
+                anchorpoint = line.interpolate(anchorprop, normalized=True)
+                x, y = bm(anchorpoint.x, anchorpoint.y)
                 # size
-                marker_size = 0 + math.sqrt(row[commodity]) * 1.5
+                marker_size = 5 + math.sqrt(row[commodity]) * 1.5
                 font_size = 3 + 5 * math.sqrt(row[commodity]) / 200
                 # plot
                 bm.scatter(x, y, latlon=False,
-                            c=COLORS[commodity], s=marker_size,
-                            marker=marker_style, lw=0.5,
-                            edgecolor=(1, 1, 1), zorder=40)
+                           c=COLORS[commodity], s=marker_size,
+                           marker=marker_style, lw=0.5,
+                           edgecolor=(1, 1, 1), zorder=40)
                 # annotate at line midpoint
                 if annotations and row[commodity] > 0:
+                    if complex_plot:
+                        def _calc_xytext_offset(line):
+                            dx, dy = [abs(cc[0] - cc[1]) for cc in list(zip(*line.coords[:]))]
+                            if dx == 0 or (dy / dx) > 1:  # |
+                                shx, shy = 15, 0
+                            else:                         # --
+                                shx, shy = 0, -15
+                            return (shx, shy)
+                        annotsettings['xytext'] = _calc_xytext_offset(row['geometry'])
                     plt.annotate(
-                        '%u'%row[commodity], xy=(x, y),
+                        '%u' % row[commodity], xy=(x, y),
                         fontsize=font_size, zorder=41,
-                        color=COLORS['decoration'], **annotate_defaults)
+                        color=COLORS['decoration'], **annotsettings)
 
         plt.title("{} capacities".format(commodity))
 
@@ -1264,23 +1325,26 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
         plt.title("{} demand".format(commodity))
 
     # map decoration
-    bm.drawmapboundary(linewidth=0)
-    parallel_labels = [1,0,0,0] if tick_labels else [0,0,0,0]
-    meridian_labels = [0,0,0,1] if tick_labels else [0,0,0,0]
-    bm.drawparallels(
-        np.arange(bbox[0] + height * .15, bbox[2], height * .25),
-        color=COLORS['decoration'], zorder=9,
-        linewidth=0.1, labels=parallel_labels, dashes=(None, None))
-    bm.drawmeridians(
-        np.arange(bbox[1] + width * .15, bbox[3], width * .25),
-        color=COLORS['decoration'], zorder=9,
-        linewidth=0.1, labels=meridian_labels, dashes=(None, None))
+    if not boundary:
+        bm.drawmapboundary(linewidth=0)
 
-    # bar length = (horizontal map extent) / 3, rounded to 100 (1e-2) metres
-    bar_length = round((bm(bbox[3], bbox[2])[0] -
-                        bm(bbox[1], bbox[0])[0]) / 3, -2)
+    if decoration:
+        parallel_labels = [1,0,0,0] if tick_labels else [0,0,0,0]
+        meridian_labels = [0,0,0,1] if tick_labels else [0,0,0,0]
+        bm.drawparallels(
+            np.arange(bbox[0] + height * .15, bbox[2], height * .25),
+            color=COLORS['decoration'], zorder=9,
+            linewidth=0.1, labels=parallel_labels, dashes=(None, None))
+        bm.drawmeridians(
+            np.arange(bbox[1] + width * .15, bbox[3], width * .25),
+            color=COLORS['decoration'], zorder=9,
+            linewidth=0.1, labels=meridian_labels, dashes=(None, None))
+
 
     if mapscale:
+        # bar length = (horizontal map extent) / 3, rounded to 100 (1e-2) metres
+        bar_length = round((bm(bbox[3], bbox[2])[0] -
+                            bm(bbox[1], bbox[0])[0]) / 3, -2)
         bm.drawmapscale(
             bbox[1]+ 0.22 * width, bbox[0] + 0.1 * height,
             central_meridian, central_parallel, bar_length,
