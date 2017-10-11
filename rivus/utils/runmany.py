@@ -88,3 +88,54 @@ def parameter_range(data_df, index, column, lim_lo=None, lim_up=None,
         else:
             df.loc[index, column] = mod
         yield df
+
+
+def char_plot(vertex, just_return=False, show_vertex_ids=False):
+    """Plot vertices of a square grid to stdout.
+    O: where no sources
+    E,G,H... :  First letter of the commodity what is in the source.
+
+    Parameters
+    ----------
+    vertex : GeoDataFrame
+        As returned by ``create_model()``.
+    just_return : Boolean
+        Plot and return None or do not plot but return a string.
+    show_vertex_ids : Boolean
+        Show ``O`` or verex id for vertices which are not sources.
+    """
+    from math import sqrt
+    vertex = vertex.copy()
+    del vertex['geometry']
+    # FIXME: handle multiple commodities with same letter
+    vertex.rename(columns=(lambda x: x[0].upper()), inplace=True)
+    square_side = sqrt(len(vertex))
+
+    txts = []
+
+    def extract_signs(vert):
+        letters = ''.join([com for com, cap in vert.iteritems() if cap > 0])
+        txts.append(letters)
+
+    vertex.apply(extract_signs, axis=1)
+    char_plot = ''
+    is_newline = False
+    curr_row = []
+    for ix, txt in enumerate(txts):
+        is_newline = True if (ix % square_side) == 0 else False
+        if is_newline:
+            char_plot = '\t'.join(curr_row) + '\n' + char_plot
+            curr_row = []
+        if txt is '':
+            if show_vertex_ids:
+                curr_row += [str(ix)]
+            else:
+                curr_row += ['O']
+        else:
+            curr_row += [txt]
+    else:
+        char_plot = '\t'.join(curr_row) + '\n' + char_plot
+
+    if just_return:
+        return char_plot
+    print(char_plot)
