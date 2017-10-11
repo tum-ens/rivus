@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import os
 import pandas as pd
-from rivus.utils import pandashp as pdshp
+import geopandas
 from rivus.main import rivus
 try:
     import pyomo.environ
@@ -66,8 +66,8 @@ def prepare_edge(edge_shapefile, building_shapefile):
     # 2. group DataFrame by columns 'nearest' (ID of nearest edge) and 'type'
     #    (residential, commercial, industrial, other)
     # 3. sum by group and unstack, i.e. convert secondary index 'type' to columns
-    buildings = pdshp.read_shp(building_shapefile)
-    building_type_mapping = { 
+    buildings = geopandas.read_file(building_shapefile + '.shp')
+    building_type_mapping = {
         'church': 'other', 
         'farm': 'other',
         'hospital': 'residential',  
@@ -85,7 +85,7 @@ def prepare_edge(edge_shapefile, building_shapefile):
     # 1. read shapefile to DataFrame (with geometry column)
     # 2. join DataFrame total_area on index (=ID)
     # 3. fill missing values with 0
-    edge = pdshp.read_shp(edge_shapefile)
+    edge = geopandas.read_file(edge_shapefile + '.shp')
     edge = edge.set_index('Edge')
     edge = edge.join(total_area)
     edge = edge.fillna(0)
@@ -100,7 +100,7 @@ def run_scenario(scenario):
     
     # prepare input data 
     data = rivus.read_excel(data_spreadsheet)
-    vertex = pdshp.read_shp(vertex_shapefile)    
+    vertex = geopandas.read_file(vertex_shapefile + '.shp')   
     edge = prepare_edge(edge_shapefile, building_shapefile)
     
     # apply scenario function to input data

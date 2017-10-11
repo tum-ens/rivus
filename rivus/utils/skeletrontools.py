@@ -1,7 +1,5 @@
-from shapely.geometry import Polygon, LineString, Point, box
-
+from shapely.geometry import Polygon, box
 import Skeletron
-import pandashp
 import shapely.ops
 
 
@@ -25,20 +23,28 @@ def extract_lines_from_graph(graphs):
     return lines
 
 
-def skeletonize(roads, buffer_length=60,
-                dissolve_length=30,
-                simplify_length=30,
-                buffer_resolution=2,
-                psg_length=150):
+def skeletonize(roads, buffer_length=60, dissolve_length=30,
+                simplify_length=30, buffer_resolution=2, psg_length=150):
     """Uses qhull to find simplified road network for given DataFrame of roads.
 
-    Args:
-        roads               pandashp DataFrame of shapely LINESTRINGs (projected)
-        buffer_length       optional roughly equivalent to amount of generalization
-        dissolve_length     optional (def: 30) considerably smaller than buffer_length
-        simplify_length     optional
-        buffer_resolution   optional
-        psg_length          optional (default: 150) Skeletron algorithm length
+    Parameters
+    ----------
+    roads : GeoDataFrame
+        pandashp DataFrame of shapely LINESTRINGs (projected)
+    buffer_length : int, optional
+        optional roughly equivalent to amount of generalization
+    dissolve_length : int, optional
+        optional (def: 30) considerably smaller than buffer_length
+    simplify_length : int, optional
+        meters?
+    buffer_resolution : int, optional
+        TODO
+    psg_length : int, optional
+        optional (default: 150) Skeletron algorithm length
+
+    Returns
+    -------
+    LineString or MultiLineString when lines are not contiguous
     """
 
     # buffer and merge streets

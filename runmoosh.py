@@ -9,8 +9,8 @@ except ImportError:
 import matplotlib.pyplot as plt
 import os
 import pandas as pd
+import geopandas
 from operator import itemgetter
-from rivus.utils import pandashp as pdshp
 from rivus.main import rivus
 
 base_directory = os.path.join('data', 'moosh')
@@ -44,7 +44,7 @@ def setup_solver(optim):
 # 2. group DataFrame by columns 'nearest' (ID of nearest edge) and 'type'
 #    (residential, commercial, industrial, other)
 # 3. sum by group and unstack, i.e. convert secondary index 'type' to columns
-buildings = pdshp.read_shp(building_shapefile)
+buildings = geopandas.read_file(building_shapefile + '.shp')
 building_type_mapping = { 
 'church': 'other', 
 'farm': 'other',
@@ -64,13 +64,13 @@ total_area = buildings_grouped.sum()['AREA'].unstack()
 # 1. read shapefile to DataFrame (with geometry column)
 # 2. join DataFrame total_area on index (=ID)
 # 3. fill missing values with 0
-edge = pdshp.read_shp(edge_shapefile)
+edge = geopandas.read_file(edge_shapefile + '.shp')
 edge = edge.set_index('Edge')
 edge = edge.join(total_area)
 edge = edge.fillna(0)
 
 # load nodes
-vertex = pdshp.read_shp(vertex_shapefile)
+vertex = geopandas.read_file(vertex_shapefile + '.shp')
 
 # load spreadsheet data
 data = rivus.read_excel(data_spreadsheet)

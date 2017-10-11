@@ -8,7 +8,6 @@ except ImportError:
     PYOMO3 = True
 import geopandas
 import os
-from rivus.utils import pandashp as pdshp
 from rivus.main import rivus
 from datetime import datetime
 
@@ -197,7 +196,7 @@ def prepare_edge(edge_shapefile, building_shapefile):
     # 1. read shapefile to DataFrame (with geometry column)
     # 2. join DataFrame total_area on index (=ID)
     # 3. fill missing values with 0
-    edge = pdshp.read_shp(edge_shapefile)
+    edge = geopandas.read_file(edge_shapefile + '.shp')
     edge = edge.set_index('Edge')
     edge = edge.join(total_area)
     edge = edge.fillna(0)
@@ -211,7 +210,7 @@ def run_scenario(scenario, result_dir):
 
     # prepare input data
     data = rivus.read_excel(data_spreadsheet)
-    vertex = pdshp.read_shp(vertex_shapefile)
+    vertex = geopandas.read_file(vertex_shapefile + '.shp')
     edge = prepare_edge(edge_shapefile, building_shapefile)
 
     # apply scenario function to input data

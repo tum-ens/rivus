@@ -1,7 +1,5 @@
 import geopandas
-import pandas as pd
 import pandashp as pdshp
-import shutil
 import os
 
 
