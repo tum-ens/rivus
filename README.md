@@ -36,18 +36,27 @@ Electricity network capacities|  Heat network capacities    |  Gas network capac
    conda install -c conda-forge pyproj fiona geopy geopandas
    ```
    
-5. For interactive (3D) plots with **plotly**:
+5. For **interactive, 3-D plots** with plotly:
    ```
-   pip install plotly
+   conda install -c conda-forge plotly
    ```
+
+6. For **Postgres + PostGIS** integration:
+   ```
+   conda install -c conda-forge psycopg2 sqlalchemy
+   ``` 
+7. For **graph-theoretical analysis**:
+   ```
+   conda install -c conda-forge networkx
+   ``` 
 
 ## Documentation / Tutorials
 
   * [Official documentation](http://rivus.readthedocs.io/en/latest/) (still a skeleton only)
   * List of helpful IPython notebooks on handling geographic input data:
-    + [join data from building.shp and edge.shp](https://gist.github.com/lnksz/6edcd0a877997e9365e808146e9b51fe)
-    + [OSM street data to vertex.shp and edge.shp](https://gist.github.com/lnksz/7977c4cff9c529ca137b67b6774c60d7)
-    + [Square grid to vertex.shp and edge.shp](https://gist.github.com/lnksz/bd8ce0a79e499479b61ea7b45d5c661d)
+    + [join data from building.shp and edge.shp](https://nbviewer.jupyter.org/gist/lnksz/6edcd0a877997e9365e808146e9b51fe)
+    + [OSM street data to vertex.shp and edge.shp](https://nbviewer.jupyter.org/gist/lnksz/7977c4cff9c529ca137b67b6774c60d7)
+    + [Square grid to vertex.shp and edge.shp](https://nbviewer.jupyter.org/gist/lnksz/bd8ce0a79e499479b61ea7b45d5c661d)
 
 ## Copyright
 
