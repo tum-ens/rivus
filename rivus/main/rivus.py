@@ -1352,7 +1352,7 @@ def save_log(result, filename):
         file_handle.write(str(result))
 
 
-def save(prob, filename):
+def save(prob, filename, mode='all'):
     """Save rivus model instance to a gzip'ed pickle file
 
     Pickle is the standard Python way of serializing and de-serializing Python
@@ -1368,7 +1368,13 @@ def save(prob, filename):
     Args:
         prob: a rivus model instance
         filename: pickle file to be written
-
+        mode: what to save into the archive
+            all - store all the rivus model [default]
+            io  - store inputs and outputs without the model
+                  in a dict() with:
+                'costs',  'pmax',  'kappa_hub', 'kappa_process',
+                'source', 'flows', 'hubs',      'proc_io',       'proc_tau',
+                'r_out',  'r_in',  'peak'
     Returns:
         Nothing
     """
@@ -1378,7 +1384,26 @@ def save(prob, filename):
     except ImportError:
         import pickle
     with gzip.GzipFile(filename, 'wb') as file_handle:
+        if mode == 'io':
+            outp = {}
+            for para in ('edge', 'vertex'):
+                outp[para] = prob.params[para]
+            costs, pmax, kappa_hub, kappa_process = get_constants(prob)
+            source, flows, hubs, proc_io, proc_tau = get_timeseries(prob)
+            r_out, r_in = prob.r_out, prob.r_in
+            peak = prob.peak
+            vals = [costs, pmax, kappa_hub, kappa_process,
+                    source, flows, hubs, proc_io, proc_tau,
+                    r_out, r_in, peak]
+            keys = ['costs', 'pmax', 'kappa_hub', 'kappa_process',
+                    'source', 'flows', 'hubs', 'proc_io', 'proc_tau',
+                    'r_out', 'r_in', 'peak']
+            for obj, key in zip(vals, keys):
+                outp[key] = obj
+            prob = outp
+
         pickle.dump(prob, file_handle)
+        
 
 def load(filename):
     """Load a rivus model instance from a gzip'ed pickle file
