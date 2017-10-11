@@ -1,8 +1,6 @@
-"""rivus: optimization model for distributed urban energy systems
+# rivus: optimization model for distributed urban energy systems
+# rivus optimizes topology and size of urban energy networks, energy conversion.
 
-rivus optimizes topology and size of urban energy networks, energy conversion.
-
-"""
 import warnings
 try:
     import pyomo.core as pyomo
@@ -59,26 +57,37 @@ to_rgb = lambda r,g,b: tuple(x/255. for x in (r,g,b))
 for key, val in COLORS.items():
     COLORS[key] = to_rgb(*val)
 
-def read_excel(filename):
+
+def read_excel(filepath):
     """Read Excel input file and prepare rivus input data dict.
 
     Reads an Excel spreadsheet that adheres to the structure shown in the
     example dataset data/mnl/mnl.xlsx. Must contain
 
-    Args:
-        filename: filename to an Excel spreadsheet.
+    Parameters
+    ----------
+    filepath : str
+        absolute or relative filepath to an Excel spreadsheet.
 
-    Returns:
-        a dict of 6 DataFrames, one for each sheet
+    Returns
+    -------
+    dict
+        5 DataFrames, one for each sheet
+
+    Example
+    --------
+    ::
+
+        data = read_excel('./data/mnl/data.xlsx')
     """
-    with pd.ExcelFile(filename) as xls:
+    with pd.ExcelFile(filepath) as xls:
         commodity = xls.parse('Commodity').set_index(['Commodity'])
         process = xls.parse('Process').set_index(['Process'])
         time = xls.parse('Time').set_index(['Time'])
         area_demand = xls.parse('Area-Demand').set_index(['Area', 'Commodity'])
         process_commodity = (
             xls.parse('Process-Commodity')
-               .set_index(['Process', 'Commodity', 'Direction']))
+            .set_index(['Process', 'Commodity', 'Direction']))
 
     data = {
         'commodity': commodity,
@@ -88,8 +97,8 @@ def read_excel(filename):
         'area_demand': area_demand}
 
     # sort nested indexes to make direct assignments work, cf
-    # http://pandas.pydata.org/pandas-docs/stable/indexing.html#the-need-for-sortedness-with-multiindex
-    # https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.sort_index.html#pandas.DataFrame.sort_index
+    # https://goo.gl/zYLfnN - indexing
+    # https://goo.gl/zoENbv - sort_index
     for key in data:
         if isinstance(data[key].index, pd.core.index.MultiIndex):
             data[key].sort_index(inplace=True)
@@ -100,18 +109,32 @@ def create_model(data, vertex, edge, peak_multiplier=None,
                  hub_only_in_edge=True):
     """Return a rivus model instance from input file and spatial input.
 
-    Args:
-        spreadsheet: Excel spreadsheet with entity sheets Commodity, Process,
-            Process-Commodity, Time and Area-Demand
-        vertex: DataFrame with vertex IDs as column 'Vertex' and other columns
-            named like source commodities (e.g. 'Gas', 'Elec', 'Pellets'),
-            containing source vertex capacities (in kW)
-        edge: DataFrame woth vertex IDs in columns 'Vertex1' and 'Vertex2' and
-            other columns named like area types (in spreadsheet/Area-Demand),
-            containing total areas (square metres) to be supplied
+    Parameters
+    ----------
+    data : dict
+        Processed Excel spreadsheet by ``read_excel``
+    vertex : GeoDataFrame
+        DataFrame with vertex IDs as column 'Vertex' and other columns
+        named like source commodities (e.g. 'Gas', 'Elec', 'Pellets'),
+        containing source vertex capacities (in kW)
+    edge : GeoDataFrame
+        DataFrame with vertex IDs in columns 'Vertex1' and 'Vertex2' and
+        other columns named like area types (in spreadsheet/Area-Demand),
+        containing total areas (square metres) to be supplied
+    peak_multiplier : callable, optional
+        If not None and bool-casts to True, then m.peak will be calculated
+        by calling ``m.peak = peak_multiplier(m)``
+    hub_only_in_edge : bool, optional
+        Temporary switch between original and fixed process handling.
 
-    Returns:
-        Pyomo ConcreteModel object
+    Returns
+    -------
+    Pyomo ConcreteModel object
+
+    Note
+    ----
+    This function will change its input objects!
+    (Reindex, insertion of values.)
 
     """
     m = pyomo.ConcreteModel()
@@ -667,19 +690,26 @@ def line_length(line):
 def pairs(lst):
     """Iterate over a list in overlapping pairs without wrap-around.
 
-    Args:
-        lst: an iterable/list
+    Parameters
+    ----------
+    lst : iterable/list
+        to yield pairs from
 
-    Returns:
-        Yields a pair of consecutive elements (lst[k], lst[k+1]) of lst. Last
-        call yields the last two elements.
+    Example
+    -------
+    ::
 
-    Example:
         lst = [4, 7, 11, 2]
         pairs(lst) yields (4, 7), (7, 11), (11, 2)
 
-    Source:
-        http://stackoverflow.com/questions/1257413/1257446#1257446
+    Reference
+    ---------
+    http://stackoverflow.com/questions/1257413/1257446#1257446
+
+    Yields
+    ------
+    Yields a pair of consecutive elements (lst[k], lst[k+1]) of lst. Last
+    call yields the last two elements.
     """
     i = iter(lst)
     prev = next(i)
@@ -792,10 +822,11 @@ def list_entities(instance, entity_type):
         DataFrame of entities
 
     Example:
+    ::
+
         >>> data = read_excel('data-example.xlsx')
-        >>> model = create_model(data, range(1,25))
-        >>> list_entities(model, 'obj')  #doctest: +NORMALIZE_WHITESPACE
-                                         Description Domain
+        >>> model = create_model(data, vertex, edge)
+        >>> list_entities(model, 'obj')
         Name
         obj   minimize(cost = sum of all cost types)     []
         [1 rows x 2 columns]
@@ -835,12 +866,14 @@ def list_entities(instance, entity_type):
 
 
 def get_onset_names(entity):
-    """
-        Example:
-            >>> data = read_excel('data-example.xlsx')
-            >>> model = create_model(data, range(1,25))
-            >>> get_onset_names(model.e_co_stock)
-            ['t', 'sit', 'com', 'com_type']
+    """ Get onset names of model entity
+    Example:
+    ::
+
+        vertex, edge = create_square_grid()
+        data = read_excel('data-example.xlsx')
+        model = create_model(data, vertex, edge)
+        get_onset_names(model.hub)
     """
     # get column titles for entities from domain set names
     labels = []
@@ -884,14 +917,14 @@ def get_onset_names(entity):
 def get_constants(prob):
     """Retrieve time-independent variables/quantities.
 
-    Usage:
-        costs, Pmax, Kappa_hub, Kappa_process = get_constants(prob)
-
     Args:
         prob: a rivus model instance
 
     Returns:
-        (costs, Pmax, Kappa_hub) tuple
+        (costs, pmax, kappa_hub, kappa_process) tuple
+
+    Example:
+        costs, pmax, kappa_hub, kappa_process = get_constants(prob)
     """
     costs = get_entity(prob, 'costs')
     Pmax = get_entity(prob, 'Pmax')
@@ -927,7 +960,7 @@ def get_constants(prob):
 def get_timeseries(prob):
     """Retrieve time-dependent variables/quantities.
 
-    Usage:
+    Example:
         source, flows, hubs, proc_io, proc_tau = get_timeseries(prob)
 
     Args:
@@ -977,8 +1010,8 @@ def plot(prob, commodity, plot_demand=False, mapscale=False, tick_labels=True,
     consumed (Sigma, peak).
 
     Args:
-        prob:
-        commodity:
+        prob: rivus ConcreteModel
+        commodity: str like `Elec`, `Heat` etc.
         plot_demand: If True, plot demand, else plot capacities
         mapscale: If True, add mapscale to plot (default: False)
         tick_labels: If True, add lon/lat tick labels (default: True)
@@ -1261,7 +1294,8 @@ def result_figures(prob, file_basename, buildings=None, shapefiles=None):
         prob: a rivus model instance
         file_basename: filename prefix for figures
         buildings: optional filename to buildings shapefile
-
+        shapefiles: list of dicts of shapefiles that shall be drawn by
+                    basemap function readshapefile. is passed as `**kwargs`
     Returns:
         Nothing
     """
@@ -1285,7 +1319,7 @@ def result_figures(prob, file_basename, buildings=None, shapefiles=None):
 
                 # create subdirectory according to plot variant
                 sub_dir = 'annotated' if plot_annotations else 'plain'
-                sub_dir += '-transparent' if transp and ext!= 'pdf' else ''
+                sub_dir += '-transparent' if transp and ext != 'pdf' else ''
 
                 # create subdirectory if does not exist yet
                 fig_dir = os.path.join(base_dir, sub_dir)
@@ -1339,7 +1373,7 @@ def report(prob, filename):
 
 
 def save_log(result, filename):
-    """Save urbs result and solver information to a log file.
+    """Save rivus result and solver information to a log file.
 
     Args:
         result: as returned by the solve method of a solver object
