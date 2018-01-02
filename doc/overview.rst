@@ -63,7 +63,7 @@ Most generally speaking, for working with ``rivus`` you will need the following 
 There are several possibilities to get the spatial input data for ``rivus``,
 and conduct analysis on them.
 
-1. Extract data from :abbr:`OSM (OpenStreetMap)` (e.g. with the help of MapZen_)
+1. Extract data from :abbr:`OSM (OpenStreetMap)` (e.g. with the help of HOTexport_)
 
   - Extensive data preparation is needed for simplifying the geometrical structure
     of the vector layers. (*Currently, this workflow is under maintenance.*)
@@ -101,7 +101,7 @@ and conduct analysis on them.
   - See :ref:`reference <_a_gridder>` for usage.
 
 .. _haag15: https://github.com/tum-ens/rivus/tree/master/data/haag15
-.. _MapZen: https://mapzen.com/data/metro-extracts/
+.. _HOTexport: https://export.hotosm.org/en/v3/
 .. _QGIS: http://www.qgis.org/en/site/
 .. _OSMnx: https://github.com/gboeing/osmnx
 
